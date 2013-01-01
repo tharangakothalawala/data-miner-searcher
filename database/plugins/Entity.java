@@ -30,7 +30,7 @@ public class Entity {
 
                 for (int i = 0; i < arr.length; i++) {
                     String[] splits = arr[i].split(db.COLNAMETYPESP);
-                    if (isSearchable(splits[1])) { // column type
+                    if (this.isSearchable(splits[1])) { // column type
                         arr[i] = splits[0]; // column name
                         attributes += arr[i] + ", ";
                     }

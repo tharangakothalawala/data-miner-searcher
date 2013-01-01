@@ -2,6 +2,7 @@ package database;
 
 import java.sql.*;
 import java.util.*;
+import database.plugins.*;
 
 public class Database {
 
@@ -16,7 +17,7 @@ public class Database {
     private Map[] resultset; // to return all the loaded data
     private Map<String, String> map; // to hold each row
     // other
-    public static final String COLNAMETYPESP = ":"; // ex: username:nvarchar
+    public final String COLNAMETYPESP = ":"; // ex: username:nvarchar
     private String[] dbtableArray;
     private String[] dbviewArray;
 
@@ -35,7 +36,7 @@ public class Database {
 
     /*
      * @param (ResultSet)	rs		: The rs resultset used to fetch all the meta data about the query being processed
-     * @param (int)		key		: The param used to identify what is needed as theh output
+     * @param (int)		key		: The param used to identify what is needed as the output
      * @return (String[])	entityMetaArray	: The returnArray contains the data which is requested. (return data will depend on the second param)
      */
     public String[] getMetaData(ResultSet rs, int key) throws Exception {
@@ -199,6 +200,9 @@ public class Database {
         return dbviewArray;
     }
 
+    /*
+     * This is used only to call this.getDatabaseTableList();
+     */
     public String getTables() {
         String[] tableArray = this.getDatabaseTableList();
 
@@ -210,6 +214,9 @@ public class Database {
         return tables;
     }
 
+    /*
+     * This is used only to call this.getDatabaseViewList();
+     */
     public String getViews() {
         String[] tableArray = this.getDatabaseViewList();
 
@@ -223,6 +230,11 @@ public class Database {
 
     public String[] getFilteredTables() {
         String table, view = "";
+
+        // creating the search context by retrieving searchable tables from the database
+        this.getTables();
+        this.getViews();
+
         for (int j = 0; j < dbtableArray.length; j++) {
             //System.out.println("Table: "+ dbtableArray[j]);
             for (int i = 0; i < dbviewArray.length; i++) {
@@ -240,18 +252,18 @@ public class Database {
 
         int viewCount = 0;
         for (int i = 0; i < dbtableArray.length; i++) {
-            if (dbtableArray[i] == "null") {
+            if (dbtableArray[i].equalsIgnoreCase("null")) {
                 viewCount++;
             }
             //System.out.println(i + "). Table: " + dbtableArray[i]);
         }
 
-        System.out.println(viewCount);
+        System.out.println("viewCount: " + viewCount);
 
         String[] finalArray = new String[dbtableArray.length - viewCount];
         int c = 0;
         for (int i = 0; i < dbtableArray.length; i++) {
-            if (dbtableArray[i] != "null") {
+            if (!dbtableArray[i].equalsIgnoreCase("null")) {
                 finalArray[c] = dbtableArray[i];
                 c++;
                 //System.out.println("Table: " + dbtableArray[i]);
@@ -259,5 +271,12 @@ public class Database {
         }
 
         return finalArray;
+    }
+
+    /*
+     * @return      : this returns an Entity instance to access the table specific data (ex: searchable attributes etc)
+     */
+    public Entity getEntity () {
+        return new Entity();
     }
 }
