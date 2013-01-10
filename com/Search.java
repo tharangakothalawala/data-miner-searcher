@@ -69,5 +69,6 @@ public class Search {
                 } // end :traversing through each table row to display data
             }
         } // end: traversing through each table
+        System.exit(0); // @TODO : just stopping the execution. Needs to be handled by the communigram
     } // function end
 }

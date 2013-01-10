@@ -12,12 +12,12 @@ public class Database {
     private String dbname = "CGDB";
     private String dbuser = "sa";
     private String dbpasswd = "qwerty1"; // FooBar(1)?
-    // query
+    // query parameters
     private String query = "";
     private Map[] resultset; // to return all the loaded data
     private Map<String, String> map; // to hold each row
-    // other
-    public final String COLNAMETYPESP = ":"; // ex: username:nvarchar
+    // other parameters
+    public final String COLNAMETYPESP = ":"; // to be used to identify metadata ex: username:nvarchar
     private String[] dbtableArray;
     private String[] dbviewArray;
 
@@ -202,6 +202,7 @@ public class Database {
 
     /*
      * This is used only to call this.getDatabaseTableList();
+     * TODO : this needs to be deprecated
      */
     public String getTables() {
         String[] tableArray = this.getDatabaseTableList();
@@ -216,6 +217,7 @@ public class Database {
 
     /*
      * This is used only to call this.getDatabaseViewList();
+     * TODO : this needs to be deprecated
      */
     public String getViews() {
         String[] tableArray = this.getDatabaseViewList();
@@ -274,7 +276,7 @@ public class Database {
     }
 
     /*
-     * @return      : this returns an Entity instance to access the table specific data (ex: searchable attributes etc)
+     * @return (Entity)		: this returns an Entity instance to access the table specific data (ex: searchable attributes etc)
      */
     public Entity getEntity () {
         return new Entity();
