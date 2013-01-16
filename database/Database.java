@@ -165,6 +165,7 @@ public class Database {
             //Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "'", null, null, null, null);
             //Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_SCHEMA = '" + dbname + "'", null, null, null, null);
 
+            // set is_callable type codes in here to check for any plugins/functions in Entity to get a pre-defined tables to the 'dbtableArray'
             dbtableArray = new String[resultsets.length];
 
             for (int i = 0; i < resultsets.length; i++) {
@@ -233,52 +234,58 @@ public class Database {
     public String[] getFilteredTables() {
         String table, view = "";
 
-        // creating the search context by retrieving searchable tables from the database
-        this.getTables();
-        this.getViews();
+        if (this.getEntity().getSearchableTables() != null) {
+            dbtableArray = this.getEntity().getSearchableTables();
 
-        for (int j = 0; j < dbtableArray.length; j++) {
-            //System.out.println("Table: "+ dbtableArray[j]);
-            for (int i = 0; i < dbviewArray.length; i++) {
-                table = dbtableArray[j];
-                view = dbviewArray[i];
-                //System.out.println(table + " || "+ view);
-                if (table.equalsIgnoreCase(view)) {
+            return dbtableArray;
+        } else {
+            // creating the search context by retrieving searchable tables from the database
+            this.getTables();
+            this.getViews();
 
-                    //System.out.println("VIEWS: " + dbtableArray[j]);
-                    dbtableArray[j] = "null";
-                    //      dbtableArray2[j] = rs.get("TABLE_NAME");
+            for (int j = 0; j < dbtableArray.length; j++) {
+                //System.out.println("Table: "+ dbtableArray[j]);
+                for (int i = 0; i < dbviewArray.length; i++) {
+                    table = dbtableArray[j];
+                    view = dbviewArray[i];
+                    //System.out.println(table + " || "+ view);
+                    if (table.equalsIgnoreCase(view)) {
+
+                        //System.out.println("VIEWS: " + dbtableArray[j]);
+                        dbtableArray[j] = "null";
+                        //      dbtableArray2[j] = rs.get("TABLE_NAME");
+                    }
                 }
             }
-        }
-
-        int viewCount = 0;
-        for (int i = 0; i < dbtableArray.length; i++) {
-            if (dbtableArray[i].equalsIgnoreCase("null")) {
-                viewCount++;
+            //   }
+            int viewCount = 0;
+            for (int i = 0; i < dbtableArray.length; i++) {
+                if (dbtableArray[i].equalsIgnoreCase("null")) {
+                    viewCount++;
+                }
+                //System.out.println(i + "). Table: " + dbtableArray[i]);
             }
-            //System.out.println(i + "). Table: " + dbtableArray[i]);
-        }
 
-        System.out.println("viewCount: " + viewCount);
+            System.out.println("viewCount: " + viewCount);
 
-        String[] finalArray = new String[dbtableArray.length - viewCount];
-        int c = 0;
-        for (int i = 0; i < dbtableArray.length; i++) {
-            if (!dbtableArray[i].equalsIgnoreCase("null")) {
-                finalArray[c] = dbtableArray[i];
-                c++;
-                //System.out.println("Table: " + dbtableArray[i]);
+            String[] finalArray = new String[dbtableArray.length - viewCount];
+            int c = 0;
+            for (int i = 0; i < dbtableArray.length; i++) {
+                if (!dbtableArray[i].equalsIgnoreCase("null")) {
+                    finalArray[c] = dbtableArray[i];
+                    c++;
+                    //System.out.println("Table: " + dbtableArray[i]);
+                }
             }
-        }
 
-        return finalArray;
+            return finalArray;
+        }
     }
 
     /*
      * @return (Entity)		: this returns an Entity instance to access the table specific data (ex: searchable attributes etc)
      */
-    public Entity getEntity () {
+    public Entity getEntity() {
         return new Entity();
     }
 }

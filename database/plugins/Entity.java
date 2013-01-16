@@ -11,6 +11,7 @@ import java.util.*;
 public class Entity {
 
     private boolean doSearchInAll = false;
+    private boolean isEnabledSearchInAllTables = false;
     Database db = new Database();
 
     /*
@@ -22,7 +23,7 @@ public class Entity {
 
         db.setQuery("SELECT * FROM " + table);
 
-        if (!doSearchInAll) {
+        if (!this.doSearchInAll) {
             try {
                 ResultSet rs = db.loadData();
 
@@ -73,6 +74,15 @@ public class Entity {
             }
         }
         return isSearchable;
+    }
+
+    public String[] getSearchableTables () {
+        String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT"};
+
+        if (this.isEnabledSearchInAllTables)
+            return null;
+        else
+            return searchableTables;
     }
     /*
     public static void main(String argv[]) {
