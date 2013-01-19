@@ -15,28 +15,28 @@ public class AppGUI extends JPanel implements ActionListener {
 
     private JButton btnSearch;
     private JTextField txtSearchKeyword;
-    /*private JTextArea textarea;
+    private JTextArea textarea;
     JScrollPane textareaScroll;//*/
     private Database db = new Database();
 
     public AppGUI() {
         btnSearch = new JButton("Search");
         txtSearchKeyword = new JTextField(5);
-        //    textarea = new JTextArea(10, 65);
-        //    textareaScroll = new JScrollPane(textarea);
+            textarea = new JTextArea(10, 65);
+            textareaScroll = new JScrollPane(textarea);
 
         btnSearch.addActionListener(this);
 
         btnSearch.setToolTipText("Search");
         txtSearchKeyword.setFont(new Font("Calibri", Font.BOLD, 14));
-        txtSearchKeyword.setText("ad");
+        txtSearchKeyword.setText("ad"); // only for the demo
 
-        setPreferredSize(new Dimension(360, 100));
+        setPreferredSize(new Dimension(360, 400));
         setLayout(null);
 
         add(btnSearch).setBounds(255, 40, 90, 20);
         add(txtSearchKeyword).setBounds(15, 15, 330, 20);
-        //    add(textareaScroll).setBounds(15, 70, 330, 300);
+            add(textareaScroll).setBounds(15, 70, 330, 300);
 
     }
 
@@ -47,6 +47,8 @@ public class AppGUI extends JPanel implements ActionListener {
             // triggering the search method
             Search searchTest = new Search();
             searchTest.doSearch(searchKeyword);
+
+            textarea.setText(searchTest.searchResults);
         }
     }
 

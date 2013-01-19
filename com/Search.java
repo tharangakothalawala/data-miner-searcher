@@ -10,6 +10,7 @@ import java.util.*;
 public class Search {
 
     private Database db = new Database();
+    public String searchResults = "";
 
     public void doSearch(String searchKeyword) {
         //Entity entity = new Entity();
@@ -41,6 +42,7 @@ public class Search {
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
         String[] tableArray = db.getFilteredTables();
 
+        String eachRowData = "";
         // begin: traversing through each table
         for (int t = 0; t < tableArray.length; t++) {
             //     System.out.println(t + "). " + tableArray[t]);
@@ -58,17 +60,21 @@ public class Search {
                 if (resultsets.length > 0) {
                     for (int i = 0; i < resultsets.length; i++) {
                         Map<String, String> resultset = resultsets[i];
-
+                        eachRowData += tableArray[t]+ " : ";
                         System.out.println("== ROW: " + (i+1) + " ========================");
                         for (Map.Entry<String, String> entry : resultset.entrySet()) {
                             String key = entry.getKey();
                             String value = entry.getValue();
                             System.out.println("['" + key + "'] = " + value);
+                            eachRowData += value + ", ";
                         }
+                        eachRowData += "\n";
                     }
                 } // end :traversing through each table row to display data
             }
         } // end: traversing through each table
-        System.exit(0); // @TODO : just stopping the execution. Needs to be handled by the communigram
+        searchResults = eachRowData;
+        System.out.println(eachRowData);
+        //System.exit(0); // @TODO : just stopping the execution. Needs to be handled by the communigram
     } // function end
 }
