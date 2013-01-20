@@ -7,11 +7,11 @@ import database.plugins.*;
 public class Database {
 
     // database parameters
-    private String host = "localhost"; // localhost | 192.168.232.134
+    private String host = "192.168.232.134"; // localhost | 192.168.232.134
     private int port = 1433;
     private String dbname = "CGDB";
     private String dbuser = "sa";
-    private String dbpasswd = "qwerty1"; // FooBar(1)?
+    private String dbpasswd = "FooBar(1)?"; // FooBar(1)?
     // query parameters
     private String query = "";
     private Map[] resultset; // to return all the loaded data
@@ -74,6 +74,46 @@ public class Database {
         }
 
         return entityMetaArray;
+    }
+
+    public void processAndSetQuery(String table, String columns, String clause, String group, String order, String limit, String offset) {
+            if (table != null && columns != null) {
+                if (clause != null) {
+                    clause = " WHERE " + clause + "";
+                } else {
+                    clause = "";
+                }
+                if (group != null) {
+                    group = " GROUP BY " + group + "";
+                } else {
+                    group = "";
+                }
+                if (order != null) {
+                    order = " ORDER BY " + order + "";
+                } else {
+                    order = "";
+                }
+                if (limit != null) {
+                    limit = " LIMIT " + limit + "";
+                } else {
+                    limit = "";
+                }
+                if (offset != null) {
+                    offset = " OFFSET " + offset + "";
+                } else {
+                    offset = "";
+                }
+
+                // building the query
+                String localQuery = "SELECT " + columns
+                        + " FROM " + table + clause
+                        + group + order
+                        + limit + offset + ";";
+
+                //System.out.println("Query: " + localQuery);
+
+                this.setQuery(localQuery);
+            }
     }
 
     // SQL select

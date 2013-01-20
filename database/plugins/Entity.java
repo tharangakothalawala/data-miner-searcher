@@ -10,7 +10,7 @@ import java.util.*;
 
 public class Entity {
 
-    private boolean doSearchInAll = false;
+    private boolean doSearchInAll = true;
     private boolean isEnabledSearchInAllTables = false;
     Database db = new Database();
 
@@ -77,7 +77,10 @@ public class Entity {
     }
 
     public String[] getSearchableTables () {
-        String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT"};
+        //String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT"};
+        //String[] searchableTables = {"USERS"};
+        //String[] searchableTables = {"USERS", "NEXTKEY"};
+        String[] searchableTables = {"USERS", "NEXTKEY", "PROFILE", "RSRC", "PROJECT"};
 
         if (this.isEnabledSearchInAllTables)
             return null;

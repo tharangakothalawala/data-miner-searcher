@@ -18,6 +18,7 @@ public class AppGUI extends JPanel implements ActionListener {
     private JTextArea textarea;
     JScrollPane textareaScroll;//*/
     private Database db = new Database();
+    Search searchTest = new Search();
 
     public AppGUI() {
         btnSearch = new JButton("Search");
@@ -38,6 +39,8 @@ public class AppGUI extends JPanel implements ActionListener {
         add(txtSearchKeyword).setBounds(15, 15, 330, 20);
             add(textareaScroll).setBounds(15, 70, 330, 300);
 
+        searchTest.populateGraph();
+
     }
 
     public void actionPerformed(ActionEvent event) {
@@ -45,8 +48,10 @@ public class AppGUI extends JPanel implements ActionListener {
             String searchKeyword = txtSearchKeyword.getText();
 
             // triggering the search method
-            Search searchTest = new Search();
-            searchTest.doSearch(searchKeyword);
+            //Search searchTest = new Search();
+            //searchTest.doSearch(searchKeyword);
+            //searchTest.populateGraph();
+            searchTest.doGraphSearch(searchKeyword);
 
             textarea.setText(searchTest.searchResults);
         }

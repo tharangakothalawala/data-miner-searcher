@@ -5,76 +5,72 @@ package com;
  * @author Tharanga
  */
 import database.*;
+import database.models.UsersSearchModel;
+import com.graph.*;
 import java.util.*;
+import java.sql.*;
 
 public class Search {
 
     private Database db = new Database();
     public String searchResults = "";
+    public UsersSearchModel[] usermodel;
+    //public int userRecordTracker = 0;
+    Graph[] entitiyGraphs;
 
-    public void doSearch(String searchKeyword) {
-        //Entity entity = new Entity();
-
-        /*System.out.println(entity.getSearchables(searchEntity));
-        System.out.println(entity.makeClause(entity.getSearchables(searchEntity), searchKeyword));
-
-        //gui.showSearchGUI();
-        //Map[] resultsets = db.sqlSelect("CALENDAR", "*", "clndr_id = '10' OR clndr_id = '20'", null, null, null, null);
-        Map[] resultsets = db.sqlSelect(searchEntity, entity.getSearchables(searchEntity), entity.makeClause(entity.getSearchables(searchEntity), searchKeyword), null, null, null, null);
-
-
-
-        //Map<String, String> rs = resultsets[0];
-        //System.out.println("DATA: "+ rs.get("clndr_type"));
-
-        // traversing through each row to display data
-        for (int i = 0; i < resultsets.length; i++) {
-        Map<String, String> resultset = resultsets[i];
-
-        System.out.println("== ROW: " + i + " ========================");
-        for (Map.Entry<String, String> entry : resultset.entrySet()) {
-        String key = entry.getKey();
-        String value = entry.getValue();
-        System.out.println("['" + key + "'] = " + value);
-        }
-        }//*/
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void populateGraph() {
         String[] tableArray = db.getFilteredTables();
+        entitiyGraphs = new Graph[tableArray.length];
 
-        String eachRowData = "";
         // begin: traversing through each table
         for (int t = 0; t < tableArray.length; t++) {
-            //     System.out.println(t + "). " + tableArray[t]);
-            //     System.out.println(t + "). " + entity.getSearchables(tableArray[t]));
-            //     System.out.println(t + "). " + entity.makeClause(entity.getSearchables(tableArray[t]), searchKeyword));
-
             // need only the tables which contain searchable attributes
             if (!db.getEntity().getSearchables(tableArray[t]).equalsIgnoreCase("")) {
                 // sending the query to the database to retrieve data
-                Map[] resultsets = db.sqlSelect(tableArray[t], db.getEntity().getSearchables(tableArray[t]), db.getEntity().makeClause(db.getEntity().getSearchables(tableArray[t]), searchKeyword), null, null, null, null);
+                Map[] resultsets = db.sqlSelect(tableArray[t], db.getEntity().getSearchables(tableArray[t]), null, null, null, null, null);
 
-                System.out.println((t+1) + "). datarows: " + resultsets.length + " ################################## " + tableArray[t] + " ##################################");
+                //System.out.println((t+1) + "). datarows: " + resultsets.length + " ################################## " + tableArray[t] + " ##################################");
+                Graph theGraph = new Graph();
+                theGraph.addVertex(new HashMap<String, String>()); // add as a initial item
 
                 // begin :traversing through each table row to display data
                 if (resultsets.length > 0) {
                     for (int i = 0; i < resultsets.length; i++) {
-                        Map<String, String> resultset = resultsets[i];
-                        eachRowData += tableArray[t]+ " : ";
-                        System.out.println("== ROW: " + (i+1) + " ========================");
-                        for (Map.Entry<String, String> entry : resultset.entrySet()) {
-                            String key = entry.getKey();
-                            String value = entry.getValue();
-                            System.out.println("['" + key + "'] = " + value);
-                            eachRowData += value + ", ";
-                        }
-                        eachRowData += "\n";
+                        theGraph.addVertex(resultsets[i]);
+                        theGraph.addEdge(i, (i + 1)); // creating edges
                     }
                 } // end :traversing through each table row to display data
+
+                // saving each entity data into graphs, so that we can query later
+                entitiyGraphs[t] = theGraph;
             }
         } // end: traversing through each table
-        searchResults = eachRowData;
-        System.out.println(eachRowData);
-        //System.exit(0); // @TODO : just stopping the execution. Needs to be handled by the communigram
-    } // function end
+    }
+
+    public void doGraphSearch(String searchKeyword) {
+        // Now we start contructing relational data mapping within graphs, or in other words SQL JOIN in theory
+        System.out.println("name");
+        entitiyGraphs[0].dfs("name", searchKeyword);
+        
+        for (Map.Entry<String, String> entry : entitiyGraphs[0].queryResult.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            System.out.println(">>['" + key + "'] = " + value);
+        }
+        //System.out.println("1user_id");
+        //entitiyGraphs[0].dfs("user_id", searchKeyword);
+        System.out.println("2user_id");
+        entitiyGraphs[3].dfs("user_id", ""+10);
+        for (Map.Entry<String, String> entry : entitiyGraphs[3].queryResult.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            System.out.println(">>['" + key + "'] = " + value);
+        }
+        //System.out.println("rsrc_name");
+        //entitiyGraphs[3].dfs("rsrc_name", ""+10);
+    }
+
+    public void graphJoin () {
+        
+    }
 }
