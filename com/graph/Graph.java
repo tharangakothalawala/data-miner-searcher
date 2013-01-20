@@ -19,7 +19,9 @@ public class Graph {
     private int nVerts; // current number of vertices
     private StackX theStack;
     private Queue theQueue;
-    public Map<String, String> queryResult;
+    //public Map<String, String> queryResult;
+    //public Map<String, String> map; // to hold each row
+    public Map[] resultset; // to return all the loaded data
 // -----------------------------------------------------------
 
     public Graph() // constructor
@@ -61,45 +63,51 @@ public class Graph {
     }
 // ------------------------------------------------------------
 
-    public void dfs(String considerAttribute, String searchKeyword) // depth-first search
+    public Map[] dfs(String considerAttribute, String searchKeyword) // depth-first search
     { // begin at vertex 0
-        //String searchKeyword = "thara";
-
         vertexList[0].wasVisited = true; // mark it
         displayVertex(0); // display it
         theStack.push(0); // push it
+        resultset = new Map[nVerts - 1];
+
+        int counter = 0;
         while (!theStack.isEmpty()) { // until stack empty,
+            //map = new HashMap<String, String>();
+            boolean isFound = false;
             // get an unvisited vertex adjacent to stack top
             int v = getAdjUnvisitedVertex(theStack.peek());
             if (v == -1) { // if no such vertex,
                 theStack.pop();
             } else {
-                //System.out.print("\n INIT: ");
-
+                //System.out.print("\n INIT: " + counter + "\n");
                 try {
                     for (Map.Entry<String, String> entry : vertexList[v].label.entrySet()) {
                         String key = entry.getKey();
                         String value = entry.getValue();
                         //System.out.println(">>['" + key + "'] = " + value);
-
+                        //map.put(key, value);
                         if (key.equalsIgnoreCase(considerAttribute) && value != null && value.matches(".*" + searchKeyword + ".*")) {
-                            //System.out.println(v + " >>['" + key + "'] = " + value);
-                            queryResult = vertexList[v].label;
-                            //displayVertex(v); // display it
+                            isFound = true;
                         }
                     }
                 } catch (Exception ex) {
                     System.out.println("Error :" + ex);
                 }
+
                 vertexList[v].wasVisited = true; // mark it
                 theStack.push(v);
+
+                if (isFound) {
+                    resultset[counter] = vertexList[v].label;
+                    counter++;
+                }
             }
         } // end while
         // stack is empty, so we’re done
         for (int j = 0; j < nVerts; j++) { // reset flags
             vertexList[j].wasVisited = false;
         }
-        //System.out.println(theStack.peek());
+        return resultset;
     } // end dfs
 // ------------------------------------------------------------
 

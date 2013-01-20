@@ -6,6 +6,7 @@ package com;
  */
 import database.*;
 import database.models.UsersSearchModel;
+import database.plugins.Entity;
 import com.graph.*;
 import java.util.*;
 import java.sql.*;
@@ -50,27 +51,70 @@ public class Search {
     public void doGraphSearch(String searchKeyword) {
         // Now we start contructing relational data mapping within graphs, or in other words SQL JOIN in theory
         System.out.println("name");
-        entitiyGraphs[0].dfs("name", searchKeyword);
-        
-        for (Map.Entry<String, String> entry : entitiyGraphs[0].queryResult.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            System.out.println(">>['" + key + "'] = " + value);
-        }
+        //entitiyGraphs[0].dfs("name", searchKeyword);
+        //System.out.println("USERS: name: " + entitiyGraphs[0].map.get("name"));
+
+        /*for (Map.Entry<String, String> entry : entitiyGraphs[0].queryResult.entrySet()) {
+        String key = entry.getKey();
+        String value = entry.getValue();
+        System.out.println(">>['" + key + "'] = " + value);
+        }//*/
         //System.out.println("1user_id");
-        //entitiyGraphs[0].dfs("user_id", searchKeyword);
+        /*entitiyGraphs[0].dfs("user_id", searchKeyword);
+        //entitiyGraphs[3].dfs("user_id", entitiyGraphs[0].map.get("user_id"));
         System.out.println("2user_id");
         entitiyGraphs[3].dfs("user_id", ""+10);
         for (Map.Entry<String, String> entry : entitiyGraphs[3].queryResult.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            System.out.println(">>['" + key + "'] = " + value);
-        }
+        String key = entry.getKey();
+        String value = entry.getValue();
+        System.out.println(">>['" + key + "'] = " + value);
+        }//*/
         //System.out.println("rsrc_name");
         //entitiyGraphs[3].dfs("rsrc_name", ""+10);
+
+        ///////////////////////
+
+
+        try {
+            //Map[] resultsets = entitiyGraphs[0].dfs("name", searchKeyword);
+            Map[] resultsets = this.graphSelect("USERS", "name", "name", searchKeyword);
+
+            //System.out.println(resultsets.length);
+            //Set sada = resultsets[0].entrySet();
+            // begin :traversing through each table row to display data
+            if (resultsets.length > 0) {
+                for (int i = 0; i < resultsets.length; i++) {
+                    System.out.println("USERS: name: " + resultsets[i].get("name"));
+                    Map<String, String> resultset = resultsets[i];
+
+                    System.out.println("== ROW: " + i + " ========================");
+                    for (Map.Entry<String, String> entry : resultset.entrySet()) {
+                        String key = entry.getKey();
+                        String value = entry.getValue();
+                        System.out.println("['" + key + "'] = " + value);
+                    }
+                }
+            } // end :traversing through each table row to display data//*/
+
+        } catch (Exception ex) {
+        }
     }
 
-    public void graphJoin () {
-        
+    public Map[] graphSelect(String table, String columns, String whereColumn, String searchKeyword) {
+        Entity entity = new Entity();
+        String[] dbtableArray = entity.getSearchableTables();
+        int triggeredTable = 0;
+        for (int i = 0; i < dbtableArray.length; i++) {
+            if (table == dbtableArray[i]) {
+                triggeredTable = i;
+            }
+        }
+        //System.out.println("triggeredTable: " + triggeredTable);
+        //entitiyGraphs[triggeredTable].dfs(whereColumn, searchKeyword);
+        Map[] resultsets = entitiyGraphs[triggeredTable].dfs(whereColumn, searchKeyword);
+        //System.out.println("USERS: name: " + entitiyGraphs[triggeredTable].map.get(columns));
+
+        return resultsets;
+        //entitiyGraphs[triggeredTable].dfs("user_id", entitiyGraphs[0].map.get("columns"));
     }
 }
