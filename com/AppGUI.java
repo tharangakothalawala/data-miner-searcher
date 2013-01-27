@@ -14,30 +14,49 @@ import database.*;
 public class AppGUI extends JPanel implements ActionListener {
 
     private JButton btnSearch;
+    private JLabel lblUsers, lblRsrc;
+    private JLabel lblUsersName, lblRsrcName;
     private JTextField txtSearchKeyword;
+    private JTextField txtUsersName; // USERS::name
+    private JTextField txtRsrcName; // RSRC::name
     private JTextArea textarea;
     JScrollPane textareaScroll;//*/
     private Database db = new Database();
     Search searchTest = new Search();
 
     public AppGUI() {
+        lblUsers = new JLabel("Users");
+        lblRsrc = new JLabel("Resources");
+        lblUsersName = new JLabel("name :");
+        lblRsrcName = new JLabel("name :");
+
         btnSearch = new JButton("Search");
         txtSearchKeyword = new JTextField(5);
-            textarea = new JTextArea(10, 65);
-            textareaScroll = new JScrollPane(textarea);
+        txtUsersName = new JTextField(5);
+        txtRsrcName = new JTextField(5);
+        textarea = new JTextArea(10, 65);
+        textareaScroll = new JScrollPane(textarea);
 
         btnSearch.addActionListener(this);
 
         btnSearch.setToolTipText("Search");
         txtSearchKeyword.setFont(new Font("Calibri", Font.BOLD, 14));
         txtSearchKeyword.setText("ad"); // only for the demo
+        txtUsersName.setText("tha"); // only for the demo
 
         setPreferredSize(new Dimension(360, 400));
         setLayout(null);
 
-        add(btnSearch).setBounds(255, 40, 90, 20);
-        add(txtSearchKeyword).setBounds(15, 15, 330, 20);
-            add(textareaScroll).setBounds(15, 70, 330, 300);
+        add(btnSearch).setBounds(255, 80, 90, 20);
+        //add(txtSearchKeyword).setBounds(15, 15, 330, 20);
+        add(lblUsers).setBounds(15, 15, 100, 20);
+        add(lblRsrc).setBounds(165, 15, 100, 20);
+        add(lblUsersName).setBounds(15, 40, 100, 20);
+        add(lblRsrcName).setBounds(165, 40, 100, 20);
+
+        add(txtUsersName).setBounds(50, 40, 100, 20);
+        add(txtRsrcName).setBounds(200, 40, 100, 20);
+        add(textareaScroll).setBounds(15, 110, 330, 260);
 
         searchTest.populateGraph();
 
@@ -45,13 +64,28 @@ public class AppGUI extends JPanel implements ActionListener {
 
     public void actionPerformed(ActionEvent event) {
         if (event.getSource() == btnSearch) {
+            //textarea.setText("");
             String searchKeyword = txtSearchKeyword.getText();
+
+            String entity = "";
+            String entityField = "";
+            if (!txtUsersName.getText().equalsIgnoreCase("")) {
+                entity = "USERS";
+                entityField = "name";
+                searchKeyword = txtUsersName.getText();
+            } else {
+                if (!txtRsrcName.getText().equalsIgnoreCase("")) {
+                    entity = "RSRC";
+                    entityField = "rsrc_name";
+                    searchKeyword = txtRsrcName.getText();
+                }
+            }
 
             // triggering the search method
             //Search searchTest = new Search();
             //searchTest.doSearch(searchKeyword);
             //searchTest.populateGraph();
-            searchTest.doGraphSearch(searchKeyword);
+            searchTest.doGraphSearch(entity, entityField, searchKeyword);
 
             textarea.setText(searchTest.searchResults);
         }

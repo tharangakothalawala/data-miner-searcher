@@ -48,7 +48,8 @@ public class Search {
         } // end: traversing through each table
     }
 
-    public void doGraphSearch(String searchKeyword) {
+    public void doGraphSearch(String entity, String entityField, String searchKeyword) {
+        searchResults = "";
         // Now we start contructing relational data mapping within graphs, or in other words SQL JOIN in theory
         System.out.println("name");
         //entitiyGraphs[0].dfs("name", searchKeyword);
@@ -77,7 +78,8 @@ public class Search {
 
         try {
             //Map[] resultsets = entitiyGraphs[0].dfs("name", searchKeyword);
-            Map[] resultsets = this.graphSelect("USERS", "name", "name", searchKeyword);
+            //Map[] resultsets = this.graphSelect("USERS", "name", searchKeyword);
+            Map[] resultsets = this.graphSelect(entity, entityField, searchKeyword);
 
             //System.out.println(resultsets.length);
             //Set sada = resultsets[0].entrySet();
@@ -92,6 +94,7 @@ public class Search {
                         String key = entry.getKey();
                         String value = entry.getValue();
                         System.out.println("['" + key + "'] = " + value);
+                        searchResults += "\n['" + key + "'] = " + value;
                     }
                 }
             } // end :traversing through each table row to display data//*/
@@ -100,7 +103,7 @@ public class Search {
         }
     }
 
-    public Map[] graphSelect(String table, String columns, String whereColumn, String searchKeyword) {
+    public Map[] graphSelect(String table, String whereColumn, String searchKeyword) {
         Entity entity = new Entity();
         String[] dbtableArray = entity.getSearchableTables();
         int triggeredTable = 0;
