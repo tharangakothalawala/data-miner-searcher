@@ -13,49 +13,47 @@ import database.*;
 
 public class AppGUI extends JPanel implements ActionListener {
 
-    private JButton btnSearch;
-    private JLabel lblUsers, lblRsrc;
-    private JLabel lblUsersName, lblRsrcName;
     private JTextField txtSearchKeyword;
-    private JTextField txtUsersName; // USERS::name
-    private JTextField txtRsrcName; // RSRC::name
+    private JButton btnSearch;
+    private JCheckBox chkSearchAll;
+    private JCheckBox chkSearchUsers;
+    private JCheckBox jcomp5;
+    private JCheckBox chkSearchResources;
+    private JCheckBox jcomp7;
     private JTextArea textarea;
     JScrollPane textareaScroll;//*/
     private Database db = new Database();
     Search searchTest = new Search();
 
     public AppGUI() {
-        lblUsers = new JLabel("Users");
-        lblRsrc = new JLabel("Resources");
-        lblUsersName = new JLabel("name :");
-        lblRsrcName = new JLabel("name :");
-
-        btnSearch = new JButton("Search");
-        txtSearchKeyword = new JTextField(5);
-        txtUsersName = new JTextField(5);
-        txtRsrcName = new JTextField(5);
+        txtSearchKeyword = new JTextField (5);
+        btnSearch = new JButton ("Search");
+        chkSearchAll = new JCheckBox ("All");
+        chkSearchUsers = new JCheckBox ("Users");
+        jcomp5 = new JCheckBox ("with name");
+        chkSearchResources = new JCheckBox ("Resources");
+        jcomp7 = new JCheckBox ("with name");
         textarea = new JTextArea(10, 65);
         textareaScroll = new JScrollPane(textarea);
 
         btnSearch.addActionListener(this);
 
+        jcomp5.setEnabled(false);
+        jcomp7.setEnabled(false);
         btnSearch.setToolTipText("Search");
         txtSearchKeyword.setFont(new Font("Calibri", Font.BOLD, 14));
         txtSearchKeyword.setText("ad"); // only for the demo
-        txtUsersName.setText("tha"); // only for the demo
 
         setPreferredSize(new Dimension(360, 400));
         setLayout(null);
 
-        add(btnSearch).setBounds(255, 80, 90, 20);
-        //add(txtSearchKeyword).setBounds(15, 15, 330, 20);
-        add(lblUsers).setBounds(15, 15, 100, 20);
-        add(lblRsrc).setBounds(165, 15, 100, 20);
-        add(lblUsersName).setBounds(15, 40, 100, 20);
-        add(lblRsrcName).setBounds(165, 40, 100, 20);
-
-        add(txtUsersName).setBounds(50, 40, 100, 20);
-        add(txtRsrcName).setBounds(200, 40, 100, 20);
+        add(txtSearchKeyword).setBounds (15, 15, 220, 20);
+        add(btnSearch).setBounds (250, 15, 100, 20);
+        add(chkSearchAll).setBounds (15, 50, 100, 25);
+        add(chkSearchUsers).setBounds (15, 75, 100, 25);
+        add(jcomp5).setBounds (30, 95, 100, 25);
+        add(chkSearchResources).setBounds (165, 50, 100, 25);
+        add(jcomp7).setBounds (180, 70, 100, 25);
         add(textareaScroll).setBounds(15, 110, 330, 260);
 
         searchTest.populateGraph();
@@ -63,31 +61,28 @@ public class AppGUI extends JPanel implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent event) {
+        String[] entities = new String[2];
+        String[] entityFields = new String[2];
+
+        /* @TODO : need to handle this somewhere else then here in the view.
+         * But this may be the place as we will need to anyhow know what categories are being considered
+         */
+        if (chkSearchUsers.isSelected()) {
+            entities[0] = "USERS";
+            entityFields[0] = "name";
+        }
+        if (chkSearchResources.isSelected()) {
+            entities[1] = "RSRC";
+            entityFields[1] = "rsrc_name";
+        }
         if (event.getSource() == btnSearch) {
-            //textarea.setText("");
             String searchKeyword = txtSearchKeyword.getText();
 
-            String entity = "";
-            String entityField = "";
-            if (!txtUsersName.getText().equalsIgnoreCase("")) {
-                entity = "USERS";
-                entityField = "name";
-                searchKeyword = txtUsersName.getText();
-            } else {
-                if (!txtRsrcName.getText().equalsIgnoreCase("")) {
-                    entity = "RSRC";
-                    entityField = "rsrc_name";
-                    searchKeyword = txtRsrcName.getText();
-                }
+            if (!searchKeyword.equalsIgnoreCase("")) {
+                searchTest.doGraphSearch(entities, entityFields, searchKeyword);
+
+                textarea.setText(searchTest.searchResults);
             }
-
-            // triggering the search method
-            //Search searchTest = new Search();
-            //searchTest.doSearch(searchKeyword);
-            //searchTest.populateGraph();
-            searchTest.doGraphSearch(entity, entityField, searchKeyword);
-
-            textarea.setText(searchTest.searchResults);
         }
     }
 

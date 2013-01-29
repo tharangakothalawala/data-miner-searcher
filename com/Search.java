@@ -17,11 +17,11 @@ public class Search {
     public String searchResults = "";
     public UsersSearchModel[] usermodel;
     //public int userRecordTracker = 0;
-    Graph[] entitiyGraphs;
+    Graph[] entitiyGraphArray;
 
     public void populateGraph() {
         String[] tableArray = db.getFilteredTables();
-        entitiyGraphs = new Graph[tableArray.length];
+        entitiyGraphArray = new Graph[tableArray.length];
 
         // begin: traversing through each table
         for (int t = 0; t < tableArray.length; t++) {
@@ -43,50 +43,34 @@ public class Search {
                 } // end :traversing through each table row to display data
 
                 // saving each entity data into graphs, so that we can query later
-                entitiyGraphs[t] = theGraph;
+                entitiyGraphArray[t] = theGraph;
             }
         } // end: traversing through each table
     }
 
-    public void doGraphSearch(String entity, String entityField, String searchKeyword) {
+    public void doGraphSearch(String[]  entity, String[]  entityField, String searchKeyword) {
         searchResults = "";
-        // Now we start contructing relational data mapping within graphs, or in other words SQL JOIN in theory
-        System.out.println("name");
-        //entitiyGraphs[0].dfs("name", searchKeyword);
-        //System.out.println("USERS: name: " + entitiyGraphs[0].map.get("name"));
+        // Now we can start contructing relational data mapping within graphs, or in other words SQL JOIN in theory
 
-        /*for (Map.Entry<String, String> entry : entitiyGraphs[0].queryResult.entrySet()) {
-        String key = entry.getKey();
-        String value = entry.getValue();
-        System.out.println(">>['" + key + "'] = " + value);
+        /*for (int f = 0; f < entity.length; f++) {
+            System.out.println("entity: " + entity[f] + ", searchKeyword: " + searchKeyword);
+        }
+        for (int f = 0; f < entityField.length; f++) {
+            System.out.println("entityField: " + entityField[f] + ", searchKeyword: " + searchKeyword);
         }//*/
-        //System.out.println("1user_id");
-        /*entitiyGraphs[0].dfs("user_id", searchKeyword);
-        //entitiyGraphs[3].dfs("user_id", entitiyGraphs[0].map.get("user_id"));
-        System.out.println("2user_id");
-        entitiyGraphs[3].dfs("user_id", ""+10);
-        for (Map.Entry<String, String> entry : entitiyGraphs[3].queryResult.entrySet()) {
-        String key = entry.getKey();
-        String value = entry.getValue();
-        System.out.println(">>['" + key + "'] = " + value);
-        }//*/
-        //System.out.println("rsrc_name");
-        //entitiyGraphs[3].dfs("rsrc_name", ""+10);
-
-        ///////////////////////
-
 
         try {
-            //Map[] resultsets = entitiyGraphs[0].dfs("name", searchKeyword);
-            //Map[] resultsets = this.graphSelect("USERS", "name", searchKeyword);
-            Map[] resultsets = this.graphSelect(entity, entityField, searchKeyword);
+            for (int j = 0; j < entity.length; j++) {
+                System.out.println("entity: '" + entity[j] + "', entityField: '" + entityField[j] + "'" + ", searchKeyword: '" + searchKeyword + "'");
+            if (entity[j] != null) { //  (!entity[j].equalsIgnoreCase(""))
 
-            //System.out.println(resultsets.length);
-            //Set sada = resultsets[0].entrySet();
+            //Map[] resultsets = entitiyGraphArray[0].dfs("name", searchKeyword);
+            //Map[] resultsets = this.graphSelect("USERS", "name", searchKeyword);
+            Map[] resultsets = this.graphSelect(entity[j], entityField[j], searchKeyword);
+
             // begin :traversing through each table row to display data
             if (resultsets.length > 0) {
                 for (int i = 0; i < resultsets.length; i++) {
-                    System.out.println("USERS: name: " + resultsets[i].get("name"));
                     Map<String, String> resultset = resultsets[i];
 
                     System.out.println("== ROW: " + i + " ========================");
@@ -94,10 +78,14 @@ public class Search {
                         String key = entry.getKey();
                         String value = entry.getValue();
                         System.out.println("['" + key + "'] = " + value);
-                        searchResults += "\n['" + key + "'] = " + value;
+                        if (entityField[j].equalsIgnoreCase(key)) // uncomment this if statement to display all the search results
+                            searchResults += "\n['" + key + "'] = " + value;
                     }
                 }
             } // end :traversing through each table row to display data//*/
+
+            }
+        }
 
         } catch (Exception ex) {
         }
@@ -113,11 +101,11 @@ public class Search {
             }
         }
         //System.out.println("triggeredTable: " + triggeredTable);
-        //entitiyGraphs[triggeredTable].dfs(whereColumn, searchKeyword);
-        Map[] resultsets = entitiyGraphs[triggeredTable].dfs(whereColumn, searchKeyword);
-        //System.out.println("USERS: name: " + entitiyGraphs[triggeredTable].map.get(columns));
+        //entitiyGraphArray[triggeredTable].dfs(whereColumn, searchKeyword);
+        Map[] resultsets = entitiyGraphArray[triggeredTable].dfs(whereColumn, searchKeyword);
+        //System.out.println("USERS: name: " + entitiyGraphArray[triggeredTable].map.get(columns));
 
         return resultsets;
-        //entitiyGraphs[triggeredTable].dfs("user_id", entitiyGraphs[0].map.get("columns"));
+        //entitiyGraphArray[triggeredTable].dfs("user_id", entitiyGraphArray[0].map.get("columns"));
     }
 }
