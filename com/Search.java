@@ -15,6 +15,7 @@ public class Search {
     String[] foreignKeyArray;
 
     public void doSearch(String searchKeyword) {
+        this.processEntityRelations ();
         String[] entityRelationsArray = this.getEntityRelations();
 
         String eachRowData = "";
@@ -32,6 +33,8 @@ public class Search {
         System.out.println("----------------");
 
         String table = "";
+        String relatedTables = "";
+        String upperLevelTable = "";
         do {
             System.out.print("Select a table : ");
             table = input.next();
@@ -41,22 +44,37 @@ public class Search {
 
             boolean isFound = false;
             for (int t = 0; t < levelOneEntities.length; t++) {
-                if (levelOneEntities[t].equalsIgnoreCase(table)) {
                     for (int i = 0; i < entityRelationsArray.length; i++) {
                         String[] level = entityRelationsArray[i].split(db.COLNAMETYPESP);
-                        if (level[0].equalsIgnoreCase(table))
-                            System.out.println(level[1]);
+
+                        if (level[0].equalsIgnoreCase(table) && !upperLevelTable.equalsIgnoreCase(table)) {
+                            System.out.println(level[1]); // available related entities
+
+                            System.out.println(db.getEntity().getSearchables(table));
+                            upperLevelTable = table;
+                            isFound = true;
+
+                            System.out.println("----------------.");
+                        } else if (level[0].equalsIgnoreCase(table) && this.isRelatedWithAnyTable(table) && !upperLevelTable.equalsIgnoreCase(table)) {
+                            System.out.println(db.getEntity().getSearchables(table));
+                            upperLevelTable = table;
+                            isFound = true;
+
+                            System.out.println("----------------..");
+                        }
                     }
 
-                    System.out.println(db.getEntity().getSearchables(table));
-                    isFound = true;
+                    if (this.isRelatedWithAnyTable(table) && !isFound) { //  && !upperLevelTable.equalsIgnoreCase(table)
+                        System.out.println(db.getEntity().getSearchables(table));
+                        upperLevelTable = table;
+                        isFound = true;
 
-                    System.out.println("----------------");
-                }
+                        System.out.println("----------------...");
+                    }
             }
 
-            if (!isFound)
-                System.out.println("Not Found!\n----------------");
+            //if (!isFound)
+                //System.out.println("Not Found!\n----------------");
 
         } while (!table.equalsIgnoreCase(""));
 
@@ -66,6 +84,31 @@ public class Search {
         //System.out.println(eachRowData);//*/
         //System.exit(0); // @TODO : just stopping the execution. Needs to be handled by the communigram
     } // function end
+
+    public boolean in_array (String[] array, String searchValue) {
+        for (int i = 0; i < array.length; i++)
+            if (array[i].equalsIgnoreCase(searchValue))
+                return true;
+
+        return false;
+    }
+
+    public boolean isRelatedWithAnyTable (String table) {
+        boolean result = false;
+        String[] relatedEntities = this.getEntityRelations ();
+
+        for (int i = 0; i < relatedEntities.length; i++) {
+            if (!result && relatedEntities[i].matches(".*"+table+".*")) {
+                String[] tableInfo = relatedEntities[i].split(db.COLNAMETYPESP);
+                String[] tables = tableInfo[1].split(",");
+                if (this.in_array(tables, table))
+                    result = true;
+            }
+        }
+
+        //System.out.println("related tables : " + result);
+        return result;
+    }
 
     public void processEntityRelations () {
         String[] tableArray = db.getFilteredTables();
@@ -118,8 +161,7 @@ public class Search {
         } // end: traversing through each table
     }
 
-    public String[] getEntityRelations () { //(String[] primaryKeyArray, String[] foreignKeyArray) {
-        this.processEntityRelations ();
+    public String[] getEntityRelations () {
         String eachEntity = "";
         String relatedEntity = "";
         String nextForeignKeyTable = "";
@@ -152,7 +194,8 @@ public class Search {
                             if (relatedEntity.equalsIgnoreCase("")) {
                                 relatedEntity += primaryKeySplits[0];
                             } else {
-                                relatedEntity += "," + primaryKeySplits[0];
+                                if (!relatedEntity.matches(".*"+primaryKeySplits[0]+".*"))
+                                    relatedEntity += "," + primaryKeySplits[0];
                             }
                         }
                     }
