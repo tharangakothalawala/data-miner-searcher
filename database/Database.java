@@ -112,7 +112,7 @@ public class Database {
                         + group + order
                         + limit + offset + ";";
 
-                System.out.println("Query: " + localQuery);
+                //System.out.println("Query: " + localQuery);
 
                 this.setQuery(localQuery);
                 ResultSet rs = this.loadData();

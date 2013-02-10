@@ -6,7 +6,6 @@ package database.plugins;
  */
 import database.Database;
 import java.sql.*;
-import java.util.*;
 
 public class Entity {
 
@@ -77,7 +76,7 @@ public class Entity {
     }
 
     public String[] getSearchableTables () {
-        String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT"};
+        String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT", "CALENDAR", "ROLES", "DOCUMENT"};
 
         if (this.isEnabledSearchInAllTables)
             return null;
