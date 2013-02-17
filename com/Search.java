@@ -14,33 +14,77 @@ public class Search {
     String[] primaryKeyArray;
     String[] foreignKeyArray;
 
-    public void doSearch(String searchKeyword) {
-        this.processEntityRelations ();
+    public String[] showInitialView () {
         String[] entityRelationsArray = this.getEntityRelations();
 
-        String eachRowData = "";
         // Displaying the available entity relationships
         String[] levelOneEntities = new String[entityRelationsArray.length];
         for (int t = 0; t < entityRelationsArray.length; t++) {
             String[] level1 = entityRelationsArray[t].split(db.COLNAMETYPESP);
             System.out.println(level1[0] + " : " + level1[1]);
             levelOneEntities[t] = level1[0];
-            //eachRowData += entityRelationsArray[t];
         }
+        return levelOneEntities;
+    }
+
+    /*
+     * ex. inputs:
+     * USERS s name a s name ad PROFILE s prof_name min s prof_name dmin
+     */
+    public void doSearch(String searchKeyword) {
+        String currentSelectedTable = "";
+        String [] eachSelectedTableClauseData = new String[50];
+
+        ////////////////////////////////////////////////////////////////////////
+        this.processEntityRelations ();
+        String[] entityRelationsArray = this.getEntityRelations();
+
+        String eachRowData = "";
+        String[] levelOneEntities = this.showInitialView();
 
         Scanner input = new Scanner(System.in);
 
         System.out.println("----------------");
 
         String table = "";
-        String relatedTables = "";
         String upperLevelTable = "";
+
         do {
             System.out.print("Select a table : ");
             table = input.next();
 
-            if (table.equalsIgnoreCase("x"))
+            if (this.isRelatedWithAnyTable(table) || (!this.isRelatedWithAnyTable(table) && this.in_array(db.getEntity().getSearchableTables (), table))) {
+                currentSelectedTable = table;
+                if (!this.isTableSelected(eachSelectedTableClauseData, currentSelectedTable)) {
+                    eachSelectedTableClauseData[this.nextPos(eachSelectedTableClauseData)] = table + "::";
+                }
+            }
+
+            if (table.equalsIgnoreCase("x")) // exit
                 break;
+
+            // this may be used to get to the level 1
+            if (table.equalsIgnoreCase("r")) { // reset
+                String[] arr = this.showInitialView();
+            }
+
+            // this may be used to get to the level 1
+            if (table.equalsIgnoreCase("d")) { // display
+                this.vardumpArray(eachSelectedTableClauseData);
+                System.out.println("\n### Query : --------------------------------<<<");
+                this.buildQuery (eachSelectedTableClauseData);
+                //this.vardumpArray(this.getEntityRelations ());
+                break;
+            }
+
+            // selecting an attribute to set value (this will be used to create the SQL on the fly)
+            if (table.equalsIgnoreCase("s")) { // select
+                System.out.print("Select an attribute to set a value : ");
+                String attribute = input.next();
+                System.out.print("value : ");
+                String value = input.next();
+                eachSelectedTableClauseData[this.findPos(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += attribute + " LIKE '%" + value + "%':";
+            }
 
             boolean isFound = false;
             for (int t = 0; t < levelOneEntities.length; t++) {
@@ -50,13 +94,13 @@ public class Search {
                         if (level[0].equalsIgnoreCase(table) && !upperLevelTable.equalsIgnoreCase(table)) {
                             System.out.println(level[1]); // available related entities
 
-                            System.out.println(db.getEntity().getSearchables(table));
+                            System.out.println(db.getEntity().getSearchables(table, false));
                             upperLevelTable = table;
                             isFound = true;
 
                             System.out.println("----------------.");
                         } else if (level[0].equalsIgnoreCase(table) && this.isRelatedWithAnyTable(table) && !upperLevelTable.equalsIgnoreCase(table)) {
-                            System.out.println(db.getEntity().getSearchables(table));
+                            System.out.println(db.getEntity().getSearchables(table, false));
                             upperLevelTable = table;
                             isFound = true;
 
@@ -65,7 +109,7 @@ public class Search {
                     }
 
                     if (this.isRelatedWithAnyTable(table) && !isFound) { //  && !upperLevelTable.equalsIgnoreCase(table)
-                        System.out.println(db.getEntity().getSearchables(table));
+                        System.out.println(db.getEntity().getSearchables(table, false));
                         upperLevelTable = table;
                         isFound = true;
 
@@ -78,12 +122,168 @@ public class Search {
 
         } while (!table.equalsIgnoreCase(""));
 
-        searchResults = eachRowData;
+        //searchResults = eachRowData;
 
-        System.exit(0);
+        //System.exit(0);
         //System.out.println(eachRowData);//*/
         //System.exit(0); // @TODO : just stopping the execution. Needs to be handled by the communigram
     } // function end
+
+    public String createWhereClause (String[] rawDataArray, boolean isWithinJoin) {
+        String[] conditions = rawDataArray[1].split(db.COLNAMETYPESP);
+        String whereClause = "";
+        for (int k = 0; k < conditions.length; k++) {
+            whereClause += rawDataArray[0] + "." + conditions[k] + " OR ";
+        }
+        whereClause = whereClause.substring(0, (whereClause.length()) - 4);
+        if (isWithinJoin)
+            return "(" + whereClause + ")";
+        else
+            return whereClause;
+    }
+
+    /*
+     * this will creat the SQL join statement. ex. input: USERS s name a s name ad PROFILE s prof_name min s prof_name dmin
+     */
+    public void buildQuery (String[] queryRawDataArray) {
+        String select = "SELECT";
+        String whereClause = " WHERE ";
+        String leftJoin = "";
+        String parentJoinTable = "";
+        String parentTableCondition = "";
+
+        // creating the select clause to the selected tables
+        String sqlSelects = "";
+        for (int i = 0; i < queryRawDataArray.length; i++) {
+            if (queryRawDataArray[i] != null) {
+                String[] tableData = queryRawDataArray[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
+
+                // always need to select the levelOne table
+                if (i == 0) {
+                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true) + ",";
+                }
+                // only select table attributes if we have a condition. array index 2 contains the condition.
+                if (tableData.length > 1)
+                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true) + ",";
+            }
+        }
+
+        for (int i = 0; i < queryRawDataArray.length; i++) {
+            if (queryRawDataArray[i] != null) {
+                // index 0 means to consider the 0th index values as related to levelOne table
+                if (i == 0) {
+                    String[] mainTableData = queryRawDataArray[0].split(db.COLNAMETYPESP+db.COLNAMETYPESP); // seperating the table::with their coditions
+                    parentJoinTable = mainTableData[0];
+                    if (mainTableData.length > 1) {
+                        whereClause += this.createWhereClause(mainTableData, false);
+                        parentTableCondition = whereClause;
+                    }
+
+                    select += sqlSelects.substring(0, (sqlSelects.length()) - 1) + " FROM " + mainTableData[0]; // SELECT * FROM <selected_first_table>
+                } else {
+                    // JOINs will be set in here
+                    String[] mainTableData = queryRawDataArray[i-1].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
+                    parentJoinTable = mainTableData[0];
+                    String[] tableClause = queryRawDataArray[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
+
+                    String[] leftjoinData = primaryKeyArray[this.findPos(primaryKeyArray, tableClause[0], db.COLNAMETYPESP)].split(db.COLNAMETYPESP);
+                    String condition = "";
+                    System.out.println(tableClause.length);
+                    if (tableClause.length > 1) {
+                        condition = this.createWhereClause(tableClause, true);
+
+                        leftJoin += " JOIN " + tableClause[0] + " ON " + tableClause[0] + "." + leftjoinData[1] + " = " + parentJoinTable + "." + leftjoinData[1] + " AND " + condition;
+                    } else {
+                        condition = "";
+                    }
+                }
+            }
+        }
+        leftJoin += parentTableCondition;
+
+        this.initializeArray(queryRawDataArray);
+        String finalSQLQuery = select + leftJoin + ";";
+
+        System.out.println(finalSQLQuery);
+        System.out.println("### Query : -------------------------------->>>");
+        this.getRealData (finalSQLQuery); // finally send the plain sql statement to get the real data
+    }
+
+    public void getRealData(String sqlQuery) {
+        String eachRowData = "";
+        try {
+            Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, null, true);
+
+            // begin :traversing through each table row to display data
+            if (resultsets.length > 0) {
+                for (int i = 0; i < resultsets.length; i++) {
+                    Map<String, String> resultset = resultsets[i];
+                    System.out.println("== ROW: " + (i + 1) + " ========================");
+                    eachRowData += "== ROW: " + (i + 1) + " ========================";
+                    for (Map.Entry<String, String> entry : resultset.entrySet()) {
+                        String key = entry.getKey();
+                        String value = entry.getValue();
+                        if (value != null) {
+                            System.out.println("['" + key + "'] = " + value);
+                            eachRowData += "\n['" + key + "'] = " + value;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+        }
+
+        searchResults = eachRowData;
+    }
+
+    public void initializeArray (String[] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = null;
+        }
+    }
+
+    public void vardumpArray (String[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null)
+                System.out.println(array[i]);
+        }
+    }
+
+    public int findPos (String[] array, String value, String splitter) {
+        int position = 0;
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null){
+                String[] tableClause = array[i].split(splitter);
+                if (tableClause[0].toString().equalsIgnoreCase(value)) {
+                    position = i;
+                    break;
+                }
+            }
+        }
+        return position;
+    }
+
+    public int nextPos (String[] array) {
+        int nextIndex = 0;
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == null) {
+                nextIndex = i;
+                break;
+            }
+        }
+        return nextIndex;
+    }
+
+    public boolean isTableSelected (String[] array, String table) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null) {
+            String[] tableClause = array[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
+            if (tableClause[0].matches(".*"+table+".*"))
+                return true;
+            }
+        }
+        return false;
+    }
 
     public boolean in_array (String[] array, String searchValue) {
         for (int i = 0; i < array.length; i++)
@@ -115,7 +315,7 @@ public class Search {
 
         int totalKeyColumns = 0;
         for (int t = 0; t < tableArray.length; t++) {
-            Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, null);
+            Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, null, false);
             totalKeyColumns += resultsets.length;
         }
         primaryKeyArray = new String[totalKeyColumns];
@@ -126,9 +326,9 @@ public class Search {
         // begin: traversing through each table
         for (int t = 0; t < tableArray.length; t++) {
             // need only the tables which contain searchable attributes
-            if (!db.getEntity().getSearchables(tableArray[t]).equalsIgnoreCase("")) {
+            if (!db.getEntity().getSearchables(tableArray[t], false).equalsIgnoreCase("")) {
                 // sending the query to the database to retrieve data
-                Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, null);
+                Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, null, false);
 
                 // begin :traversing through each table row to display data
                 if (resultsets.length > 0) {
@@ -146,11 +346,13 @@ public class Search {
                             if (key.equalsIgnoreCase("CONSTRAINT_NAME")) {
                                 if (value.matches(".*fk.*")) {
                                     foreignKeyArray[foreignkeycount] = tableArray[t] + db.COLNAMETYPESP + columnname;
+                                    //System.out.println("FK: "+ tableArray[t] + db.COLNAMETYPESP + columnname);
                                     foreignkeycount++;
                                 }
                                 if (value.matches(".*PK.*")) {
 
                                     primaryKeyArray[primarykeycount] = tableArray[t] + db.COLNAMETYPESP + columnname;
+                                    //System.out.println("PK: "+ tableArray[t] + db.COLNAMETYPESP + columnname);
                                     primarykeycount++;
                                 }
                             }

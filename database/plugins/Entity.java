@@ -15,9 +15,10 @@ public class Entity {
 
     /*
      * @param (String)      table           : The table which it going to search
+     * @param (boolean)     appendTableName : true, if we need in the form of <table>.<attribute>, <table>.<attribute> ...
      * @return (String)     attributes      : returns a set of possible searchable attributes to a given table
      */
-    public String getSearchables(String table) {
+    public String getSearchables(String table, boolean appendTableName) {
         String attributes = "";
 
         db.setQuery("SELECT * FROM " + table);
@@ -32,7 +33,10 @@ public class Entity {
                     String[] splits = arr[i].split(db.COLNAMETYPESP);
                     if (this.isSearchable(splits[1])) { // column type
                         arr[i] = splits[0]; // column name
-                        attributes += arr[i] + ", ";
+                        if (appendTableName)
+                            attributes += table + "." + arr[i] + ", ";
+                        else
+                            attributes += arr[i] + ", ";
                     }
                     //System.out.println(i + ")    " + arr[i] + " ");
                 }

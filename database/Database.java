@@ -77,7 +77,7 @@ public class Database {
     }
 
     // SQL select
-    public Map[] sqlSelect(String table, String columns, String clause, String group, String order, String limit, String offset) {
+    public Map[] sqlSelect(String table, String columns, String clause, String group, String order, String limit, String offset, boolean isForced) {
         try {
             if (table != null && columns != null) {
                 if (clause != null) {
@@ -114,7 +114,11 @@ public class Database {
 
                 //System.out.println("Query: " + localQuery);
 
-                this.setQuery(localQuery);
+                if (isForced) {
+                    this.setQuery(table);
+                } else {
+                    this.setQuery(localQuery);
+                }
                 ResultSet rs = this.loadData();
 
                 // getting the row and column count to initialize the resultset array
@@ -161,7 +165,7 @@ public class Database {
     public String[] getDatabaseTableList() {
 
         try {
-            Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "' OR TABLE_SCHEMA = '" + dbname + "'", null, null, null, null);
+            Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "' OR TABLE_SCHEMA = '" + dbname + "'", null, null, null, null, false);
             //Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "'", null, null, null, null);
             //Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_SCHEMA = '" + dbname + "'", null, null, null, null);
 
@@ -184,7 +188,7 @@ public class Database {
     public String[] getDatabaseViewList() {
 
         try {
-            Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.VIEWS", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "' OR TABLE_SCHEMA = '" + dbname + "'", null, null, null, null);
+            Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.VIEWS", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "' OR TABLE_SCHEMA = '" + dbname + "'", null, null, null, null, false);
 
             dbviewArray = new String[resultsets.length];
 
