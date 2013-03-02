@@ -17,13 +17,16 @@ public class Search {
     public String[] showInitialView () {
         String[] entityRelationsArray = this.getEntityRelations();
 
+        System.out.println(" ## Avaliable Entities ## ");
         // Displaying the available entity relationships
         String[] levelOneEntities = new String[entityRelationsArray.length];
         for (int t = 0; t < entityRelationsArray.length; t++) {
             String[] level1 = entityRelationsArray[t].split(db.COLNAMETYPESP);
-            System.out.println(level1[0] + " : " + level1[1]);
+            System.out.println(level1[0] + " : " + level1[1] + " - " + db.getEntity().getEntityMeta(level1[0], 3)[0]);
             levelOneEntities[t] = level1[0];
         }
+        System.out.println("\n -- Available commands: --\ns: to set a keyword for the current table selected.\nd: to search/display output\ni: show the initial view\n");
+        System.out.println("----------------------------------------------------------------");
         return levelOneEntities;
     }
 
@@ -44,13 +47,12 @@ public class Search {
 
         Scanner input = new Scanner(System.in);
 
-        System.out.println("----------------");
 
         String table = "";
         String upperLevelTable = "";
 
         do {
-            System.out.print("Select a table : ");
+            System.out.print("Select a table or type any command : ");
             table = input.next();
 
             if (this.isRelatedWithAnyTable(table) || (!this.isRelatedWithAnyTable(table) && this.in_array(db.getEntity().getSearchableTables (), table))) {
@@ -61,10 +63,10 @@ public class Search {
             }
 
             if (table.equalsIgnoreCase("x")) // exit
-                break;
+                System.exit(0); //break;
 
             // this may be used to get to the level 1
-            if (table.equalsIgnoreCase("r")) { // reset
+            if (table.equalsIgnoreCase("i")) { // reset
                 String[] arr = this.showInitialView();
             }
 
@@ -79,11 +81,14 @@ public class Search {
 
             // selecting an attribute to set value (this will be used to create the SQL on the fly)
             if (table.equalsIgnoreCase("s")) { // select
-                System.out.print("Select an attribute to set a value : ");
-                String attribute = input.next();
-                System.out.print("value : ");
+                //System.out.print("Select an attribute to set a value : ");
+                //String attribute = input.next();
+                System.out.print("search keyword : ");
                 String value = input.next();
-                eachSelectedTableClauseData[this.findPos(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += attribute + " LIKE '%" + value + "%':";
+                String[] arr = db.getEntity().getEntityMeta(currentSelectedTable, 2);
+                String clause = db.getEntity().makeClause(arr[0], value);
+                //eachSelectedTableClauseData[this.findPos(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += attribute + " LIKE '%" + value + "%':";
+                eachSelectedTableClauseData[this.findPos(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += clause;
             }
 
             boolean isFound = false;
@@ -94,13 +99,13 @@ public class Search {
                         if (level[0].equalsIgnoreCase(table) && !upperLevelTable.equalsIgnoreCase(table)) {
                             System.out.println(level[1]); // available related entities
 
-                            System.out.println(db.getEntity().getSearchables(table, false));
+                            System.out.println(db.getEntity().getSearchables(table, false, true));
                             upperLevelTable = table;
                             isFound = true;
 
                             System.out.println("----------------.");
                         } else if (level[0].equalsIgnoreCase(table) && this.isRelatedWithAnyTable(table) && !upperLevelTable.equalsIgnoreCase(table)) {
-                            System.out.println(db.getEntity().getSearchables(table, false));
+                            System.out.println(db.getEntity().getSearchables(table, false, true));
                             upperLevelTable = table;
                             isFound = true;
 
@@ -109,13 +114,15 @@ public class Search {
                     }
 
                     if (this.isRelatedWithAnyTable(table) && !isFound) { //  && !upperLevelTable.equalsIgnoreCase(table)
-                        System.out.println(db.getEntity().getSearchables(table, false));
+                        System.out.println(db.getEntity().getSearchables(table, false, true));
                         upperLevelTable = table;
                         isFound = true;
 
                         System.out.println("----------------...");
                     }
             }
+
+            
 
             //if (!isFound)
                 //System.out.println("Not Found!\n----------------");
@@ -160,11 +167,11 @@ public class Search {
 
                 // always need to select the levelOne table
                 if (i == 0) {
-                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true) + ",";
+                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true, true) + ",";
                 }
                 // only select table attributes if we have a condition. array index 2 contains the condition.
-                if (tableData.length > 1)
-                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true) + ",";
+                if (i != 0) //(tableData.length > 1) @TODO: handled like this. needs thorough testing
+                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true, true) + ",";  // this needs to be removed or handdled carefully as it sets similar attribute selects
             }
         }
 
@@ -326,7 +333,7 @@ public class Search {
         // begin: traversing through each table
         for (int t = 0; t < tableArray.length; t++) {
             // need only the tables which contain searchable attributes
-            if (!db.getEntity().getSearchables(tableArray[t], false).equalsIgnoreCase("")) {
+            if (!db.getEntity().getSearchables(tableArray[t], false, true).equalsIgnoreCase("")) {
                 // sending the query to the database to retrieve data
                 Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, null, false);
 

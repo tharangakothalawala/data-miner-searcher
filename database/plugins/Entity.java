@@ -18,7 +18,7 @@ public class Entity {
      * @param (boolean)     appendTableName : true, if we need in the form of <table>.<attribute>, <table>.<attribute> ...
      * @return (String)     attributes      : returns a set of possible searchable attributes to a given table
      */
-    public String getSearchables(String table, boolean appendTableName) {
+    public String getSearchables(String table, boolean appendTableName, boolean getPredefined) {
         String attributes = "";
 
         db.setQuery("SELECT * FROM " + table);
@@ -27,12 +27,24 @@ public class Entity {
             try {
                 ResultSet rs = db.loadData();
 
-                String[] arr = db.getMetaData(rs, 2); // get entity coloumns with their datatypes
+                String[] arr = {""};
+                if (getPredefined) {
+                    arr = this.getEntityMeta(table, 1);
+                } else {
+                    arr = db.getMetaData(rs, 2); // get entity coloumns with their datatypes
+                }
 
                 for (int i = 0; i < arr.length; i++) {
+                    if (!getPredefined) {
                     String[] splits = arr[i].split(db.COLNAMETYPESP);
-                    if (this.isSearchable(splits[1])) { // column type
-                        arr[i] = splits[0]; // column name
+                        if (this.isSearchable(splits[1])) { // column type
+                            arr[i] = splits[0]; // column name
+                            if (appendTableName)
+                                attributes += table + "." + arr[i] + ", ";
+                            else
+                                attributes += arr[i] + ", ";
+                        }
+                    } else {
                         if (appendTableName)
                             attributes += table + "." + arr[i] + ", ";
                         else
@@ -45,10 +57,10 @@ public class Entity {
                     attributes = attributes.substring(0, (attributes.length()) - 2);
                 }
                 //System.out.println("    '" + attributes + "' ");
-            } catch (Exception error) {
+           } catch (Exception error) {
                 System.out.println("\n" + error);
                 System.exit(0);
-            }
+            }//*/
         } else {
             attributes = "*";
         }
@@ -58,7 +70,7 @@ public class Entity {
 
     public String makeClause(String searchables, String keyword) {
         if (searchables != null) {
-            searchables = searchables.replaceAll(",", " LIKE '%" + keyword + "%' OR");
+            searchables = searchables.replaceAll(",", " LIKE '%" + keyword + "%' OR ");
             searchables += " LIKE '%" + keyword + "%'";
 
             return searchables;
@@ -80,133 +92,60 @@ public class Entity {
     }
 
     public String[] getSearchableTables () {
-        String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT", "CALENDAR", "ROLES", "DOCUMENT"};
-
+        String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT", "CALENDAR", "ROLES", "DOCUMENT", "TASK"};
+        
         if (this.isEnabledSearchInAllTables)
             return null;
         else
             return searchableTables;
     }
-    /*
-    public static void main(String argv[]) {
-    try {
-    Db db = new Db(argv);
 
-    System.out.println();
-    System.out.println(
-    "THIS SAMPLE SHOWS HOW TO GET INFO ABOUT DATA TYPES.");
-
-    // connect to the 'sample' database
-    db.connect();
-
-    // Get information about the Data type
-    infoGet(db.con);
-
-    db.con.commit();
-
-    // disconnect from the 'sample' database
-    db.disconnect();
-    } catch (Exception e) {
-    JdbcException jdbcExc = new JdbcException(e);
-    jdbcExc.handle();
-    }
-    } // main
-
-    static void infoGet(Connection con) {
-    try {
-    System.out.println();
-    System.out.println(
-    "----------------------------------------------------------\n"
-    + "USE THE JAVA APIs:\n"
-    + "  Connection.getMetaData()\n"
-    + "  ResultSet.getTypeInfo()\n"
-    + "  ResultSetMetaData.getMetaData()\n"
-    + "TO GET INFO ABOUT DATA TYPES AND\n"
-    + "TO RETRIEVE THE AVAILABLE INFO IN THE RESULT SET.");
-
-    DatabaseMetaData dbMetaData = con.getMetaData();
-
-    // Get a description of all the standard SQL types supported by
-    // this database
-    ResultSet rs = dbMetaData.getTypeInfo();
-
-    // Retrieve the number, type and properties of the resultset's columns
-    ResultSetMetaData rsMetaData = rs.getMetaData();
-
-    // Get the number of columns in the ResultSet
-    int colCount = rsMetaData.getColumnCount();
-    System.out.println();
-    System.out.println(
-    "  Number of columns in the ResultSet = " + colCount);
-
-    // Retrieve and display the column's name along with its type
-    // and precision in the ResultSet
-    System.out.println();
-    System.out.println("  A LIST OF ALL COLUMNS IN THE RESULT SET:\n"
-    + "    Column Name         Column Type\n"
-    + "    ------------------- -----------");
-
-    String colName, colType;
-    for (int i = 1; i <= colCount; i++) {
-    colName = rsMetaData.getColumnName(i);
-    colType = rsMetaData.getColumnTypeName(i);
-    System.out.println(
-    "    " + Data.format(colName, 19)
-    + " " + Data.format(colType, 13) + " ");
+    public String[] getSearchableTables (int key) {
+        if (key == 1) {
+            return this.getSearchableTables();
+        } else if (key == 2) {
+            // @NOTE: don't specify the tables if they don't have searchable attributes
+            String[] searchableTables = {
+                "PROFILE::prof_name::no description",
+                "USERS::name::This contains the users of the system.",
+                "RSRC::short_name,rsrc_name::This contains all the resources or in other words the people who is involved in several projects of the system.",
+                "PROJECT::plan_start_date::no description",
+                "CALENDAR::clndr_data::no description",
+                "ROLES::name,short_name::no description",
+                "DOCUMENT::name,short_name,author_name::This contains the documents created by users of the system.",
+                "TASK::name::This contains all the tasks which are defined in all projects. So you can search for task"
+            };
+            return searchableTables;
+        }
+        return null;
     }
 
-    System.out.println();
-    System.out.println(
-    "  HERE ARE SOME OF THE COLUMNS' INFO IN THE TABLE ABOVE:\n"
-    + "           TYPE_NAME          DATA_  COLUMN    NULL-   CASE_\n"
-    + "                              TYPE   _SIZE     ABLE  SENSITIVE\n"
-    + "                              (int)                          \n"
-    + "    ------------------------- ----- ---------- ----- ---------");
+    public String[] getEntityMeta (String table, int key) {
+        String[] definedTableData = this.getSearchableTables(2);
 
-    String typeName;
-    int dataType;
-    Integer columnSize;
-    boolean nullable;
-    boolean caseSensitive;
-    
-    // Retrieve and display the columns' information in the table
-    while (rs.next()) {
-    typeName = rs.getString(1);
-    dataType = rs.getInt(2);
-    if (rs.getInt(7) == 1) {
-    nullable = true;
-    } else {
-    nullable = false;
+        for (int i = 0; i < definedTableData.length; i++) {
+            String[] tableData = definedTableData[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
+            String eachTable = tableData[0];
+            String searchableAttributes = tableData[1];
+            String eachTableDescription = tableData[2];
+
+            //System.out.println (eachTable +"|"+ searchableAttributes +"|"+ eachTableDescription);
+            if (eachTable.equalsIgnoreCase(table) && key == 1) {
+                if (searchableAttributes.split(",").length > 1) {
+                    return searchableAttributes.split(",");
+                } else {
+                    String[] arr = {searchableAttributes};
+                    return arr;
+                }
+            } else if (eachTable.equalsIgnoreCase(table) && key == 2) {
+                String[] arr = {searchableAttributes};
+                return arr;
+            } else if (eachTable.equalsIgnoreCase(table) && key == 3) {
+                String[] arr = {eachTableDescription};
+                return arr;
+            }
+        }
+        String[] arr = {"null"};
+        return arr;
     }
-    if (rs.getInt(8) == 1) {
-    caseSensitive = true;
-    } else {
-    caseSensitive = false;
-    }
-    if (rs.getString(3) != null) {
-    columnSize = Integer.valueOf(rs.getString(3));
-    System.out.println(
-    "    " + Data.format(typeName, 25)
-    + " " + Data.format(dataType, 5)
-    + " " + Data.format(columnSize, 10)
-    + " " + Data.format(String.valueOf(nullable), 5)
-    + " " + Data.format(String.valueOf(caseSensitive), 10));
-    } else // for the distinct data type, column size does not apply
-    {
-    System.out.println(
-    "    " + Data.format(typeName, 25)
-    + " " + Data.format(dataType, 5)
-    + "        n/a"
-    + " " + Data.format(String.valueOf(nullable), 5)
-    + " " + Data.format(String.valueOf(caseSensitive), 10));
-    }
-    }
-    // close the result set
-    rs.close();
-    } catch (Exception e) {
-    JdbcException jdbcExc = new JdbcException(e);
-    jdbcExc.handle();
-    }
-    }
-    //*/
 }
