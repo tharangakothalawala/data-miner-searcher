@@ -371,6 +371,10 @@ public class Search {
     }
 
     public String[] getEntityRelations () {
+        /*System.out.println("-------------------------------pk>>");
+        this.vardumpArray(primaryKeyArray);
+        System.out.println("-------------------------------fk>>");
+        this.vardumpArray(foreignKeyArray);//*/
         String eachEntity = "";
         String relatedEntity = "";
         String nextForeignKeyTable = "";
@@ -410,8 +414,10 @@ public class Search {
                     }
                 }
 
-                if ((!nextForeignKeyTable.equalsIgnoreCase(foreignKeySplits[0]) || nextForeignKey == null) && !relatedEntity.equalsIgnoreCase(""))
+                if ((!nextForeignKeyTable.equalsIgnoreCase(foreignKeySplits[0]) || nextForeignKey == null) && !relatedEntity.equalsIgnoreCase("")) {
                     entityRelations += foreignKeySplits[0] + db.COLNAMETYPESP + relatedEntity + db.COLNAMETYPESP+db.COLNAMETYPESP;
+                    //System.out.println(entityRelations);
+                }
             }
         }
         entityRelations = entityRelations.substring(0, entityRelations.length()-2);

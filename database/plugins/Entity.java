@@ -9,7 +9,7 @@ import java.sql.*;
 
 public class Entity {
 
-    private boolean doSearchInAll = false;
+    private boolean isEnabledSearchInAllAttributes = false;
     private boolean isEnabledSearchInAllTables = false;
     Database db = new Database();
 
@@ -23,7 +23,7 @@ public class Entity {
 
         db.setQuery("SELECT * FROM " + table);
 
-        if (!this.doSearchInAll) {
+        if (!this.isEnabledSearchInAllAttributes) {
             try {
                 ResultSet rs = db.loadData();
 
@@ -106,14 +106,38 @@ public class Entity {
         } else if (key == 2) {
             // @NOTE: don't specify the tables if they don't have searchable attributes
             String[] searchableTables = {
-                "PROFILE::prof_name::no description",
-                "USERS::name::This contains the users of the system.",
-                "RSRC::short_name,rsrc_name::This contains all the resources or in other words the people who is involved in several projects of the system.",
-                "PROJECT::plan_start_date::no description",
-                "CALENDAR::clndr_data::no description",
-                "ROLES::name,short_name::no description",
-                "DOCUMENT::name,short_name,author_name::This contains the documents created by users of the system.",
-                "TASK::name::This contains all the tasks which are defined in all projects. So you can search for task"
+                "PROFILE::"+
+                        "false::"+ // correct - false because, there is no attribute to search against
+                        "prof_name::"+
+                        "no description",
+                "USERS::"+
+                        "true::"+ // correct
+                        "name::"+
+                        "This contains the users of the system.",
+                "RSRC::"+
+                        "true::"+ // correct
+                        "rsrc_name,office_phone,email_addr::"+
+                        "This contains all the resources or in other words the people who is involved in several projects of the system. You can search for their email addresses as well.",
+                "PROJECT::"+
+                        "false::"+ // correct - false because, there is no exact attribute to search on
+                        "plan_start_date::"+
+                        "no description",
+                "CALENDAR::"+
+                        "false::"+ // correct
+                        "clndr_data::"+
+                        "no description",
+                "ROLES::"+
+                        "false::"+ // correct - false because, this is not directly invloved with anything
+                        "name,short_name::"+
+                        "no description",
+                "DOCUMENT::"+
+                        "true::"+ // not sure yet but seems important
+                        "name,short_name,author_name::"+
+                        "This contains the documents created by users of the system.",
+                "TASK::"+
+                        "true::"+
+                        "name::"+
+                        "This contains all the tasks which are defined in all projects. So you can search for task"
             };
             return searchableTables;
         }
@@ -126,8 +150,9 @@ public class Entity {
         for (int i = 0; i < definedTableData.length; i++) {
             String[] tableData = definedTableData[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
             String eachTable = tableData[0];
-            String searchableAttributes = tableData[1];
-            String eachTableDescription = tableData[2];
+            String isAJoin = tableData[1]; // a direct or a join candidate entity
+            String searchableAttributes = tableData[2];
+            String eachTableDescription = tableData[3];
 
             //System.out.println (eachTable +"|"+ searchableAttributes +"|"+ eachTableDescription);
             if (eachTable.equalsIgnoreCase(table) && key == 1) {
