@@ -22,8 +22,10 @@ public class Search {
         String[] levelOneEntities = new String[entityRelationsArray.length];
         for (int t = 0; t < entityRelationsArray.length; t++) {
             String[] level1 = entityRelationsArray[t].split(db.COLNAMETYPESP);
-            System.out.println(level1[0] + " : " + level1[1] + " - " + db.getEntity().getEntityMeta(level1[0], 3)[0]);
-            levelOneEntities[t] = level1[0];
+            if (db.getEntity().getEntityMeta(level1[0], 2).equalsIgnoreCase("true")) { // show only the main entities.. not the join candidate entities
+                System.out.println(db.getEntity().getEntityMeta(level1[0], 1) + " : " + level1[1] + " - " + db.getEntity().getEntityMeta(level1[0], 4));
+                levelOneEntities[t] = level1[0];
+            }
         }
         System.out.println("\n -- Available commands: --\ns: to set a keyword for the current table selected.\nd: to search/display output\ni: show the initial view\n");
         System.out.println("----------------------------------------------------------------");
@@ -72,7 +74,7 @@ public class Search {
 
             // this may be used to get to the level 1
             if (table.equalsIgnoreCase("d")) { // display
-                this.vardumpArray(eachSelectedTableClauseData);
+                //this.vardumpArray(eachSelectedTableClauseData);
                 System.out.println("\n### Query : --------------------------------<<<");
                 this.buildQuery (eachSelectedTableClauseData);
                 //this.vardumpArray(this.getEntityRelations ());
@@ -85,8 +87,8 @@ public class Search {
                 //String attribute = input.next();
                 System.out.print("search keyword : ");
                 String value = input.next();
-                String[] arr = db.getEntity().getEntityMeta(currentSelectedTable, 2);
-                String clause = db.getEntity().makeClause(arr[0], value);
+                //String[] arr = db.getEntity().getEntityMeta(currentSelectedTable, 2);
+                String clause = db.getEntity().makeClause(db.getEntity().getEntityMeta(currentSelectedTable, 3), value);
                 //eachSelectedTableClauseData[this.findPos(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += attribute + " LIKE '%" + value + "%':";
                 eachSelectedTableClauseData[this.findPos(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += clause;
             }
@@ -99,13 +101,13 @@ public class Search {
                         if (level[0].equalsIgnoreCase(table) && !upperLevelTable.equalsIgnoreCase(table)) {
                             System.out.println(level[1]); // available related entities
 
-                            System.out.println(db.getEntity().getSearchables(table, false, true));
+                            //System.out.println(db.getEntity().getSearchables(table, false, true)); displaying the current table's searchable attributes to specify values
                             upperLevelTable = table;
                             isFound = true;
 
                             System.out.println("----------------.");
                         } else if (level[0].equalsIgnoreCase(table) && this.isRelatedWithAnyTable(table) && !upperLevelTable.equalsIgnoreCase(table)) {
-                            System.out.println(db.getEntity().getSearchables(table, false, true));
+                            //System.out.println(db.getEntity().getSearchables(table, false, true));
                             upperLevelTable = table;
                             isFound = true;
 
@@ -114,7 +116,7 @@ public class Search {
                     }
 
                     if (this.isRelatedWithAnyTable(table) && !isFound) { //  && !upperLevelTable.equalsIgnoreCase(table)
-                        System.out.println(db.getEntity().getSearchables(table, false, true));
+                        //System.out.println(db.getEntity().getSearchables(table, false, true));
                         upperLevelTable = table;
                         isFound = true;
 
@@ -195,7 +197,7 @@ public class Search {
 
                     String[] leftjoinData = primaryKeyArray[this.findPos(primaryKeyArray, tableClause[0], db.COLNAMETYPESP)].split(db.COLNAMETYPESP);
                     String condition = "";
-                    System.out.println(tableClause.length);
+                    //System.out.println(tableClause.length);
                     if (tableClause.length > 1) {
                         condition = this.createWhereClause(tableClause, true);
 
@@ -405,10 +407,10 @@ public class Search {
                         //System.out.println ("F" + foreignKeySplits[1] + "wwww"+ primaryKeySplits[0] + primaryKeySplits[1]);
                         if (foreignKeySplits[1].equalsIgnoreCase(primaryKeySplits[1])) {
                             if (relatedEntity.equalsIgnoreCase("")) {
-                                relatedEntity += primaryKeySplits[0];
+                                relatedEntity += db.getEntity().getEntityMeta(primaryKeySplits[0], 1);// primaryKeySplits[0];
                             } else {
                                 if (!relatedEntity.matches(".*"+primaryKeySplits[0]+".*"))
-                                    relatedEntity += "," + primaryKeySplits[0];
+                                    relatedEntity += "," + db.getEntity().getEntityMeta(primaryKeySplits[0], 1);// primaryKeySplits[0]; // setting the displayable search entity/category name
                             }
                         }
                     }
@@ -420,7 +422,7 @@ public class Search {
                 }
             }
         }
-        entityRelations = entityRelations.substring(0, entityRelations.length()-2);
+        entityRelations = entityRelations.substring(0, entityRelations.length()-2); // removing the last two characters. ex: .... les,Resources::
         String[] entityRelationsArray = entityRelations.split(db.COLNAMETYPESP+db.COLNAMETYPESP);
 
         return entityRelationsArray;
