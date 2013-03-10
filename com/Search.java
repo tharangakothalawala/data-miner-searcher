@@ -33,12 +33,28 @@ public class Search {
     }
 
     /*
+     * @Description : look whether a table(candidateTbl) is related (technically: if got a foreign key) to a given table(mainTbl)
+     * @NOTE        : Not in use. But might be usefull in future for more features
+     */
+    public boolean isRelated (String mainTbl, String candidateTbl) {
+        String[] entityRelationsArray = this.getEntityRelations();
+        for (int t = 0; t < entityRelationsArray.length; t++) {
+            String[] tableDataArr = entityRelationsArray[t].split(db.COLNAMETYPESP);
+            if (tableDataArr[0].equalsIgnoreCase(mainTbl) && tableDataArr[1].contains(candidateTbl)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
      * ex. inputs:
      * USERS s name a s name ad PROFILE s prof_name min s prof_name dmin
      */
     public void doSearch(String searchKeyword) {
         String currentSelectedTable = "";
         String [] eachSelectedTableClauseData = new String[50];
+        String [] nonConceptuallyRelatedTableCalueData = new String[50];
 
         ////////////////////////////////////////////////////////////////////////
         this.processEntityRelations ();
@@ -74,10 +90,14 @@ public class Search {
 
             // this may be used to get to the level 1
             if (table.equalsIgnoreCase("d")) { // display
-                //this.vardumpArray(eachSelectedTableClauseData);
-                System.out.println("\n### Query : --------------------------------<<<");
-                this.buildQuery (eachSelectedTableClauseData);
+                this.vardumpArray(eachSelectedTableClauseData);
+                this.vardumpArray(nonConceptuallyRelatedTableCalueData);
+                //System.out.println("\n### Query : --------------------------------<<<");
+                this.buildQuery (eachSelectedTableClauseData, true);
+                this.buildQuery(nonConceptuallyRelatedTableCalueData, false);
                 //this.vardumpArray(this.getEntityRelations ());
+                this.vardumpArray(eachSelectedTableClauseData);
+                System.out.println("-- exiting ...");
                 break;
             }
 
@@ -91,6 +111,22 @@ public class Search {
                 String clause = db.getEntity().makeClause(db.getEntity().getEntityMeta(currentSelectedTable, 3), value);
                 //eachSelectedTableClauseData[this.findPos(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += attribute + " LIKE '%" + value + "%':";
                 eachSelectedTableClauseData[this.findPos(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += clause;
+
+
+                // looking for other entity data
+                int entityCount = db.getEntity().getSearchableTables().length;
+                String[] entities = db.getEntity().getSearchableTables();
+                for (int i = 0; i < entityCount; i++) {
+                    String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
+
+                    if (eachEntityDescription.toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
+                        System.out.println("\n##2" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
+                        if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
+                            String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
+                            nonConceptuallyRelatedTableCalueData[this.nextPos(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                        }
+                    }
+                }
             }
 
             boolean isFound = false;
@@ -154,7 +190,7 @@ public class Search {
     /*
      * this will creat the SQL join statement. ex. input: USERS s name a s name ad PROFILE s prof_name min s prof_name dmin
      */
-    public void buildQuery (String[] queryRawDataArray) {
+    public void buildQuery (String[] queryRawDataArray, boolean isPlainSQL) {
         String select = "SELECT";
         String whereClause = " WHERE ";
         String leftJoin = "";
@@ -210,31 +246,63 @@ public class Search {
         }
         leftJoin += parentTableCondition;
 
-        this.initializeArray(queryRawDataArray);
         String finalSQLQuery = select + leftJoin + ";";
 
+        System.out.println("\n### Query : --------------------------------<<<");
         System.out.println(finalSQLQuery);
         System.out.println("### Query : -------------------------------->>>");
-        this.getRealData (finalSQLQuery); // finally send the plain sql statement to get the real data
+
+        if (isPlainSQL) {
+            this.getRealData (finalSQLQuery, null, true); // finally send the plain sql statement to get the real data
+        } else {
+            this.getRealData (null, queryRawDataArray, false); // finally send the plain sql statement to get the real data
+        }
+
+        this.initializeArray(queryRawDataArray); // clear all data
     }
 
-    public void getRealData(String sqlQuery) {
+    public void getRealData(String sqlQuery, String[] sqlQueryMeta, boolean isPlainSQL) {
         String eachRowData = "";
         try {
-            Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, null, true);
+            if (isPlainSQL) {
+                Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, null, true);
 
-            // begin :traversing through each table row to display data
-            if (resultsets.length > 0) {
-                for (int i = 0; i < resultsets.length; i++) {
-                    Map<String, String> resultset = resultsets[i];
-                    System.out.println("== ROW: " + (i + 1) + " ========================");
-                    eachRowData += "== ROW: " + (i + 1) + " ========================";
-                    for (Map.Entry<String, String> entry : resultset.entrySet()) {
-                        String key = entry.getKey();
-                        String value = entry.getValue();
-                        if (value != null) {
-                            System.out.println("['" + key + "'] = " + value);
-                            eachRowData += "\n['" + key + "'] = " + value;
+                // begin :traversing through each table row to display data
+                if (resultsets.length > 0) {
+                    for (int i = 0; i < resultsets.length; i++) {
+                        Map<String, String> resultset = resultsets[i];
+                        System.out.println("== ROW: " + (i + 1) + " ========================");
+                        eachRowData += "\n== ROW: " + (i + 1) + " ========================";
+                        for (Map.Entry<String, String> entry : resultset.entrySet()) {
+                            String key = entry.getKey();
+                            String value = entry.getValue();
+                            if (value != null) {
+                                System.out.println("['" + key + "'] = " + value);
+                                eachRowData += "\n['" + key + "'] = " + value;
+                            }
+                        }
+                    }
+                }
+            } else {
+                this.vardumpArray(sqlQueryMeta);
+                for (int c = 0; c < sqlQueryMeta.length; c++) {
+                    String[] queryMeta = sqlQueryMeta[c].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
+                    Map[] resultsets = db.sqlSelect(queryMeta[0], db.getEntity().getEntityMeta(queryMeta[0], 3), queryMeta[1], null, null, null, null, false);
+
+                    // begin :traversing through each table row to display data
+                    if (resultsets.length > 0) {
+                        for (int i = 0; i < resultsets.length; i++) {
+                            Map<String, String> resultset = resultsets[i];
+                            System.out.println("== ROW: " + (i + 1) + " ========================");
+                            eachRowData += "\n== ROW: " + (i + 1) + " ========================";
+                            for (Map.Entry<String, String> entry : resultset.entrySet()) {
+                                String key = entry.getKey();
+                                String value = entry.getValue();
+                                if (value != null) {
+                                    System.out.println("['" + key + "'] = " + value);
+                                    eachRowData += "\n['" + key + "'] = " + value;
+                                }
+                            }
                         }
                     }
                 }
@@ -242,7 +310,7 @@ public class Search {
         } catch (Exception ex) {
         }
 
-        searchResults = eachRowData;
+        searchResults += eachRowData;
     }
 
     public void initializeArray (String[] array) {

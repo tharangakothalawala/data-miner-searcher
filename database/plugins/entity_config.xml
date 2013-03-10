@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : entity_config.xml
+    Created on : March 10, 2013, 3:34 PM
+    Author     : Tharanga
+    Description: The following meta data will be used to create the SQL.
+    
+    NOTE       : Don't specify the tables if they don't have searchable attributes
+                 You can include meta keywords within entity descriptions.
+                 Always a meta keyword should be same as an entity name (non case sensitive).
+                 This will be used to search the table where the meta keyword is in, when searching for the table corresspondance to the meta keyword.
+                 syntax: @"name_of_a_table@"
+-->
+
+<database>
+    <table>
+        <real_name>PROFILE</real_name>
+        <display_name>Profile</display_name>
+        <is_a_join>false</is_a_join> <!-- //correct - false because, there is no attribute to search against -->
+        <searchable_attributes>prof_name</searchable_attributes>
+        <description>no description</description>
+    </table>
+    <table>
+        <real_name>USERS</real_name>
+        <display_name>Users</display_name>
+        <is_a_join>true</is_a_join> <!--  -->
+        <searchable_attributes>name</searchable_attributes>
+        <description>This contains the users of the system.</description>
+    </table>
+    <table>
+        <real_name>RSRC</real_name>
+        <display_name>Resources</display_name>
+        <is_a_join>true</is_a_join> <!--  -->
+        <searchable_attributes>rsrc_name,office_phone,email_addr</searchable_attributes>
+        <description>This contains all the resources or in other words the people or the @"users@" who is involved in several projects of the system. You can search for their email addresses as well.</description>
+    </table>
+    <table>
+        <real_name>PROJECT</real_name>
+        <display_name>Project</display_name>
+        <is_a_join>false</is_a_join> <!-- // correct - false because, there is no exact attribute to search on -->
+        <searchable_attributes>plan_start_date</searchable_attributes>
+        <description>no description</description>
+    </table>
+    <table>
+        <real_name>CALENDAR</real_name>
+        <display_name>Calendar</display_name>
+        <is_a_join>false</is_a_join> <!--  -->
+        <searchable_attributes>clndr_data</searchable_attributes>
+        <description>no description</description>
+    </table>
+    <table>
+        <real_name>ROLES</real_name>
+        <display_name>Roles</display_name>
+        <is_a_join>false</is_a_join> <!-- // correct - false because, this is not directly invloved with anything -->
+        <searchable_attributes>name,short_name</searchable_attributes>
+        <description>no description</description>
+    </table>
+    <table>
+        <real_name>DOCUMENT</real_name>
+        <display_name>Document</display_name>
+        <is_a_join>true</is_a_join> <!-- // not sure yet but seems important -->
+        <searchable_attributes>name,short_name,author_name</searchable_attributes>
+        <description>This contains the documents created by @"users@" of the system.</description>
+    </table>
+    <table>
+        <real_name>TASK</real_name>
+        <display_name>Task</display_name>
+        <is_a_join>true</is_a_join> <!--  -->
+        <searchable_attributes>name</searchable_attributes>
+        <description>This contains all the tasks which are defined in all projects. So you can search for task</description>
+    </table>
+</database>

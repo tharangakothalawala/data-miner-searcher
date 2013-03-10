@@ -7,6 +7,14 @@ package database.plugins;
 import database.Database;
 import java.sql.*;
 
+import java.io.File;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+
 public class Entity {
 
     private boolean isEnabledSearchInAllAttributes = false;
@@ -105,8 +113,46 @@ public class Entity {
         if (key == 1) {
             return this.getSearchableTables();
         } else if (key == 2) {
+            try {
+                File entityConfigFile = new File("src/database/plugins/entity_config.xml");
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                Document document = dBuilder.parse(entityConfigFile);
+
+                document.getDocumentElement().normalize();
+
+                NodeList nodeList = document.getElementsByTagName("table"); // each table
+                String[] searchableTables = new String[nodeList.getLength()];
+
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                        Node node = nodeList.item(i);
+
+                        if (node.getNodeType() == Node.ELEMENT_NODE) {
+
+                                Element element = (Element) node;
+
+                                searchableTables[i] =
+                                        element.getElementsByTagName("real_name").item(0).getTextContent() +"::"+
+                                        element.getElementsByTagName("display_name").item(0).getTextContent() +"::"+
+                                        element.getElementsByTagName("is_a_join").item(0).getTextContent() +"::"+
+                                        element.getElementsByTagName("searchable_attributes").item(0).getTextContent() +"::"+
+                                        element.getElementsByTagName("description").item(0).getTextContent();
+
+                                /*System.out.println("real_name : " + element.getElementsByTagName("real_name").item(0).getTextContent());
+                                System.out.println("display_name : " + element.getElementsByTagName("display_name").item(0).getTextContent());
+                                System.out.println("is_a_join : " + element.getElementsByTagName("is_a_join").item(0).getTextContent());
+                                System.out.println("searchable_attributes : " + element.getElementsByTagName("searchable_attributes").item(0).getTextContent());
+                                System.out.println("description : " + element.getElementsByTagName("description").item(0).getTextContent());//*/
+                        }
+                }
+                return searchableTables;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            /* This is the manual, table config entry. This code will be removed in future */
             // @NOTE: don't specify the tables if they don't have searchable attributes
-            String[] searchableTables = {
+            /*String[] searchableTables = {
                 "PROFILE::Profile::"+
                         "false::"+ // correct - false because, there is no attribute to search against
                         "prof_name::"+
@@ -118,7 +164,7 @@ public class Entity {
                 "RSRC::Resources::"+
                         "true::"+ // correct
                         "rsrc_name,office_phone,email_addr::"+
-                        "This contains all the resources or in other words the people who is involved in several projects of the system. You can search for their email addresses as well.",
+                        "This contains all the resources or in other words the people or the @"users@" who is involved in several projects of the system. You can search for their email addresses as well.",
                 "PROJECT::Project::"+
                         "false::"+ // correct - false because, there is no exact attribute to search on
                         "plan_start_date::"+
@@ -134,13 +180,14 @@ public class Entity {
                 "DOCUMENT::Document::"+
                         "true::"+ // not sure yet but seems important
                         "name,short_name,author_name::"+
-                        "This contains the documents created by users of the system.",
+                        "This contains the documents created by @"users@" of the system.",
                 "TASK::Task::"+
                         "true::"+
                         "name::"+
                         "This contains all the tasks which are defined in all projects. So you can search for task"
             };
             return searchableTables;
+            //////////////////////////////////////////////////////////////////*/
         }
         return null;
     }
@@ -151,7 +198,7 @@ public class Entity {
         for (int i = 0; i < definedTableData.length; i++) {
             String[] tableData = definedTableData[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
             String eachEntity = tableData[0];
-            String eachEntityName = tableData[1];
+            String eachEntityName = tableData[1]; // readable/displayable entity name
             String isAJoin = tableData[2]; // a direct or a join candidate entity
             String searchableAttributes = tableData[3];
             String eachTableDescription = tableData[4];
