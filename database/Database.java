@@ -34,6 +34,10 @@ public class Database {
         this.query = query;
     }
 
+    public String getQuery() {
+        return this.query;
+    }
+
     /*
      * @param (ResultSet)	rs		: The rs resultset used to fetch all the meta data about the query being processed
      * @param (int)		key		: The param used to identify what is needed as the output

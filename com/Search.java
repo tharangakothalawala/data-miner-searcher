@@ -90,13 +90,16 @@ public class Search {
 
             // this may be used to get to the level 1
             if (table.equalsIgnoreCase("d")) { // display
+                System.out.println("#########################################");
+                /*System.out.println("eachSelectedTableClauseData");
                 this.vardumpArray(eachSelectedTableClauseData);
-                this.vardumpArray(nonConceptuallyRelatedTableCalueData);
+                System.out.println("nonConceptuallyRelatedTableCalueData");
+                this.vardumpArray(nonConceptuallyRelatedTableCalueData);//*/
                 //System.out.println("\n### Query : --------------------------------<<<");
                 this.buildQuery (eachSelectedTableClauseData, true);
                 this.buildQuery(nonConceptuallyRelatedTableCalueData, false);
                 //this.vardumpArray(this.getEntityRelations ());
-                this.vardumpArray(eachSelectedTableClauseData);
+                //this.vardumpArray(eachSelectedTableClauseData);
                 System.out.println("-- exiting ...");
                 break;
             }
@@ -120,12 +123,29 @@ public class Search {
                     String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
 
                     if (eachEntityDescription.toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
-                        System.out.println("\n##2" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
+                        //System.out.println("\n##2" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
                         if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
                             String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
                             nonConceptuallyRelatedTableCalueData[this.nextPos(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
                         }
                     }
+
+                    //////////////////////////////// Each entity attribute description //////////////
+                    String searchableAttributes = db.getEntity().getEntityMeta(entities[i], 5);
+                    String[] searchableAttributeData = searchableAttributes.split(",");
+                    for (int a = 0; a < searchableAttributeData.length; a++) {
+                        String[] attributeData = searchableAttributeData[a].split(":");
+                        try {
+                        if (attributeData[1].toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
+                            //System.out.println("\n##3" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
+                            if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
+                                nonConceptuallyRelatedTableCalueData[this.nextPos(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                            }
+                        }
+                        } catch (Exception ex) { }
+                    }
+                    //////////////////////////////////////*/
                 }
             }
 
@@ -248,11 +268,12 @@ public class Search {
 
         String finalSQLQuery = select + leftJoin + ";";
 
-        System.out.println("\n### Query : --------------------------------<<<");
-        System.out.println(finalSQLQuery);
-        System.out.println("### Query : -------------------------------->>>");
+        //System.out.println("\n### Query : --------------------------------<<<");
+        
 
         if (isPlainSQL) {
+            //System.out.println(finalSQLQuery);
+            //System.out.println("### Query : -------------------------------->>>");
             this.getRealData (finalSQLQuery, null, true); // finally send the plain sql statement to get the real data
         } else {
             this.getRealData (null, queryRawDataArray, false); // finally send the plain sql statement to get the real data
@@ -266,6 +287,7 @@ public class Search {
         try {
             if (isPlainSQL) {
                 Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, null, true);
+                System.out.println("####Query :" + db.getQuery());
 
                 // begin :traversing through each table row to display data
                 if (resultsets.length > 0) {
@@ -288,6 +310,7 @@ public class Search {
                 for (int c = 0; c < sqlQueryMeta.length; c++) {
                     String[] queryMeta = sqlQueryMeta[c].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
                     Map[] resultsets = db.sqlSelect(queryMeta[0], db.getEntity().getEntityMeta(queryMeta[0], 3), queryMeta[1], null, null, null, null, false);
+                    System.out.println("####Query :" + db.getQuery());
 
                     // begin :traversing through each table row to display data
                     if (resultsets.length > 0) {

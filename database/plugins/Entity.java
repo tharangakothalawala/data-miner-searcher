@@ -209,9 +209,20 @@ public class Entity {
             } else if (eachEntity.equalsIgnoreCase(table) && key == 2) {
                 return isAJoin;
             } else if (eachEntity.equalsIgnoreCase(table) && key == 3) {
-                return searchableAttributes;
+                // sending only the attributes names in the form of <attribute1>,<attribute2>,<attribute3>,...
+                String finalAttributeList = "";
+                String[] searchableAttributeData = searchableAttributes.split(",");
+                for (int a = 0; a < searchableAttributeData.length; a++) {
+                    String[] attributeData = searchableAttributeData[a].split(":");
+                    finalAttributeList += attributeData[0] + ",";
+                }
+                finalAttributeList = finalAttributeList.substring(0, finalAttributeList.length()-1);
+                return finalAttributeList;
             } else if (eachEntity.equalsIgnoreCase(table) && key == 4) {
                 return eachTableDescription;
+            } else if (eachEntity.equalsIgnoreCase(table) && key == 5) {
+                // same as the key# 3, but with their descriptions
+                return searchableAttributes;
             }
         }
         return null;

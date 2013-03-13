@@ -18,28 +18,28 @@
         <real_name>PROFILE</real_name>
         <display_name>Profile</display_name>
         <is_a_join>false</is_a_join> <!-- //correct - false because, there is no attribute to search against -->
-        <searchable_attributes>prof_name</searchable_attributes>
+        <searchable_attributes>prof_name:this is the profile name</searchable_attributes>
         <description>no description</description>
     </table>
     <table>
         <real_name>USERS</real_name>
         <display_name>Users</display_name>
         <is_a_join>true</is_a_join> <!--  -->
-        <searchable_attributes>name</searchable_attributes>
+        <searchable_attributes>name:this is the user's name</searchable_attributes>
         <description>This contains the users of the system.</description>
     </table>
     <table>
         <real_name>RSRC</real_name>
         <display_name>Resources</display_name>
         <is_a_join>true</is_a_join> <!--  -->
-        <searchable_attributes>rsrc_name,office_phone,email_addr</searchable_attributes>
+        <searchable_attributes>rsrc_name:resource name.this can be a user,office_phone:phone number of the resource,email_addr:email address of the resource</searchable_attributes>
         <description>This contains all the resources or in other words the people or the @"users@" who is involved in several projects of the system. You can search for their email addresses as well.</description>
     </table>
     <table>
         <real_name>PROJECT</real_name>
         <display_name>Project</display_name>
         <is_a_join>false</is_a_join> <!-- // correct - false because, there is no exact attribute to search on -->
-        <searchable_attributes>plan_start_date</searchable_attributes>
+        <searchable_attributes>plan_start_date:test @"users@" attribute</searchable_attributes>
         <description>no description</description>
     </table>
     <table>
@@ -53,7 +53,7 @@
         <real_name>ROLES</real_name>
         <display_name>Roles</display_name>
         <is_a_join>false</is_a_join> <!-- // correct - false because, this is not directly invloved with anything -->
-        <searchable_attributes>name,short_name</searchable_attributes>
+        <searchable_attributes>name,short_name:test @"users@" attribute</searchable_attributes>
         <description>no description</description>
     </table>
     <table>
@@ -67,7 +67,7 @@
         <real_name>TASK</real_name>
         <display_name>Task</display_name>
         <is_a_join>true</is_a_join> <!--  -->
-        <searchable_attributes>name</searchable_attributes>
+        <searchable_attributes>name:test @"users@" attribute search trigger</searchable_attributes>
         <description>This contains all the tasks which are defined in all projects. So you can search for task</description>
     </table>
 </database>
