@@ -86,7 +86,8 @@ public class Search {
                     eachSelectedTableClauseData[this.nextAvailableArrayIndex(eachSelectedTableClauseData)] = table + "::";
                 }
             } else {
-                this.raise_error("Invalid table/category!");
+                if (currentSelectedTable.equalsIgnoreCase(""))
+                    this.raise_error("Invalid table/category!");
             }
 
             if (table.equalsIgnoreCase("x")) // exit
@@ -123,39 +124,92 @@ public class Search {
                 //eachSelectedTableClauseData[this.findExistingTableClausePrefixIndex(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += attribute + " LIKE '%" + value + "%':";
                 eachSelectedTableClauseData[this.findExistingTableClausePrefixIndex(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += clause;
 
-
-                // looking for other entity data
+                // traversing through all the available/defined seachable tables
                 int entityCount = db.getEntity().getSearchableTables().length;
                 String[] entities = db.getEntity().getSearchableTables();
+
+                // counting the tables which have got a meta keyword
+                int countOfEntitiesWithMetaKeyword = 0;
                 for (int i = 0; i < entityCount; i++) {
                     String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
-
+                    // checking for the enity description for the meta keyword/s
                     if (eachEntityDescription.toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
-                        //System.out.println("\n##2" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
-                        if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
-                            String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
-                            nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
-                        }
+                        countOfEntitiesWithMetaKeyword++;
                     }
+                }
 
-                    //////////////////////////////// Each entity attribute description //////////////
-                    String searchableAttributes = db.getEntity().getEntityMeta(entities[i], 5);
-                    String[] searchableAttributeData = searchableAttributes.split(",");
-                    //this.identifyAttributes(searchableAttributeData);
-                    for (int a = 0; a < searchableAttributeData.length; a++) {
-                        String[] attributeData = searchableAttributeData[a].split(":");
-                        try {
-                        if (attributeData[1].toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
-                            //System.out.println("\n##3" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
-                            String preferance = this.promptMessage("\nConsider " + attributeData[1].replace("@\"", "") + "? (yes|no)");
-                            if ((preferance.equalsIgnoreCase("y") || preferance.equalsIgnoreCase("yes")) && !this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
-                                String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
-                                nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                String userSelectionExtraSearch = this.promptMessage("Enter 'yes' or 'no' to continue & consider the " + countOfEntitiesWithMetaKeyword + " extra related category/ies found: ");
+                if (countOfEntitiesWithMetaKeyword > 0 && (userSelectionExtraSearch.equalsIgnoreCase("yes") || userSelectionExtraSearch.equalsIgnoreCase("y"))) {
+                    for (int i = 0; i < entityCount; i++) {
+                        String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
+
+                        // checking for the enity description for the meta keyword/s
+                        if (eachEntityDescription.toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
+                            //System.out.println("\n##2" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
+                            String entityPreferance = this.promptMessage("\nConsider " + eachEntityDescription.replace("@\"", "") + "? (yes|no)");
+                            if ((entityPreferance.equalsIgnoreCase("y") || entityPreferance.equalsIgnoreCase("yes")) && !this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                //String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
+                                //nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+
+                                //////////////////////////////// Each entity attribute description //////////////
+                                String searchableAttributes = db.getEntity().getEntityMeta(entities[i], 5);
+                                String[] searchableAttributeData = searchableAttributes.split(",");
+
+                                //-----
+                                int countOfAttributesWithMetaKeyword = 0;
+                                for (int a = 0; a < searchableAttributeData.length; a++) {
+                                    String[] attributeData = searchableAttributeData[a].split(":");
+                                    try {
+                                        if (attributeData[1].toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
+                                            countOfAttributesWithMetaKeyword++;
+                                        }
+                                    } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description */ }
+                                }
+                                //-----
+                                if (countOfAttributesWithMetaKeyword > 1) {
+                                    System.out.println("Found " + countOfAttributesWithMetaKeyword + " search criteria under this category. Please say 'yes' or 'no' for the following prompts");
+                                    String searchables = "";
+                                    for (int a = 0; a < searchableAttributeData.length; a++) {
+                                        String[] attributeData = searchableAttributeData[a].split(":");
+                                        try {
+                                        if (attributeData[1].toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
+                                            //System.out.println("\n##3" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
+                                            String preferance = this.promptMessage("\nConsider " + attributeData[1].replace("@\"", "") + "? (yes|no)");
+                                            if (preferance.equalsIgnoreCase("y") || preferance.equalsIgnoreCase("yes")) {
+                                                searchables += attributeData[0] + ",";
+                                            } else {
+                                                searchableAttributeData[a] = null; // unset the value (this will avoid considering this attribute later)
+                                            }
+                                        }
+                                        } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description */ }
+                                    }
+                                    // going through the  attributes again to get any attribute which did't get considered above due to the user input
+                                    for (int a = 0; a < searchableAttributeData.length; a++) {
+                                        try {
+                                            String[] attributeData = searchableAttributeData[a].split(":");
+                                            if (!searchables.toLowerCase().contains(attributeData[0].toLowerCase())) {
+                                                searchables += attributeData[0] + ",";
+                                            }
+                                        } catch (Exception ex) { }
+                                    }
+                                    ///////////////*/
+                                    if (!searchables.equalsIgnoreCase("")) {
+                                        searchables = searchables.substring(0, (searchables.length()) - 1);
+                                        if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                            String relatedEntityClause = db.getEntity().makeClause(searchables, value);
+                                            nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                                        }
+                                    }
+                                } else {
+                                    if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                        String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
+                                        nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                                    }
+                                }
+                                //////////////////////////////////////*/
                             }
                         }
-                        } catch (Exception ex) { }
                     }
-                    //////////////////////////////////////*/
                 }
             }
 

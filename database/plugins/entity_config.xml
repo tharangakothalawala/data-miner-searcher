@@ -32,8 +32,8 @@
         <real_name>RSRC</real_name>
         <display_name>Resources</display_name>
         <is_a_join>true</is_a_join> <!--  -->
-        <searchable_attributes>rsrc_name:resource name.this can be a user,office_phone:phone number of the resource,email_addr:email address of the resource</searchable_attributes>
-        <description>This contains all the resources or in other words the people or the @"users@" who is involved in several projects of the system. You can search for their email addresses as well.</description>
+        <searchable_attributes>rsrc_name:resource name this can be a user,office_phone:phone number of the resource,email_addr:email address of the resource</searchable_attributes>
+        <description>the resources category where it contains the data about resources such as @"users@"</description>
     </table>
     <table>
         <real_name>PROJECT</real_name>
@@ -60,8 +60,8 @@
         <real_name>DOCUMENT</real_name>
         <display_name>Document</display_name>
         <is_a_join>true</is_a_join> <!-- // not sure yet but seems important -->
-        <searchable_attributes>name:the @"users@" who created documents,short_name,author_name</searchable_attributes>
-        <description>This contains the documents created by @"users@" of the system.</description>
+        <searchable_attributes>name:the @"users@" who created documents,short_name:the short names of the @"users@",author_name: this testing field for users</searchable_attributes>
+        <description>the documents category where names of the @"users@" may appear as authors</description>
     </table>
     <table>
         <real_name>TASK</real_name>
