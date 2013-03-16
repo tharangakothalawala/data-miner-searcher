@@ -101,7 +101,13 @@ public class Entity {
     }
 
     public String[] getSearchableTables () {
-        String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT", "CALENDAR", "ROLES", "DOCUMENT", "TASK"};
+        //String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT", "CALENDAR", "ROLES", "DOCUMENT", "TASK"};
+        String[] definedTableData = this.getSearchableTables(2);
+        String[] searchableTables = new String[definedTableData.length];
+        for (int i = 0; i < definedTableData.length; i++) {
+            String[] tableData = definedTableData[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
+            searchableTables[i] = tableData[0];
+        }
         
         if (this.isEnabledSearchInAllTables)
             return null;
@@ -204,11 +210,11 @@ public class Entity {
             String eachTableDescription = tableData[4];
 
             //System.out.println (eachTable +"|"+ searchableAttributes +"|"+ eachTableDescription);
-            if (eachEntity.equalsIgnoreCase(table) && key == 1) {
+            if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 1) {
                 return eachEntityName;
-            } else if (eachEntity.equalsIgnoreCase(table) && key == 2) {
+            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 2) {
                 return isAJoin;
-            } else if (eachEntity.equalsIgnoreCase(table) && key == 3) {
+            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 3) {
                 // sending only the attributes names in the form of <attribute1>,<attribute2>,<attribute3>,...
                 String finalAttributeList = "";
                 String[] searchableAttributeData = searchableAttributes.split(",");
@@ -218,9 +224,9 @@ public class Entity {
                 }
                 finalAttributeList = finalAttributeList.substring(0, finalAttributeList.length()-1);
                 return finalAttributeList;
-            } else if (eachEntity.equalsIgnoreCase(table) && key == 4) {
+            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 4) {
                 return eachTableDescription;
-            } else if (eachEntity.equalsIgnoreCase(table) && key == 5) {
+            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 5) {
                 // same as the key# 3, but with their descriptions
                 return searchableAttributes;
             }

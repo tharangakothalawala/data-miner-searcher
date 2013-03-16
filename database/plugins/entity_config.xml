@@ -39,7 +39,7 @@
         <real_name>PROJECT</real_name>
         <display_name>Project</display_name>
         <is_a_join>false</is_a_join> <!-- // correct - false because, there is no exact attribute to search on -->
-        <searchable_attributes>plan_start_date:test @"users@" attribute</searchable_attributes>
+        <searchable_attributes>plan_start_date</searchable_attributes>
         <description>no description</description>
     </table>
     <table>
@@ -53,21 +53,21 @@
         <real_name>ROLES</real_name>
         <display_name>Roles</display_name>
         <is_a_join>false</is_a_join> <!-- // correct - false because, this is not directly invloved with anything -->
-        <searchable_attributes>name,short_name:test @"users@" attribute</searchable_attributes>
+        <searchable_attributes>name:the @"users@" in the roles category,short_name</searchable_attributes>
         <description>no description</description>
     </table>
     <table>
         <real_name>DOCUMENT</real_name>
         <display_name>Document</display_name>
         <is_a_join>true</is_a_join> <!-- // not sure yet but seems important -->
-        <searchable_attributes>name,short_name,author_name</searchable_attributes>
+        <searchable_attributes>name:the @"users@" who created documents,short_name,author_name</searchable_attributes>
         <description>This contains the documents created by @"users@" of the system.</description>
     </table>
     <table>
         <real_name>TASK</real_name>
         <display_name>Task</display_name>
         <is_a_join>true</is_a_join> <!--  -->
-        <searchable_attributes>name:test @"users@" attribute search trigger</searchable_attributes>
+        <searchable_attributes>name:task names where @"users@" may contain</searchable_attributes>
         <description>This contains all the tasks which are defined in all projects. So you can search for task</description>
     </table>
 </database>

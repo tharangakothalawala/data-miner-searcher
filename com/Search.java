@@ -14,7 +14,16 @@ public class Search {
     String[] primaryKeyArray;
     String[] foreignKeyArray;
 
+    public Search () {
+        this.loadEntityRelations ();
+    }
+
     public String[] showInitialView () {
+        /////// temp
+        /*String searchableAttributes = db.getEntity().getEntityMeta("ROLES", 5);
+        String[] searchableAttributeData = searchableAttributes.split(",");
+        this.identifyAttributes(searchableAttributeData);
+        ///////*/
         String[] entityRelationsArray = this.getEntityRelations();
 
         System.out.println(" ## Avaliable Entities ## ");
@@ -33,14 +42,14 @@ public class Search {
     }
 
     /*
-     * @Description : look whether a table(candidateTbl) is related (technically: if got a foreign key) to a given table(mainTbl)
-     * @NOTE        : Not in use. But might be usefull in future for more features
+     * @Desc : look whether a table(candidateEntity) is related (technically: if exists a foreign key) to a given table(entity)
      */
-    public boolean isRelated (String mainTbl, String candidateTbl) {
+    public boolean isRelated (String entity, String candidateEntity) {
         String[] entityRelationsArray = this.getEntityRelations();
         for (int t = 0; t < entityRelationsArray.length; t++) {
             String[] tableDataArr = entityRelationsArray[t].split(db.COLNAMETYPESP);
-            if (tableDataArr[0].equalsIgnoreCase(mainTbl) && tableDataArr[1].contains(candidateTbl)) {
+            String[] relatedTables = tableDataArr[1].split(db.COLNAMETYPESP);
+            if (tableDataArr[0].equalsIgnoreCase(entity) && this.in_array(relatedTables, candidateEntity)) {
                 return true;
             }
         }
@@ -57,27 +66,27 @@ public class Search {
         String [] nonConceptuallyRelatedTableCalueData = new String[50];
 
         ////////////////////////////////////////////////////////////////////////
-        this.processEntityRelations ();
+        //this.loadEntityRelations ();
+
         String[] entityRelationsArray = this.getEntityRelations();
+        //this.vardumpArray(entityRelationsArray);
 
         String eachRowData = "";
         String[] levelOneEntities = this.showInitialView();
-
-        Scanner input = new Scanner(System.in);
-
 
         String table = "";
         String upperLevelTable = "";
 
         do {
-            System.out.print("Select a table or type any command : ");
-            table = input.next();
+            table = this.promptMessage("Select a table/category or type any command : ");
 
             if (this.isRelatedWithAnyTable(table) || (!this.isRelatedWithAnyTable(table) && this.in_array(db.getEntity().getSearchableTables (), table))) {
                 currentSelectedTable = table;
                 if (!this.isTableSelected(eachSelectedTableClauseData, currentSelectedTable)) {
-                    eachSelectedTableClauseData[this.nextPos(eachSelectedTableClauseData)] = table + "::";
+                    eachSelectedTableClauseData[this.nextAvailableArrayIndex(eachSelectedTableClauseData)] = table + "::";
                 }
+            } else {
+                this.raise_error("Invalid table/category!");
             }
 
             if (table.equalsIgnoreCase("x")) // exit
@@ -108,12 +117,11 @@ public class Search {
             if (table.equalsIgnoreCase("s")) { // select
                 //System.out.print("Select an attribute to set a value : ");
                 //String attribute = input.next();
-                System.out.print("search keyword : ");
-                String value = input.next();
+                String value = this.promptMessage("search keyword : ");
                 //String[] arr = db.getEntity().getEntityMeta(currentSelectedTable, 2);
                 String clause = db.getEntity().makeClause(db.getEntity().getEntityMeta(currentSelectedTable, 3), value);
-                //eachSelectedTableClauseData[this.findPos(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += attribute + " LIKE '%" + value + "%':";
-                eachSelectedTableClauseData[this.findPos(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += clause;
+                //eachSelectedTableClauseData[this.findExistingTableClausePrefixIndex(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += attribute + " LIKE '%" + value + "%':";
+                eachSelectedTableClauseData[this.findExistingTableClausePrefixIndex(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += clause;
 
 
                 // looking for other entity data
@@ -126,21 +134,23 @@ public class Search {
                         //System.out.println("\n##2" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
                         if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
                             String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
-                            nonConceptuallyRelatedTableCalueData[this.nextPos(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                            nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
                         }
                     }
 
                     //////////////////////////////// Each entity attribute description //////////////
                     String searchableAttributes = db.getEntity().getEntityMeta(entities[i], 5);
                     String[] searchableAttributeData = searchableAttributes.split(",");
+                    //this.identifyAttributes(searchableAttributeData);
                     for (int a = 0; a < searchableAttributeData.length; a++) {
                         String[] attributeData = searchableAttributeData[a].split(":");
                         try {
                         if (attributeData[1].toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
                             //System.out.println("\n##3" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
-                            if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
+                            String preferance = this.promptMessage("\nConsider " + attributeData[1].replace("@\"", "") + "? (yes|no)");
+                            if ((preferance.equalsIgnoreCase("y") || preferance.equalsIgnoreCase("yes")) && !this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
                                 String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
-                                nonConceptuallyRelatedTableCalueData[this.nextPos(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                                nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
                             }
                         }
                         } catch (Exception ex) { }
@@ -149,6 +159,7 @@ public class Search {
                 }
             }
 
+            // displaying the child/related tables
             boolean isFound = false;
             for (int t = 0; t < levelOneEntities.length; t++) {
                     for (int i = 0; i < entityRelationsArray.length; i++) {
@@ -194,6 +205,21 @@ public class Search {
         //System.exit(0); // @TODO : just stopping the execution. Needs to be handled by the communigram
     } // function end
 
+    public void identifyAttributes (String[] attributes) {
+        for (int a = 0; a < attributes.length; a++) {
+            String[] attributeData = attributes[a].split(":");
+            System.out.println(attributeData[0]);
+        }
+
+        System.exit(0);
+    }
+
+    public String promptMessage (String message) {
+        System.out.print(message);
+        Scanner input = new Scanner(System.in);
+        return input.next().toString();
+    }
+
     public String createWhereClause (String[] rawDataArray, boolean isWithinJoin) {
         String[] conditions = rawDataArray[1].split(db.COLNAMETYPESP);
         String whereClause = "";
@@ -223,13 +249,16 @@ public class Search {
             if (queryRawDataArray[i] != null) {
                 String[] tableData = queryRawDataArray[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
 
-                // always need to select the levelOne table
+                // always need to select first user slection (first category/entity)
                 if (i == 0) {
                     sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true, true) + ",";
                 }
-                // only select table attributes if we have a condition. array index 2 contains the condition.
-                if (i != 0) //(tableData.length > 1) @TODO: handled like this. needs thorough testing
-                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true, true) + ",";  // this needs to be removed or handdled carefully as it sets similar attribute selects
+                // only select table attributes if we have a condition to join with the first/parent selection. (array index 2 contains the condition)
+                if (tableData.length > 1) {
+                    if (i != 0 && !tableData[1].equalsIgnoreCase("")) {
+                        sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true, true) + ",";
+                    }
+                }
             }
         }
 
@@ -251,7 +280,7 @@ public class Search {
                     parentJoinTable = mainTableData[0];
                     String[] tableClause = queryRawDataArray[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
 
-                    String[] leftjoinData = primaryKeyArray[this.findPos(primaryKeyArray, tableClause[0], db.COLNAMETYPESP)].split(db.COLNAMETYPESP);
+                    String[] leftjoinData = primaryKeyArray[this.findExistingTableClausePrefixIndex(primaryKeyArray, tableClause[0], db.COLNAMETYPESP)].split(db.COLNAMETYPESP);
                     String condition = "";
                     //System.out.println(tableClause.length);
                     if (tableClause.length > 1) {
@@ -287,7 +316,7 @@ public class Search {
         try {
             if (isPlainSQL) {
                 Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, null, true);
-                System.out.println("####Query :" + db.getQuery());
+                System.out.println("1###Query :" + db.getQuery());
 
                 // begin :traversing through each table row to display data
                 if (resultsets.length > 0) {
@@ -310,7 +339,7 @@ public class Search {
                 for (int c = 0; c < sqlQueryMeta.length; c++) {
                     String[] queryMeta = sqlQueryMeta[c].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
                     Map[] resultsets = db.sqlSelect(queryMeta[0], db.getEntity().getEntityMeta(queryMeta[0], 3), queryMeta[1], null, null, null, null, false);
-                    System.out.println("####Query :" + db.getQuery());
+                    System.out.println("2###Query :" + db.getQuery());
 
                     // begin :traversing through each table row to display data
                     if (resultsets.length > 0) {
@@ -349,22 +378,25 @@ public class Search {
         }
     }
 
-    public int findPos (String[] array, String value, String splitter) {
-        int position = 0;
+    public int findExistingTableClausePrefixIndex (String[] array, String value, String splitter) {
+        int index = 0; // the very first array insertion index
         for (int i = 0; i < array.length; i++) {
             if (array[i] != null){
                 String[] tableClause = array[i].split(splitter);
                 if (tableClause[0].toString().equalsIgnoreCase(value)) {
-                    position = i;
+                    index = i;
                     break;
                 }
             }
         }
-        return position;
+        return index;
     }
 
-    public int nextPos (String[] array) {
-        int nextIndex = 0;
+    /*
+     * return the next insertion position for a given array
+     */
+    public int nextAvailableArrayIndex (String[] array) {
+        int nextIndex = 0; // the very first array insertion index
         for (int i = 0; i < array.length; i++) {
             if (array[i] == null) {
                 nextIndex = i;
@@ -410,7 +442,7 @@ public class Search {
         return result;
     }
 
-    public void processEntityRelations () {
+    public void loadEntityRelations () {
         String[] tableArray = db.getFilteredTables();
 
         int totalKeyColumns = 0;
@@ -444,7 +476,7 @@ public class Search {
                             }
 
                             if (key.equalsIgnoreCase("CONSTRAINT_NAME")) {
-                                if (value.matches(".*fk.*")) {
+                                if (value.matches(".*fk.*")) { // @TODO this string comparison needs to be re-coded
                                     foreignKeyArray[foreignkeycount] = tableArray[t] + db.COLNAMETYPESP + columnname;
                                     //System.out.println("FK: "+ tableArray[t] + db.COLNAMETYPESP + columnname);
                                     foreignkeycount++;
@@ -517,5 +549,9 @@ public class Search {
         String[] entityRelationsArray = entityRelations.split(db.COLNAMETYPESP+db.COLNAMETYPESP);
 
         return entityRelationsArray;
+    }
+
+    public void raise_error (String message) {
+        System.out.println(message);
     }
 }
