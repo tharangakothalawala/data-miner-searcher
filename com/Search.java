@@ -13,9 +13,13 @@ public class Search {
     public String searchResults = "";
     String[] primaryKeyArray;
     String[] foreignKeyArray;
+    String [] eachSelectedTableClauseData;
+    String[] nonConceptuallyRelatedTableCalueData;
 
     public Search () {
         this.loadEntityRelations ();
+        eachSelectedTableClauseData = new String[db.getEntity().getSearchableTables().length];
+        nonConceptuallyRelatedTableCalueData = new String[db.getEntity().getSearchableTables().length];
     }
 
     public String[] showInitialView () {
@@ -41,6 +45,22 @@ public class Search {
         return levelOneEntities;
     }
 
+    public String[] showInitialView (boolean withChildData) {
+        String[] entityRelationsArray = this.getEntityRelations();
+
+        String[] levelOneEntities = new String[entityRelationsArray.length];
+        int count = 0;
+        for (int t = 0; t < entityRelationsArray.length; t++) {
+            String[] level1 = entityRelationsArray[t].split(db.COLNAMETYPESP);
+            if (db.getEntity().getEntityMeta(level1[0], 2).equalsIgnoreCase("true")) { // show only the main entities.. not the join candidate entities
+                levelOneEntities[count] = db.getEntity().getEntityMeta(level1[0], 1) + " : " + level1[1];
+                count++;
+            }
+        }
+
+        return levelOneEntities;
+    }
+
     /*
      * @Desc : look whether a table(candidateEntity) is related (technically: if exists a foreign key) to a given table(entity)
      */
@@ -62,11 +82,6 @@ public class Search {
      */
     public void doSearch(String searchKeyword) {
         String currentSelectedTable = "";
-        String [] eachSelectedTableClauseData = new String[50];
-        String [] nonConceptuallyRelatedTableCalueData = new String[50];
-
-        ////////////////////////////////////////////////////////////////////////
-        //this.loadEntityRelations ();
 
         String[] entityRelationsArray = this.getEntityRelations();
         //this.vardumpArray(entityRelationsArray);
@@ -138,7 +153,10 @@ public class Search {
                     }
                 }
 
-                String userSelectionExtraSearch = this.promptMessage("Enter 'yes' or 'no' to continue & consider the " + countOfEntitiesWithMetaKeyword + " extra related category/ies found: ");
+                String userSelectionExtraSearch = "";
+                if (countOfEntitiesWithMetaKeyword > 0) {
+                    userSelectionExtraSearch = this.promptMessage("Enter 'yes' or 'no' to continue & consider the " + countOfEntitiesWithMetaKeyword + " extra related category/ies found: ");
+                }
                 if (countOfEntitiesWithMetaKeyword > 0 && (userSelectionExtraSearch.equalsIgnoreCase("yes") || userSelectionExtraSearch.equalsIgnoreCase("y"))) {
                     for (int i = 0; i < entityCount; i++) {
                         String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
@@ -535,7 +553,7 @@ public class Search {
                                     //System.out.println("FK: "+ tableArray[t] + db.COLNAMETYPESP + columnname);
                                     foreignkeycount++;
                                 }
-                                if (value.matches(".*PK.*")) {
+                                if (value.matches(".*PK.*") || value.matches(".*PRIMARY.*")) { // "PRIMARY" is used in mysql
 
                                     primaryKeyArray[primarykeycount] = tableArray[t] + db.COLNAMETYPESP + columnname;
                                     //System.out.println("PK: "+ tableArray[t] + db.COLNAMETYPESP + columnname);

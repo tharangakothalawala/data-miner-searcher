@@ -4,14 +4,23 @@ import java.sql.*;
 import java.util.*;
 import database.plugins.*;
 
+import java.io.File;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+
 public class Database {
 
     // database parameters
-    private String host = "localhost"; // localhost | 192.168.232.134
-    private int port = 1433;
-    private String dbname = "CGDB";
-    private String dbuser = "sa";
-    private String dbpasswd = "qwerty1"; // FooBar(1)?
+    private String dbdriver;
+    private String connurl;
+    public String dbname;
+    private String dbuser;
+    private String dbpasswd;//*/
+
     // query parameters
     private String query = "";
     private Map[] resultset; // to return all the loaded data
@@ -21,13 +30,62 @@ public class Database {
     private String[] dbtableArray;
     private String[] dbviewArray;
 
-    // establish a connection between database and returns the connection
-    public Connection getDbConnection() throws Exception {
-        // loading the driver for the MS SQL server
-        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+    public Database() {
+        boolean isFoundEnabledDB = false;
+        try {
+            File DBConfigFile = new File("src/database/configuration.xml");
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document document = dBuilder.parse(DBConfigFile);
 
-        return DriverManager.getConnection("jdbc:sqlserver://" + this.host + ":" + this.port + ";databaseName=" + this.dbname + ";", this.dbuser, this.dbpasswd);
+            document.getDocumentElement().normalize();
+
+            NodeList databaseList = document.getElementsByTagName("database"); // each database
+
+            for (int i = 0; i < databaseList.getLength(); i++) {
+                if (!isFoundEnabledDB) {
+                    Node database = databaseList.item(i);
+
+                    if (database.getNodeType() == Node.ELEMENT_NODE) {
+                        Element element = (Element) database;
+
+                        if (element.getElementsByTagName("isEnabled").item(0).getTextContent().equalsIgnoreCase("1")) {
+                            isFoundEnabledDB = true;
+                            this.dbdriver = element.getElementsByTagName("dbdriver").item(0).getTextContent();
+                            this.connurl = element.getElementsByTagName("connurl").item(0).getTextContent();
+                            this.dbname = element.getElementsByTagName("dbname").item(0).getTextContent();
+                            this.dbuser = element.getElementsByTagName("dbuser").item(0).getTextContent();
+                            this.dbpasswd = element.getElementsByTagName("dbpasswd").item(0).getTextContent();
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (!isFoundEnabledDB) { // if it is not found an enabled db configuration
+            System.out.println("Error : No database connection parameters found!");
+            System.exit(0);
+        }
+    }
+
+    // establish a connection between database and returns the connection
+    public Connection getDbConnection() {
+        try {
+        // loading the driver for the MS SQL server
+        Class.forName(this.dbdriver);
+        //Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+        //return DriverManager.getConnection("jdbc:sqlserver://" + this.host + ":" + this.port + ";databaseName=" + this.dbname + ";", this.dbuser, this.dbpasswd);
+        return DriverManager.getConnection(this.connurl, this.dbuser, this.dbpasswd);
         //return DriverManager.getDbConnection("jdbc:sqlserver://176.250.128.96:1433;databaseName=" + this.dbname + ";", this.dbuser, this.dbpasswd); // this is to connect to the database at home remotely
+        } catch (Exception ex) {
+            System.out.println("Error : Cannot connect to the database, '" + this.dbname + "'");
+            System.exit(0);
+        }
+        return null;
     }
 
     public void setQuery(String query) {

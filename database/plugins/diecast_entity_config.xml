@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : entity_config.xml
+    Created on : March 10, 2013, 3:34 PM
+    Author     : Tharanga
+    Description: The following meta data will be used to create the SQL.
+    
+    NOTE       : Don't specify the tables if they don't have searchable attributes
+                 You can include meta keywords within entity descriptions.
+                 Always a meta keyword should be same as an entity name (non case sensitive).
+                 This will be used to search the table where the meta keyword is in, when searching for the table corresspondance to the meta keyword.
+                 syntax: @"name_of_a_table@"
+-->
+
+<database>
+    <table>
+        <real_name>4images_users</real_name>
+        <display_name>4images_users</display_name>
+        <is_a_join>true</is_a_join> <!-- //correct - false because, there is no attribute to search against -->
+        <searchable_attributes>user_name:this is the profile name,user_email</searchable_attributes>
+        <description>no description</description>
+    </table>
+    <table>
+        <real_name>4images_images</real_name>
+        <display_name>4images_images</display_name>
+        <is_a_join>true</is_a_join> <!--  -->
+        <searchable_attributes>image_name:this is the image name,image_description,image_keywords</searchable_attributes>
+        <description>This contains the image details</description>
+    </table>
+    <table>
+        <real_name>4images_comments</real_name>
+        <display_name>4images_comments</display_name>
+        <is_a_join>true</is_a_join> <!--  -->
+        <searchable_attributes>user_name:this is a user,comment_headline:headline of the commnet,comment_text</searchable_attributes>
+        <description>the comments category where it contains comments for the @"4images_images@"</description>
+    </table>
+</database>

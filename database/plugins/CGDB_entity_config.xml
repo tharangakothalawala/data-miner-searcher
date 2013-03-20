@@ -59,8 +59,9 @@
     <table>
         <real_name>DOCUMENT</real_name>
         <display_name>Document</display_name>
-        <is_a_join>true</is_a_join> <!-- // not sure yet but seems important -->
-        <searchable_attributes>name:the @"users@" who created documents,short_name:the short names of the @"users@",author_name: this testing field for users</searchable_attributes>
+        <is_a_join>true</is_a_join>
+        <searchable_attributes>name:the @"users@" who created documents,short_name:the short names of the @"users@",author_name:
+            this testing field for users</searchable_attributes>
         <description>the documents category where names of the @"users@" may appear as authors</description>
     </table>
     <table>

@@ -120,7 +120,7 @@ public class Entity {
             return this.getSearchableTables();
         } else if (key == 2) {
             try {
-                File entityConfigFile = new File("src/database/plugins/entity_config.xml");
+                File entityConfigFile = new File("src/database/plugins/" + db.dbname + "_entity_config.xml");
                 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
                 Document document = dBuilder.parse(entityConfigFile);
