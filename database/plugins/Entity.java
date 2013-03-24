@@ -79,8 +79,8 @@ public class Entity {
 
     public String makeClause(String searchables, String keyword) {
         if (searchables != null) {
-            searchables = searchables.replaceAll(",", " LIKE '%" + keyword + "%' OR ");
-            searchables += " LIKE '%" + keyword + "%'";
+            searchables = searchables.replaceAll(",", " LIKE \"%" + keyword + "%\" OR ");
+            searchables += " LIKE \"%" + keyword + "%\"";
 
             return searchables;
         } else {
@@ -137,63 +137,24 @@ public class Entity {
 
                                 Element element = (Element) node;
 
+                                String related_entities = element.getElementsByTagName("related_entities").item(0).getTextContent();
+                                if (related_entities.equalsIgnoreCase(""))
+                                    related_entities = null;
+
                                 searchableTables[i] =
                                         element.getElementsByTagName("real_name").item(0).getTextContent() +"::"+
                                         element.getElementsByTagName("display_name").item(0).getTextContent() +"::"+
                                         element.getElementsByTagName("is_a_join").item(0).getTextContent() +"::"+
                                         element.getElementsByTagName("searchable_attributes").item(0).getTextContent() +"::"+
-                                        element.getElementsByTagName("description").item(0).getTextContent();
-
-                                /*System.out.println("real_name : " + element.getElementsByTagName("real_name").item(0).getTextContent());
-                                System.out.println("display_name : " + element.getElementsByTagName("display_name").item(0).getTextContent());
-                                System.out.println("is_a_join : " + element.getElementsByTagName("is_a_join").item(0).getTextContent());
-                                System.out.println("searchable_attributes : " + element.getElementsByTagName("searchable_attributes").item(0).getTextContent());
-                                System.out.println("description : " + element.getElementsByTagName("description").item(0).getTextContent());//*/
+                                        element.getElementsByTagName("description").item(0).getTextContent() +"::"+
+                                        related_entities;
                         }
                 }
                 return searchableTables;
             } catch (Exception e) {
+                System.out.println ("Error: " + e);
                 e.printStackTrace();
             }
-
-            /* This is the manual, table config entry. This code will be removed in future */
-            // @NOTE: don't specify the tables if they don't have searchable attributes
-            /*String[] searchableTables = {
-                "PROFILE::Profile::"+
-                        "false::"+ // correct - false because, there is no attribute to search against
-                        "prof_name::"+
-                        "no description",
-                "USERS::Users::"+
-                        "true::"+ // correct
-                        "name::"+
-                        "This contains the users of the system.",
-                "RSRC::Resources::"+
-                        "true::"+ // correct
-                        "rsrc_name,office_phone,email_addr::"+
-                        "This contains all the resources or in other words the people or the @"users@" who is involved in several projects of the system. You can search for their email addresses as well.",
-                "PROJECT::Project::"+
-                        "false::"+ // correct - false because, there is no exact attribute to search on
-                        "plan_start_date::"+
-                        "no description",
-                "CALENDAR::Calendar::"+
-                        "false::"+ // correct
-                        "clndr_data::"+
-                        "no description",
-                "ROLES::Roles::"+
-                        "false::"+ // correct - false because, this is not directly invloved with anything
-                        "name,short_name::"+
-                        "no description",
-                "DOCUMENT::Document::"+
-                        "true::"+ // not sure yet but seems important
-                        "name,short_name,author_name::"+
-                        "This contains the documents created by @"users@" of the system.",
-                "TASK::Task::"+
-                        "true::"+
-                        "name::"+
-                        "This contains all the tasks which are defined in all projects. So you can search for task"
-            };
-            return searchableTables;
-            //////////////////////////////////////////////////////////////////*/
         }
         return null;
     }
@@ -208,6 +169,7 @@ public class Entity {
             String isAJoin = tableData[2]; // a direct or a join candidate entity
             String searchableAttributes = tableData[3];
             String eachTableDescription = tableData[4];
+            String relatedEntities = tableData[5];
 
             //System.out.println (eachTable +"|"+ searchableAttributes +"|"+ eachTableDescription);
             if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 1) {
@@ -229,6 +191,10 @@ public class Entity {
             } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 5) {
                 // same as the key# 3, but with their descriptions
                 return searchableAttributes;
+            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 6) {
+                return relatedEntities;
+            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 7) { // returns the real_name
+                return eachEntity;
             }
         }
         return null;

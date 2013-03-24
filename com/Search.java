@@ -35,9 +35,10 @@ public class Search {
         String[] levelOneEntities = new String[entityRelationsArray.length];
         for (int t = 0; t < entityRelationsArray.length; t++) {
             String[] level1 = entityRelationsArray[t].split(db.COLNAMETYPESP);
-            if (db.getEntity().getEntityMeta(level1[0], 2).equalsIgnoreCase("true")) { // show only the main entities.. not the join candidate entities
-                System.out.println(db.getEntity().getEntityMeta(level1[0], 1) + " : " + level1[1] + " - " + db.getEntity().getEntityMeta(level1[0], 4));
-                levelOneEntities[t] = level1[0];
+            if (db.getEntity().getEntityMeta(level1[0], 2).equalsIgnoreCase("true") && this.is_array(level1)) { // show only the main entities.. not the join candidate entities
+                System.out.println(db.getEntity().getEntityMeta(level1[0], 7) + " : " + level1[1] + " - " + db.getEntity().getEntityMeta(level1[0], 4));
+            } else if (db.getEntity().getEntityMeta(level1[0], 2).equalsIgnoreCase("true")) {
+                System.out.println(db.getEntity().getEntityMeta(level1[0], 7));
             }
         }
         System.out.println("\n -- Available commands: --\ns: to set a keyword for the current table selected.\nd: to search/display output\ni: show the initial view\n");
@@ -47,13 +48,17 @@ public class Search {
 
     public String[] showInitialView (boolean withChildData) {
         String[] entityRelationsArray = this.getEntityRelations();
+        //this.vardumpArray(entityRelationsArray);
 
         String[] levelOneEntities = new String[entityRelationsArray.length];
         int count = 0;
         for (int t = 0; t < entityRelationsArray.length; t++) {
             String[] level1 = entityRelationsArray[t].split(db.COLNAMETYPESP);
-            if (db.getEntity().getEntityMeta(level1[0], 2).equalsIgnoreCase("true")) { // show only the main entities.. not the join candidate entities
-                levelOneEntities[count] = db.getEntity().getEntityMeta(level1[0], 1) + " : " + level1[1];
+            if (db.getEntity().getEntityMeta(level1[0], 2).equalsIgnoreCase("true") && this.is_array(level1)) { // show only the main entities.. not the join candidate entities
+                levelOneEntities[count] = db.getEntity().getEntityMeta(level1[0], 1) + ":" + level1[1];
+                count++;
+            } else if (db.getEntity().getEntityMeta(level1[0], 2).equalsIgnoreCase("true")) {
+                levelOneEntities[count] = db.getEntity().getEntityMeta(level1[0], 1);
                 count++;
             }
         }
@@ -114,12 +119,16 @@ public class Search {
             }
 
             // this may be used to get to the level 1
+            // 4images_images s Texas Drive n 4images_users s sales@milezone.com
             if (table.equalsIgnoreCase("d")) { // display
                 System.out.println("#########################################");
-                /*System.out.println("eachSelectedTableClauseData");
+                System.out.println("eachSelectedTableClauseData");
+                // example re-created search SQL meta data
+                //eachSelectedTableClauseData[0] = "4images_images::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%' OR image_keywords LIKE '%Texas%'";
+                //eachSelectedTableClauseData[1] = "4images_users::user_name LIKE '%sales@milezone.com%' OR user_email LIKE '%sales@milezone.com%'";
                 this.vardumpArray(eachSelectedTableClauseData);
-                System.out.println("nonConceptuallyRelatedTableCalueData");
-                this.vardumpArray(nonConceptuallyRelatedTableCalueData);//*/
+                //System.out.println("nonConceptuallyRelatedTableCalueData");
+                //this.vardumpArray(nonConceptuallyRelatedTableCalueData);//*/
                 //System.out.println("\n### Query : --------------------------------<<<");
                 this.buildQuery (eachSelectedTableClauseData, true);
                 this.buildQuery(nonConceptuallyRelatedTableCalueData, false);
@@ -238,7 +247,9 @@ public class Search {
                         String[] level = entityRelationsArray[i].split(db.COLNAMETYPESP);
 
                         if (level[0].equalsIgnoreCase(table) && !upperLevelTable.equalsIgnoreCase(table)) {
-                            System.out.println(level[1]); // available related entities
+                            if (this.is_array(level)) {
+                                System.out.println(level[1]); // available related entities
+                            }
 
                             //System.out.println(db.getEntity().getSearchables(table, false, true)); displaying the current table's searchable attributes to specify values
                             upperLevelTable = table;
@@ -497,16 +508,34 @@ public class Search {
         return false;
     }
 
+    public boolean is_array (String[] array) {
+        try {
+            String valueAtArrayIndexTwo = array[1];
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean isRelatedWithAnyTable (String table) {
         boolean result = false;
         String[] relatedEntities = this.getEntityRelations ();
+        /*String[] availableEntities = this.db.getEntity().getSearchableTables();
+        String[] relatedEntities = new String[availableEntities.length];
+        for (int t = 0; t < availableEntities.length; t++) {
+            relatedEntities[t] = this.db.getEntity().getEntityMeta(availableEntities[t], 6);
+        }//*/
 
         for (int i = 0; i < relatedEntities.length; i++) {
             if (!result && relatedEntities[i].matches(".*"+table+".*")) {
                 String[] tableInfo = relatedEntities[i].split(db.COLNAMETYPESP);
-                String[] tables = tableInfo[1].split(",");
-                if (this.in_array(tables, table))
-                    result = true;
+                if (this.is_array(tableInfo)) {
+                    String[] tables = tableInfo[1].split(",");
+                    if (this.in_array(tables, table)) {
+                        result = true;
+                    }
+                }
             }
         }
 
@@ -568,10 +597,23 @@ public class Search {
     }
 
     public String[] getEntityRelations () {
+        String[] availableEntities = this.db.getEntity().getSearchableTables();
+        String[] relatedEntities = new String[availableEntities.length];
+        for (int t = 0; t < availableEntities.length; t++) {
+            if (!this.db.getEntity().getEntityMeta(availableEntities[t], 6).toString().equalsIgnoreCase("null")) {
+                relatedEntities[t] = availableEntities[t] + ":" + this.db.getEntity().getEntityMeta(availableEntities[t], 6);
+            } else {
+                relatedEntities[t] = availableEntities[t];
+            }
+        }
+        return relatedEntities;
+    }
+
+    /*public String[] getEntityRelations () {
         /*System.out.println("-------------------------------pk>>");
         this.vardumpArray(primaryKeyArray);
         System.out.println("-------------------------------fk>>");
-        this.vardumpArray(foreignKeyArray);//*/
+        this.vardumpArray(foreignKeyArray);//*
         String eachEntity = "";
         String relatedEntity = "";
         String nextForeignKeyTable = "";
@@ -621,7 +663,7 @@ public class Search {
         String[] entityRelationsArray = entityRelations.split(db.COLNAMETYPESP+db.COLNAMETYPESP);
 
         return entityRelationsArray;
-    }
+    }//*/
 
     public void raise_error (String message) {
         System.out.println(message);

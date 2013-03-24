@@ -20,6 +20,7 @@
         <is_a_join>false</is_a_join> <!-- //correct - false because, there is no attribute to search against -->
         <searchable_attributes>prof_name:this is the profile name</searchable_attributes>
         <description>no description</description>
+        <related_entities></related_entities>
     </table>
     <table>
         <real_name>USERS</real_name>
@@ -27,6 +28,7 @@
         <is_a_join>true</is_a_join> <!--  -->
         <searchable_attributes>name:this is the user's name</searchable_attributes>
         <description>This contains the users of the system.</description>
+        <related_entities>Profile</related_entities>
     </table>
     <table>
         <real_name>RSRC</real_name>
@@ -34,6 +36,7 @@
         <is_a_join>true</is_a_join> <!--  -->
         <searchable_attributes>rsrc_name:resource name this can be a user,office_phone:phone number of the resource,email_addr:email address of the resource</searchable_attributes>
         <description>the resources category where it contains the data about resources such as @"users@"</description>
+        <related_entities>Calendar,Roles,Users</related_entities>
     </table>
     <table>
         <real_name>PROJECT</real_name>
@@ -41,6 +44,7 @@
         <is_a_join>false</is_a_join> <!-- // correct - false because, there is no exact attribute to search on -->
         <searchable_attributes>plan_start_date</searchable_attributes>
         <description>no description</description>
+        <related_entities></related_entities>
     </table>
     <table>
         <real_name>CALENDAR</real_name>
@@ -48,6 +52,7 @@
         <is_a_join>false</is_a_join> <!--  -->
         <searchable_attributes>clndr_data</searchable_attributes>
         <description>no description</description>
+        <related_entities></related_entities>
     </table>
     <table>
         <real_name>ROLES</real_name>
@@ -55,6 +60,7 @@
         <is_a_join>false</is_a_join> <!-- // correct - false because, this is not directly invloved with anything -->
         <searchable_attributes>name:the @"users@" in the roles category,short_name</searchable_attributes>
         <description>no description</description>
+        <related_entities></related_entities>
     </table>
     <table>
         <real_name>DOCUMENT</real_name>
@@ -63,6 +69,7 @@
         <searchable_attributes>name:the @"users@" who created documents,short_name:the short names of the @"users@",author_name:
             this testing field for users</searchable_attributes>
         <description>the documents category where names of the @"users@" may appear as authors</description>
+        <related_entities>Project</related_entities>
     </table>
     <table>
         <real_name>TASK</real_name>
@@ -70,5 +77,6 @@
         <is_a_join>true</is_a_join> <!--  -->
         <searchable_attributes>name:task names where @"users@" may contain</searchable_attributes>
         <description>This contains all the tasks which are defined in all projects. So you can search for task</description>
+        <related_entities>Calendar,Roles,Resources</related_entities>
     </table>
 </database>
