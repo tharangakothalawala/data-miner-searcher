@@ -17,11 +17,13 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
     private static final int HEIGHT = 600;
 
     private JButton btnSearch, btnSetData, btnTestSearch, btnReset;
+    private JLabel lblSearchResultInfo;
     private JTextField txtSearchKeyword;
     private JTextArea textarea;
     JScrollPane textareaScroll;//*/
     private Database db = new Database();
     private Search search = new Search();
+    Query query = new Query(search.primaryKeyArray, search.foreignKeyArray);
     private int categoryCount = 0;
 
 
@@ -33,13 +35,13 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
     int selectedCategoryIndex = 0;
 
     private boolean isCategorySelected = false;
-    private int categorySelected = 0;
 
     public AppGUI() {
-        btnSearch = new JButton("Search");
+        btnSearch = new JButton("go cmd line");
         btnSetData = new JButton("Set Test Data");
         btnTestSearch = new JButton("Test Search");
         btnReset = new JButton("Reset");
+        lblSearchResultInfo = new JLabel("...");
         txtSearchKeyword = new JTextField(5);
         textarea = new JTextArea(12, 65);
         textareaScroll = new JScrollPane(textarea);
@@ -52,14 +54,17 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
         btnSearch.setToolTipText("Search");
         txtSearchKeyword.setFont(new Font("Calibri", Font.BOLD, 14));
         txtSearchKeyword.setText("ad"); // only for the demo
+        lblSearchResultInfo.setBackground(Color.lightGray);
+        lblSearchResultInfo.setOpaque(true);
 
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setLayout(null);
 
-        add(btnSearch).setBounds(350, 15, 90, 20);
+        add(btnSearch).setBounds(350, 15, 150, 20);
         add(btnSetData).setBounds(630, 180, 120, 20);
         add(btnTestSearch).setBounds(630, 200, 120, 20);
         add(btnReset).setBounds(630, 10, 120, 20);
+        add(lblSearchResultInfo).setBounds((WIDTH/2) - 100, 200, 200, 20);
         add(txtSearchKeyword).setBounds(15, 15, 330, 20);
         add(textareaScroll).setBounds(10, 230, 740, 360);
 
@@ -157,65 +162,51 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
     }
 
     public void itemStateChanged(ItemEvent ie) {
-        //try {
             String[] labels = search.showInitialView(true);
-            //String[] relatedEntities = entityData[1].split(",");
-            //if (relatedEntities.length > 1)
             if (!isCategorySelected) {
-                for (int i = 0; i < categoryCheckboxes.length; i++) {
+		for (int i = 0; i < categoryCheckboxes.length; i++) {
                     String[] entityData = labels[i].split(db.COLNAMETYPESP);
                     if (ie.getSource() != categoryCheckboxes[i] && !categoryCheckboxes[i].isSelected()) {
-                        categoryCheckboxes[i].setEnabled(false);
+			categoryCheckboxes[i].setEnabled(false);
                     } else {
-                        isCategorySelected = true;
-                        selectedCategoryIndex = i;
-                        String clause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entityData[0], 3), txtSearchKeyword.getText());
-                        System.out.println(db.getEntity().getEntityMeta(entityData[0], 7) + "::" + clause);
-                        search.eachSelectedTableClauseData[0] = db.getEntity().getEntityMeta(entityData[0], 7) + "::" + clause;
+			isCategorySelected = true;
+			selectedCategoryIndex = i;
+			String clause = query.makeClause(db.getEntity().getEntityMeta(entityData[0], 3), txtSearchKeyword.getText());
+			System.out.println(db.getEntity().getEntityMeta(entityData[0], 7) + "::" + clause);
+			search.eachSelectedTableClauseData[0] = db.getEntity().getEntityMeta(entityData[0], 7) + "::" + clause;
+			search.selectedMainCategory = db.getEntity().getEntityMeta(entityData[0], 7);
+
+			query.buildQuery(search.eachSelectedTableClauseData, true);
+			System.out.println(query.getSqlQuery());
                     }
-                }
+		}
             } else {
-                for (int i = 0; i < categoryCheckboxes.length; i++) {
+		for (int i = 0; i < categoryCheckboxes.length; i++) {
                     if (ie.getSource() != categoryCheckboxes[i] && !categoryCheckboxes[i].isSelected()) {
                         categoryCheckboxes[i].setEnabled(true);
                         isCategorySelected = false;
                     } else {
                         isCategorySelected = false;
-                        //categorySelected = 0;
                     }
-                }
+		}
             }
 
-            //if (JOptionPane.showConfirmDialog(null, "Are you sure you need to logout without uploading the new data to the remote server!") == 0) {
-            //}
-
             for (int i = 0; i < relatedCheckboxArray.length; i++) {
-                if (ie.getSource() == relatedCheckboxArray[i] && relatedCheckboxArray[i].isSelected()) {
+		if (ie.getSource() == relatedCheckboxArray[i] && relatedCheckboxArray[i].isSelected()) {
                     String relatedSearchText = "";
                     if (!relatedTextfieldArray[i].getText().equalsIgnoreCase("")) {
                         relatedSearchText = relatedTextfieldArray[i].getText();
                     } else {
                         relatedSearchText = txtSearchKeyword.getText();
                     }
-                    String clause = db.getEntity().makeClause(db.getEntity().getEntityMeta(relatedCheckboxArray[i].getText(), 3), relatedSearchText);
+                    String clause = query.makeClause(db.getEntity().getEntityMeta(relatedCheckboxArray[i].getText(), 3), relatedSearchText);
                     System.out.println(relatedCheckboxArray[i].getText() + "::" + clause);
                     search.eachSelectedTableClauseData[1] = db.getEntity().getEntityMeta(relatedCheckboxArray[i].getText(), 7) + "::" + clause;
-                }
+
+                    query.buildQuery(search.eachSelectedTableClauseData, true);
+                    System.out.println(query.getSqlQuery());
+		}
             }
-
-            /*if (categorySelected == 1) {
-                //isRelatedEntitySelected = true;
-                JCheckBox chk = (JCheckBox) ie.getSource();
-                String clause = db.getEntity().makeClause(db.getEntity().getEntityMeta(chk.getText(), 3), txtSearchKeyword.getText());
-                //String[] entityData = labels[selectedCategoryIndex].split(db.COLNAMETYPESP);
-                System.out.println(chk.getText() + "::" + clause);
-                search.eachSelectedTableClauseData[1] = db.getEntity().getEntityMeta(chk.getText(), 7) + "::" + clause;
-            }//*/
-
-            //categorySelected = 1;
-        //} catch (Exception ex) {
-        //    System.out.println("Error: (GUI) - Category Selection. Exception: " + ex);
-        //}
     }
 
     public void actionPerformed(ActionEvent event) {
@@ -228,18 +219,139 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
 
             textarea.setText(search.searchResults);
         } else if (event.getSource() == btnSetData) {
-            String searchKeyword = txtSearchKeyword.getText();
 
             search.eachSelectedTableClauseData[0] = "4images_images::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%' OR image_keywords LIKE '%Texas%'";
             search.eachSelectedTableClauseData[1] = "4images_users::user_name LIKE '%sales@milezone.com%' OR user_email LIKE '%sales@milezone.com%'";
+            search.selectedMainCategory = "4images_images";
 
             //textarea.setText(search.searchResults);
         } else if (event.getSource() == btnTestSearch) {
-            search.buildQuery(search.eachSelectedTableClauseData, true);
-            textarea.setText(search.searchResults);
+            String searchResults = "";
+            String searchKeyword = txtSearchKeyword.getText();
+            //search.buildQuery(search.eachSelectedTableClauseData, true);
+            //textarea.setText(search.searchResults);
+
+            //String value = "ad";
+            // traversing through all the available/defined seachable tables
+                int entityCount = db.getEntity().getSearchableTables().length;
+                String[] entities = db.getEntity().getSearchableTables();
+
+                // counting the tables which have got a meta keyword
+                int countOfEntitiesWithMetaKeyword = 0;
+                for (int i = 0; i < entityCount; i++) {
+                    String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
+                    // checking for the enity description for the meta keyword/s
+                    if (eachEntityDescription.toLowerCase().contains("@\""+search.selectedMainCategory.toLowerCase()+"@\"")) {
+                        countOfEntitiesWithMetaKeyword++;
+                    }
+                }
+
+                //String userSelectionExtraSearch = "";
+                boolean userSelectionExtraSearch = false;
+                if (countOfEntitiesWithMetaKeyword > 0) {
+                    if (JOptionPane.showConfirmDialog(null, "Click 'yes' to continue & consider the " + countOfEntitiesWithMetaKeyword + " extra related category/ies found, or Click 'no' to Skip: ") == 0) {
+                        userSelectionExtraSearch = true;
+                    }
+                }
+                if (countOfEntitiesWithMetaKeyword > 0 && userSelectionExtraSearch) {
+                    for (int i = 0; i < entityCount; i++) {
+                        String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
+
+                        // checking for the enity description for the meta keyword/s
+                        if (eachEntityDescription.toLowerCase().contains("@\""+search.selectedMainCategory.toLowerCase()+"@\"")) {
+                            //System.out.println("\n##2" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
+                            //String entityPreferance = search.promptMessage("\nConsider " + eachEntityDescription.replace("@\"", "") + "? (yes|no)");
+                            boolean entityPreferance = false;
+                            if (JOptionPane.showConfirmDialog(null, "Consider " + eachEntityDescription.replace("@\"", "") + "? (yes|no)") == 0) {
+                                entityPreferance = true;
+                            }
+                            if (entityPreferance && !search.isTableSelected(search.nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                //String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
+                                //nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+
+                                //////////////////////////////// Each entity attribute description //////////////
+                                String searchableAttributes = db.getEntity().getEntityMeta(entities[i], 5);
+                                String[] searchableAttributeData = searchableAttributes.split(",");
+
+                                //-----
+                                int countOfAttributesWithMetaKeyword = 0;
+                                for (int a = 0; a < searchableAttributeData.length; a++) {
+                                    String[] attributeData = searchableAttributeData[a].split(":");
+                                    try {
+                                        if (attributeData[1].toLowerCase().contains("@\""+search.selectedMainCategory.toLowerCase()+"@\"")) {
+                                            countOfAttributesWithMetaKeyword++;
+                                        }
+                                    } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description */ }
+                                }
+                                //-----
+                                if (countOfAttributesWithMetaKeyword > 1) {
+                                    JOptionPane.showMessageDialog(null, "Found " + countOfAttributesWithMetaKeyword + " search criteria under this category.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                                    String searchables = "";
+                                    for (int a = 0; a < searchableAttributeData.length; a++) {
+                                        String[] attributeData = searchableAttributeData[a].split(":");
+                                        try {
+                                        if (attributeData[1].toLowerCase().contains("@\""+search.selectedMainCategory.toLowerCase()+"@\"")) {
+                                            //System.out.println("\n##3" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
+                                            //String preferance = search.promptMessage("\nConsider " + attributeData[1].replace("@\"", "") + "? (yes|no)");
+                                            boolean preferance = false;
+                                            if (JOptionPane.showConfirmDialog(null, "Consider " + attributeData[1].replace("@\"", "") + "? (yes|no)") == 0) {
+                                                preferance = true;
+                                            }
+                                            if (preferance) {
+                                                searchables += attributeData[0] + ",";
+                                            } else {
+                                                searchableAttributeData[a] = null; // unset the value (this will avoid considering this attribute later)
+                                            }
+                                        }
+                                        } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description */ }
+                                    }
+                                    // going through the  attributes again to get any attribute which did't get considered above due to the user input
+                                    for (int a = 0; a < searchableAttributeData.length; a++) {
+                                        try {
+                                            String[] attributeData = searchableAttributeData[a].split(":");
+                                            if (!searchables.toLowerCase().contains(attributeData[0].toLowerCase())) {
+                                                searchables += attributeData[0] + ",";
+                                            }
+                                        } catch (Exception ex) { }
+                                    }
+                                    ///////////////*/
+                                    if (!searchables.equalsIgnoreCase("")) {
+                                        searchables = searchables.substring(0, (searchables.length()) - 1);
+                                        if (!search.isTableSelected(search.nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                            String relatedEntityClause = query.makeClause(searchables, searchKeyword);
+                                            search.nonConceptuallyRelatedTableCalueData[search.nextAvailableArrayIndex(search.nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                                        }
+                                    }
+                                } else {
+                                    if (!search.isTableSelected(search.nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                        String relatedEntityClause = query.makeClause(db.getEntity().getEntityMeta(entities[i], 3), searchKeyword);
+                                        search.nonConceptuallyRelatedTableCalueData[search.nextAvailableArrayIndex(search.nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                                    }
+                                }
+                                //////////////////////////////////////*/
+                            }
+                        }
+                    }
+                }
+
+            // getting the result count
+            String sqlCountQuery = query.buildQuery(search.eachSelectedTableClauseData, true);
+            lblSearchResultInfo.setText(query.getCount(sqlCountQuery) + " results found");
+
+            String sqlQuery = query.buildQuery(search.eachSelectedTableClauseData, false);
+            search.getRealData(sqlQuery, null);
+            searchResults = search.searchResults;
+            search.searchResults = "";
+            //sqlQuery = search.buildQuery(search.nonConceptuallyRelatedTableCalueData);
+            search.getRealData(null, search.nonConceptuallyRelatedTableCalueData);
+            searchResults += search.searchResults;
+            textarea.setText(searchResults);
             search.searchResults = "";
         } else if (event.getSource() == btnReset) {
-            search.initializeArray(search.eachSelectedTableClauseData);
+            search.eachSelectedTableClauseData = search.initializeArray(search.eachSelectedTableClauseData);
+            search.nonConceptuallyRelatedTableCalueData = search.initializeArray(search.nonConceptuallyRelatedTableCalueData);
+            search.searchResults = "";
+            textarea.setText("");
         }
     }
 

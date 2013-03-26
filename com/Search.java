@@ -11,10 +11,13 @@ public class Search {
 
     private Database db = new Database();
     public String searchResults = "";
+    Query query;
     String[] primaryKeyArray;
     String[] foreignKeyArray;
     String [] eachSelectedTableClauseData;
     String[] nonConceptuallyRelatedTableCalueData;
+
+    String selectedMainCategory;
 
     public Search () {
         this.loadEntityRelations ();
@@ -23,11 +26,6 @@ public class Search {
     }
 
     public String[] showInitialView () {
-        /////// temp
-        /*String searchableAttributes = db.getEntity().getEntityMeta("ROLES", 5);
-        String[] searchableAttributeData = searchableAttributes.split(",");
-        this.identifyAttributes(searchableAttributeData);
-        ///////*/
         String[] entityRelationsArray = this.getEntityRelations();
 
         System.out.println(" ## Avaliable Entities ## ");
@@ -86,7 +84,7 @@ public class Search {
      * USERS s name a s name ad PROFILE s prof_name min s prof_name dmin
      */
     public void doSearch(String searchKeyword) {
-        String currentSelectedTable = "";
+        selectedMainCategory = "";
 
         String[] entityRelationsArray = this.getEntityRelations();
         //this.vardumpArray(entityRelationsArray);
@@ -101,13 +99,10 @@ public class Search {
             table = this.promptMessage("Select a table/category or type any command : ");
 
             if (this.isRelatedWithAnyTable(table) || (!this.isRelatedWithAnyTable(table) && this.in_array(db.getEntity().getSearchableTables (), table))) {
-                currentSelectedTable = table;
-                if (!this.isTableSelected(eachSelectedTableClauseData, currentSelectedTable)) {
+                selectedMainCategory = table;
+                if (!this.isTableSelected(eachSelectedTableClauseData, selectedMainCategory)) {
                     eachSelectedTableClauseData[this.nextAvailableArrayIndex(eachSelectedTableClauseData)] = table + "::";
                 }
-            } else {
-                if (currentSelectedTable.equalsIgnoreCase(""))
-                    this.raise_error("Invalid table/category!");
             }
 
             if (table.equalsIgnoreCase("x")) // exit
@@ -130,8 +125,9 @@ public class Search {
                 //System.out.println("nonConceptuallyRelatedTableCalueData");
                 //this.vardumpArray(nonConceptuallyRelatedTableCalueData);//*/
                 //System.out.println("\n### Query : --------------------------------<<<");
-                this.buildQuery (eachSelectedTableClauseData, true);
-                this.buildQuery(nonConceptuallyRelatedTableCalueData, false);
+                String sqlQuery = query.buildQuery (eachSelectedTableClauseData, false);
+                this.getRealData (sqlQuery, null);
+                this.getRealData (null, nonConceptuallyRelatedTableCalueData);
                 //this.vardumpArray(this.getEntityRelations ());
                 //this.vardumpArray(eachSelectedTableClauseData);
                 System.out.println("-- exiting ...");
@@ -143,10 +139,10 @@ public class Search {
                 //System.out.print("Select an attribute to set a value : ");
                 //String attribute = input.next();
                 String value = this.promptMessage("search keyword : ");
-                //String[] arr = db.getEntity().getEntityMeta(currentSelectedTable, 2);
-                String clause = db.getEntity().makeClause(db.getEntity().getEntityMeta(currentSelectedTable, 3), value);
-                //eachSelectedTableClauseData[this.findExistingTableClausePrefixIndex(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += attribute + " LIKE '%" + value + "%':";
-                eachSelectedTableClauseData[this.findExistingTableClausePrefixIndex(eachSelectedTableClauseData, currentSelectedTable, db.COLNAMETYPESP+db.COLNAMETYPESP)] += clause;
+                //String[] arr = db.getEntity().getEntityMeta(selectedMainCategory, 2);
+                String clause = query.makeClause(db.getEntity().getEntityMeta(selectedMainCategory, 3), value);
+                //eachSelectedTableClauseData[this.findExistingTableClausePrefixIndex(eachSelectedTableClauseData, selectedMainCategory, db.COLNAMETYPESP+db.COLNAMETYPESP)] += attribute + " LIKE '%" + value + "%':";
+                eachSelectedTableClauseData[this.findExistingTableClausePrefixIndex(eachSelectedTableClauseData, selectedMainCategory, db.COLNAMETYPESP+db.COLNAMETYPESP)] += clause;
 
                 // traversing through all the available/defined seachable tables
                 int entityCount = db.getEntity().getSearchableTables().length;
@@ -157,7 +153,7 @@ public class Search {
                 for (int i = 0; i < entityCount; i++) {
                     String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
                     // checking for the enity description for the meta keyword/s
-                    if (eachEntityDescription.toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
+                    if (eachEntityDescription.toLowerCase().contains("@\""+selectedMainCategory.toLowerCase()+"@\"")) {
                         countOfEntitiesWithMetaKeyword++;
                     }
                 }
@@ -171,7 +167,7 @@ public class Search {
                         String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
 
                         // checking for the enity description for the meta keyword/s
-                        if (eachEntityDescription.toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
+                        if (eachEntityDescription.toLowerCase().contains("@\""+selectedMainCategory.toLowerCase()+"@\"")) {
                             //System.out.println("\n##2" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
                             String entityPreferance = this.promptMessage("\nConsider " + eachEntityDescription.replace("@\"", "") + "? (yes|no)");
                             if ((entityPreferance.equalsIgnoreCase("y") || entityPreferance.equalsIgnoreCase("yes")) && !this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
@@ -187,7 +183,7 @@ public class Search {
                                 for (int a = 0; a < searchableAttributeData.length; a++) {
                                     String[] attributeData = searchableAttributeData[a].split(":");
                                     try {
-                                        if (attributeData[1].toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
+                                        if (attributeData[1].toLowerCase().contains("@\""+selectedMainCategory.toLowerCase()+"@\"")) {
                                             countOfAttributesWithMetaKeyword++;
                                         }
                                     } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description */ }
@@ -199,7 +195,7 @@ public class Search {
                                     for (int a = 0; a < searchableAttributeData.length; a++) {
                                         String[] attributeData = searchableAttributeData[a].split(":");
                                         try {
-                                        if (attributeData[1].toLowerCase().contains("@\""+currentSelectedTable.toLowerCase()+"@\"")) {
+                                        if (attributeData[1].toLowerCase().contains("@\""+selectedMainCategory.toLowerCase()+"@\"")) {
                                             //System.out.println("\n##3" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
                                             String preferance = this.promptMessage("\nConsider " + attributeData[1].replace("@\"", "") + "? (yes|no)");
                                             if (preferance.equalsIgnoreCase("y") || preferance.equalsIgnoreCase("yes")) {
@@ -223,13 +219,13 @@ public class Search {
                                     if (!searchables.equalsIgnoreCase("")) {
                                         searchables = searchables.substring(0, (searchables.length()) - 1);
                                         if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
-                                            String relatedEntityClause = db.getEntity().makeClause(searchables, value);
+                                            String relatedEntityClause = query.makeClause(searchables, value);
                                             nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
                                         }
                                     }
                                 } else {
                                     if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
-                                        String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
+                                        String relatedEntityClause = query.makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
                                         nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
                                     }
                                 }
@@ -274,18 +270,7 @@ public class Search {
                     }
             }
 
-            
-
-            //if (!isFound)
-                //System.out.println("Not Found!\n----------------");
-
         } while (!table.equalsIgnoreCase(""));
-
-        //searchResults = eachRowData;
-
-        //System.exit(0);
-        //System.out.println(eachRowData);//*/
-        //System.exit(0); // @TODO : just stopping the execution. Needs to be handled by the communigram
     } // function end
 
     public void identifyAttributes (String[] attributes) {
@@ -316,89 +301,11 @@ public class Search {
             return whereClause;
     }
 
-    /*
-     * this will creat the SQL join statement. ex. input: USERS s name a s name ad PROFILE s prof_name min s prof_name dmin
-     */
-    public void buildQuery (String[] queryRawDataArray, boolean isPlainSQL) {
-        String select = "SELECT";
-        String whereClause = " WHERE ";
-        String leftJoin = "";
-        String parentJoinTable = "";
-        String parentTableCondition = "";
-
-        // creating the select clause to the selected tables
-        String sqlSelects = "";
-        for (int i = 0; i < queryRawDataArray.length; i++) {
-            if (queryRawDataArray[i] != null) {
-                String[] tableData = queryRawDataArray[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
-
-                // always need to select first user slection (first category/entity)
-                if (i == 0) {
-                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true, true) + ",";
-                }
-                // only select table attributes if we have a condition to join with the first/parent selection. (array index 2 contains the condition)
-                if (tableData.length > 1) {
-                    if (i != 0 && !tableData[1].equalsIgnoreCase("")) {
-                        sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true, true) + ",";
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < queryRawDataArray.length; i++) {
-            if (queryRawDataArray[i] != null) {
-                // index 0 means to consider the 0th index values as related to levelOne table
-                if (i == 0) {
-                    String[] mainTableData = queryRawDataArray[0].split(db.COLNAMETYPESP+db.COLNAMETYPESP); // seperating the table::with their coditions
-                    parentJoinTable = mainTableData[0];
-                    if (mainTableData.length > 1) {
-                        whereClause += this.createWhereClause(mainTableData, false);
-                        parentTableCondition = whereClause;
-                    }
-
-                    select += sqlSelects.substring(0, (sqlSelects.length()) - 1) + " FROM " + mainTableData[0]; // SELECT * FROM <selected_first_table>
-                } else {
-                    // JOINs will be set in here
-                    String[] mainTableData = queryRawDataArray[i-1].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
-                    parentJoinTable = mainTableData[0];
-                    String[] tableClause = queryRawDataArray[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
-
-                    String[] leftjoinData = primaryKeyArray[this.findExistingTableClausePrefixIndex(primaryKeyArray, tableClause[0], db.COLNAMETYPESP)].split(db.COLNAMETYPESP);
-                    String condition = "";
-                    //System.out.println(tableClause.length);
-                    if (tableClause.length > 1) {
-                        condition = this.createWhereClause(tableClause, true);
-
-                        leftJoin += " JOIN " + tableClause[0] + " ON " + tableClause[0] + "." + leftjoinData[1] + " = " + parentJoinTable + "." + leftjoinData[1] + " AND " + condition;
-                    } else {
-                        condition = "";
-                    }
-                }
-            }
-        }
-        leftJoin += parentTableCondition;
-
-        String finalSQLQuery = select + leftJoin + ";";
-
-        //System.out.println("\n### Query : --------------------------------<<<");
-        
-
-        if (isPlainSQL) {
-            //System.out.println(finalSQLQuery);
-            //System.out.println("### Query : -------------------------------->>>");
-            this.getRealData (finalSQLQuery, null, true); // finally send the plain sql statement to get the real data
-        } else {
-            this.getRealData (null, queryRawDataArray, false); // finally send the plain sql statement to get the real data
-        }
-
-        this.initializeArray(queryRawDataArray); // clear all data
-    }
-
-    public void getRealData(String sqlQuery, String[] sqlQueryMeta, boolean isPlainSQL) {
+    public void getRealData(String sqlQuery, String[] sqlQueryMeta) {
         String eachRowData = "";
         try {
-            if (isPlainSQL) {
-                Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, null, true);
+            if (sqlQuery != null) {
+                Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, true);
                 System.out.println("1###Query :" + db.getQuery());
 
                 // begin :traversing through each table row to display data
@@ -421,7 +328,7 @@ public class Search {
                 this.vardumpArray(sqlQueryMeta);
                 for (int c = 0; c < sqlQueryMeta.length; c++) {
                     String[] queryMeta = sqlQueryMeta[c].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
-                    Map[] resultsets = db.sqlSelect(queryMeta[0], db.getEntity().getEntityMeta(queryMeta[0], 3), queryMeta[1], null, null, null, null, false);
+                    Map[] resultsets = db.sqlSelect(queryMeta[0], db.getEntity().getEntityMeta(queryMeta[0], 3), queryMeta[1], null, null, null, false);
                     System.out.println("2###Query :" + db.getQuery());
 
                     // begin :traversing through each table row to display data
@@ -448,10 +355,11 @@ public class Search {
         searchResults += eachRowData;
     }
 
-    public void initializeArray (String[] array) {
+    public String[] initializeArray (String[] array) {
         for (int i = 0; i < array.length; i++) {
             array[i] = null;
         }
+        return array;
     }
 
     public void vardumpArray (String[] array) {
@@ -521,11 +429,6 @@ public class Search {
     public boolean isRelatedWithAnyTable (String table) {
         boolean result = false;
         String[] relatedEntities = this.getEntityRelations ();
-        /*String[] availableEntities = this.db.getEntity().getSearchableTables();
-        String[] relatedEntities = new String[availableEntities.length];
-        for (int t = 0; t < availableEntities.length; t++) {
-            relatedEntities[t] = this.db.getEntity().getEntityMeta(availableEntities[t], 6);
-        }//*/
 
         for (int i = 0; i < relatedEntities.length; i++) {
             if (!result && relatedEntities[i].matches(".*"+table+".*")) {
@@ -548,7 +451,7 @@ public class Search {
 
         int totalKeyColumns = 0;
         for (int t = 0; t < tableArray.length; t++) {
-            Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, null, false);
+            Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, false);
             totalKeyColumns += resultsets.length;
         }
         primaryKeyArray = new String[totalKeyColumns];
@@ -561,7 +464,7 @@ public class Search {
             // need only the tables which contain searchable attributes
             if (!db.getEntity().getSearchables(tableArray[t], false, true).equalsIgnoreCase("")) {
                 // sending the query to the database to retrieve data
-                Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, null, false);
+                Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, false);
 
                 // begin :traversing through each table row to display data
                 if (resultsets.length > 0) {
@@ -594,6 +497,7 @@ public class Search {
                 } // end :traversing through each table row to display data
             }
         } // end: traversing through each table
+        query = new Query(this.primaryKeyArray, this.foreignKeyArray);
     }
 
     public String[] getEntityRelations () {
@@ -664,8 +568,4 @@ public class Search {
 
         return entityRelationsArray;
     }//*/
-
-    public void raise_error (String message) {
-        System.out.println(message);
-    }
 }

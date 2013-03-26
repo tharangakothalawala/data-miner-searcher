@@ -77,17 +77,6 @@ public class Entity {
         return attributes;
     }
 
-    public String makeClause(String searchables, String keyword) {
-        if (searchables != null) {
-            searchables = searchables.replaceAll(",", " LIKE \"%" + keyword + "%\" OR ");
-            searchables += " LIKE \"%" + keyword + "%\"";
-
-            return searchables;
-        } else {
-            return null;
-        }
-    }
-
     public boolean isSearchable(String datatype) {
         String[] searchableTypes = {"nvarchar", "varchar", "ntext", "text"};
         boolean isSearchable = false;
@@ -102,7 +91,7 @@ public class Entity {
 
     public String[] getSearchableTables () {
         //String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT", "CALENDAR", "ROLES", "DOCUMENT", "TASK"};
-        String[] definedTableData = this.getSearchableTables(2);
+        String[] definedTableData = this.loadEntityConfig();
         String[] searchableTables = new String[definedTableData.length];
         for (int i = 0; i < definedTableData.length; i++) {
             String[] tableData = definedTableData[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
@@ -115,10 +104,7 @@ public class Entity {
             return searchableTables;
     }
 
-    public String[] getSearchableTables (int key) {
-        if (key == 1) {
-            return this.getSearchableTables();
-        } else if (key == 2) {
+    public String[] loadEntityConfig () {
             try {
                 File entityConfigFile = new File("src/database/plugins/" + db.dbname + "_entity_config.xml");
                 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -155,12 +141,11 @@ public class Entity {
                 System.out.println ("Error: " + e);
                 e.printStackTrace();
             }
-        }
         return null;
     }
 
     public String getEntityMeta (String table, int key) {
-        String[] definedTableData = this.getSearchableTables(2);
+        String[] definedTableData = this.loadEntityConfig();
 
         for (int i = 0; i < definedTableData.length; i++) {
             String[] tableData = definedTableData[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);

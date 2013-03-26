@@ -139,7 +139,7 @@ public class Database {
     }
 
     // SQL select
-    public Map[] sqlSelect(String table, String columns, String clause, String group, String order, String limit, String offset, boolean isForced) {
+    public Map[] sqlSelect(String table, String columns, String clause, String group, String order, String limit, boolean isForced) {
         try {
             if (table != null && columns != null) {
                 if (clause != null) {
@@ -162,17 +162,12 @@ public class Database {
                 } else {
                     limit = "";
                 }
-                if (offset != null) {
-                    offset = " OFFSET " + offset + "";
-                } else {
-                    offset = "";
-                }
 
                 // building the query
                 String localQuery = "SELECT " + columns
                         + " FROM " + table + clause
                         + group + order
-                        + limit + offset + ";";
+                        + limit + ";";
 
                 //System.out.println("Query: " + localQuery);
 
@@ -205,12 +200,7 @@ public class Database {
                 }
             }
         } catch (Exception error) {
-            //System.out.println("\n" + ERROR + error);
-            map = new HashMap<String, String>();
-            map.put("ERROR", "" + error);
-            resultset[0] = map;
-            return resultset;
-            //    System.exit(0);
+            return null;
         }
         return resultset;
     }
@@ -227,7 +217,7 @@ public class Database {
     public String[] getDatabaseTableList() {
 
         try {
-            Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "' OR TABLE_SCHEMA = '" + dbname + "'", null, null, null, null, false);
+            Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "' OR TABLE_SCHEMA = '" + dbname + "'", null, null, null, false);
             //Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "'", null, null, null, null);
             //Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_SCHEMA = '" + dbname + "'", null, null, null, null);
 
@@ -250,7 +240,7 @@ public class Database {
     public String[] getDatabaseViewList() {
 
         try {
-            Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.VIEWS", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "' OR TABLE_SCHEMA = '" + dbname + "'", null, null, null, null, false);
+            Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.VIEWS", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "' OR TABLE_SCHEMA = '" + dbname + "'", null, null, null, false);
 
             dbviewArray = new String[resultsets.length];
 
