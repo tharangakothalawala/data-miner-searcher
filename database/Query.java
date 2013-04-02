@@ -39,7 +39,7 @@ public class Query {
     /*
      * this will creat the SQL join statement. ex. input: USERS s name a s name ad PROFILE s prof_name min s prof_name dmin
      */
-    public String buildQuery (String[] queryRawDataArray, boolean fetchCount) {
+    public String buildQuery (String[] queryRawDataArray, boolean fetchCount, boolean includeJoinCondition) {
         this.init();
         String parentJoinTable = "";
         String parentTableCondition = "";
@@ -52,12 +52,12 @@ public class Query {
 
                 // always need to select first user slection (first category/entity)
                 if (i == 0) {
-                    sqlSelects +=  " " + this.db.getEntity().getSearchables(tableData[0], true, true) + ",";
+                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], false, false) + ",";
                 }
                 // only select table attributes if we have a condition to join with the first/parent selection. (array index 2 contains the condition)
                 if (tableData.length > 1) {
                     if (i != 0 && !tableData[1].equalsIgnoreCase("")) {
-                        sqlSelects +=  " " + this.db.getEntity().getSearchables(tableData[0], true, true) + ",";
+                        sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], false, false) + ",";
                     }
                 }
             }
@@ -89,9 +89,11 @@ public class Query {
                     String condition = "";
                     //System.out.println(tableClause.length);
                     if (tableClause.length > 1) {
-                        condition = this.createJoinWhereClause(tableClause, true);
+                        if (includeJoinCondition) {
+                            condition = " AND " + this.createJoinWhereClause(tableClause, true);
+                        }
 
-                        joinStatement += " JOIN " + tableClause[0] + " ON " + tableClause[0] + "." + leftjoinData[1] + " = " + parentJoinTable + "." + leftjoinData[1] + " AND " + condition;
+                        joinStatement += " JOIN " + tableClause[0] + " ON " + tableClause[0] + "." + leftjoinData[1] + " = " + parentJoinTable + "." + leftjoinData[1] + condition;
                     } else {
                         condition = "";
                     }

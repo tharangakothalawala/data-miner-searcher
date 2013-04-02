@@ -61,15 +61,15 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
         setLayout(null);
 
         add(btnSearch).setBounds(350, 15, 150, 20);
-        add(btnSetData).setBounds(630, 180, 120, 20);
-        add(btnTestSearch).setBounds(630, 200, 120, 20);
-        add(btnReset).setBounds(630, 10, 120, 20);
+        //add(btnSetData).setBounds(630, 180, 120, 20);
+        //add(btnTestSearch).setBounds(630, 200, 120, 20);
+        //add(btnReset).setBounds(630, 10, 120, 20);
         add(lblSearchResultInfo).setBounds((WIDTH/2) - 100, 200, 200, 20);
         add(txtSearchKeyword).setBounds(15, 15, 330, 20);
-        add(textareaScroll).setBounds(10, 230, 740, 360);
+        add(textareaScroll).setBounds(10, 230, 740, 360);//*/
 
         ////////////////////////////////////////////////////////////////////////
-        categoryCount = search.showInitialView(true).length;
+        /*categoryCount = search.showInitialView(true).length;
         categoryCheckboxes = new JCheckBox[categoryCount];
         String[] labels = search.showInitialView(true);
 
@@ -92,28 +92,18 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
         relatedTextfieldArray = new JTextField[relatedEntityCount];
 
         int relatedCategoryRenderCount = 0;
-        //int relatedCategoryTextboxRenderCount = 0;
         for (int i = 0; i < categoryCheckboxes.length; i++) {
             if (labels[i] != null) {
                 String[] entityData = labels[i].split(db.COLNAMETYPESP);
                 String[] relatedEntities = new String[1];
                 if (search.is_array(entityData)) {
                     relatedEntities = entityData[1].split(",");
-                }/* else {
-                    String[] relatedEntities = new String[1];
-                }//*/
+                }
 
                 // creating the checkboxes for related entities
                 int startX = 60;
                 if (relatedEntities.length > 1) {
-                    //relatedEntities = entityData[1].split(",");
-                    //System.out.println("11"+entityData[1]+":"+relatedEntities[0]+":"+relatedEntities.length);
-                    //relatedCheckboxes = new JCheckBox[relatedEntities.length];
-                    //relatedTextfieldArray = new JTextField[relatedEntities.length];
                     for (int ch = 0, xpos = 25, subCategoryYpos = 120; ch < relatedEntities.length; ch++) {
-                        /*relatedCheckboxes[ch] = new JCheckBox(relatedEntities[ch]);
-                        relatedCheckboxes[ch].setToolTipText(relatedEntities[ch]);
-                        add(relatedCheckboxes[ch]).setBounds(xpos, startX+(40*i), 80, 20);//*/
 
                         relatedCheckboxArray[relatedCategoryRenderCount] = new JCheckBox(relatedEntities[ch]);
                         relatedCheckboxArray[relatedCategoryRenderCount].setToolTipText(relatedEntities[ch]);
@@ -128,11 +118,6 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                         relatedCategoryRenderCount++;
                     }
                 } else {
-                    //System.out.println("22"+entityData[1]);
-                    /*relatedCheckbox = new JCheckBox(entityData[1]);
-                    relatedCheckbox.setToolTipText(entityData[1]);
-                    add(relatedCheckbox).setBounds(25, startX+(40*i), 80, 20);//*/
-
                     if (search.is_array(entityData)) {
                         try {
                             relatedCheckboxArray[relatedCategoryRenderCount] = new JCheckBox(db.getEntity().getEntityMeta(entityData[1], 1));
@@ -145,7 +130,6 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                             add(relatedTextfieldArray[relatedCategoryRenderCount]).setBounds(120, startX+(40*i), 100, 20);
 
                             relatedCategoryRenderCount++;
-                            //relatedCategoryTextboxRenderCount++;
                         } catch (ArrayIndexOutOfBoundsException ex) {
 
                         }
@@ -158,7 +142,7 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                 categoryCheckboxes[i].addItemListener(this);
                 add(categoryCheckboxes[i]).setBounds(10, 40+(40*i), 200, 20);
             }
-        } // end of for loop
+        } // end of for loop //*/
     }
 
     public void itemStateChanged(ItemEvent ie) {
@@ -176,7 +160,7 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
 			search.eachSelectedTableClauseData[0] = db.getEntity().getEntityMeta(entityData[0], 7) + "::" + clause;
 			search.selectedMainCategory = db.getEntity().getEntityMeta(entityData[0], 7);
 
-			query.buildQuery(search.eachSelectedTableClauseData, true);
+			query.buildQuery(search.eachSelectedTableClauseData, true, true);
 			System.out.println(query.getSqlQuery());
                     }
 		}
@@ -203,7 +187,7 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                     System.out.println(relatedCheckboxArray[i].getText() + "::" + clause);
                     search.eachSelectedTableClauseData[1] = db.getEntity().getEntityMeta(relatedCheckboxArray[i].getText(), 7) + "::" + clause;
 
-                    query.buildQuery(search.eachSelectedTableClauseData, true);
+                    query.buildQuery(search.eachSelectedTableClauseData, true, true);
                     System.out.println(query.getSqlQuery());
 		}
             }
@@ -233,8 +217,8 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
 
             //String value = "ad";
             // traversing through all the available/defined seachable tables
-                int entityCount = db.getEntity().getSearchableTables().length;
-                String[] entities = db.getEntity().getSearchableTables();
+                int entityCount = db.getEntity().getSearchableTables(0).length;
+                String[] entities = db.getEntity().getSearchableTables(0);
 
                 // counting the tables which have got a meta keyword
                 int countOfEntitiesWithMetaKeyword = 0;
@@ -335,10 +319,10 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                 }
 
             // getting the result count
-            String sqlCountQuery = query.buildQuery(search.eachSelectedTableClauseData, true);
+            String sqlCountQuery = query.buildQuery(search.eachSelectedTableClauseData, true, true);
             lblSearchResultInfo.setText(query.getCount(sqlCountQuery) + " results found");
 
-            String sqlQuery = query.buildQuery(search.eachSelectedTableClauseData, false);
+            String sqlQuery = query.buildQuery(search.eachSelectedTableClauseData, false, true);
             search.getRealData(sqlQuery, null);
             searchResults = search.searchResults;
             search.searchResults = "";

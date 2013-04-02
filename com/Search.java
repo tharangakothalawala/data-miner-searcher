@@ -10,6 +10,20 @@ import java.util.*;
 public class Search {
 
     private Database db = new Database();
+
+    /*
+     * this is the limit where we can search in all tables.
+     * If the searchable table count is more than this limit, we need to ask the user to select/input the category
+     */
+    private static int ENTITYDISPLAYLIMIT;
+
+    /*
+     * 1: searching all searchable enities under the limit
+     * 2: searching ALL the enities
+     * 3: searching the specified entity
+     */
+    private int searchMode = 0;
+
     public String searchResults = "";
     Query query;
     String[] primaryKeyArray;
@@ -20,18 +34,19 @@ public class Search {
     String selectedMainCategory;
 
     public Search () {
+        ENTITYDISPLAYLIMIT = db.entityDisplayLimit;
         this.loadEntityRelations ();
-        eachSelectedTableClauseData = new String[db.getEntity().getSearchableTables().length];
-        nonConceptuallyRelatedTableCalueData = new String[db.getEntity().getSearchableTables().length];
+        eachSelectedTableClauseData = new String[db.getEntity().getSearchableTables(0).length];
+        nonConceptuallyRelatedTableCalueData = new String[db.getEntity().getSearchableTables(0).length];
     }
 
     public String[] showInitialView () {
         String[] entityRelationsArray = this.getEntityRelations();
 
-        System.out.println(" ## Avaliable Entities ## ");
+        //System.out.println(" ## Avaliable Entities ## ");
         // Displaying the available entity relationships
         String[] levelOneEntities = new String[entityRelationsArray.length];
-        for (int t = 0; t < entityRelationsArray.length; t++) {
+        /*for (int t = 0; t < entityRelationsArray.length; t++) {
             String[] level1 = entityRelationsArray[t].split(db.COLNAMETYPESP);
             if (db.getEntity().getEntityMeta(level1[0], 2).equalsIgnoreCase("true") && this.is_array(level1)) { // show only the main entities.. not the join candidate entities
                 System.out.println(db.getEntity().getEntityMeta(level1[0], 7) + " : " + level1[1] + " - " + db.getEntity().getEntityMeta(level1[0], 4));
@@ -41,6 +56,7 @@ public class Search {
         }
         System.out.println("\n -- Available commands: --\ns: to set a keyword for the current table selected.\nd: to search/display output\ni: show the initial view\n");
         System.out.println("----------------------------------------------------------------");
+        //*/
         return levelOneEntities;
     }
 
@@ -96,9 +112,219 @@ public class Search {
         String upperLevelTable = "";
 
         do {
-            table = this.promptMessage("Select a table/category or type any command : ");
+            table = this.promptMessage("Please enter your search keyword/s : ");
 
-            if (this.isRelatedWithAnyTable(table) || (!this.isRelatedWithAnyTable(table) && this.in_array(db.getEntity().getSearchableTables (), table))) {
+            String searchableTables = "";
+            String userCategorySelection = "";
+            String entitySugessions = "";
+            //if (db.getEntity().getSearchableTables(0).length > ENTITYDISPLAYLIMIT) {
+                System.out.println("");
+                if (db.getEntity().getSugesstableEntityCount() < ENTITYDISPLAYLIMIT) {
+                    // if there are no or enough suggestable entities defined, display the first "entityDisplayLimit" (ex: 3 defined entities) from the XML descriptor
+                    for (int i = 0; i < db.entityDisplayLimit; i++) {
+                        entitySugessions += db.getEntity().getSearchableTables(0)[i] + ",";
+                        System.out.println("- " + db.getEntity().getSearchableTables(0)[i] + " : " + db.getEntity().getEntityMeta(db.getEntity().getSearchableTables(0)[i], 4)); //db.getEntity().getEntityMeta(level1[0], 4))
+                    }
+                } else {
+                    for (int i = 0; i < ENTITYDISPLAYLIMIT; i++) {
+                        if (!db.getEntity().getEntityMeta(db.getEntity().getSearchableTables(0)[i], 8).equalsIgnoreCase("0")) {
+                            entitySugessions += db.getEntity().getSearchableTables(0)[i] + ",";
+                            System.out.println("- " + db.getEntity().getSearchableTables(0)[i] + " : " + db.getEntity().getEntityMeta(db.getEntity().getSearchableTables(0)[i], 4)); //db.getEntity().getEntityMeta(level1[0], 4))
+                        } else {
+                            // increment the limit by one to skip and to go to next suggestable entity
+                            ENTITYDISPLAYLIMIT += 1;
+                        }
+                    }
+                }
+                entitySugessions = entitySugessions.substring(0, entitySugessions.length()-1);
+                //System.out.println(entitySugessions);
+                userCategorySelection = this.promptMessage("\nAre you looking for something under the above categories (yes|no|category name): ");
+
+                /////////////////////////////////
+                if ((userCategorySelection.equalsIgnoreCase("yes") || userCategorySelection.equalsIgnoreCase("y"))) {
+                    // SEARCH in the suggested tables
+                    searchableTables = entitySugessions;
+                    String[] tables = searchableTables.split(",");
+                    for (int t = 0; t < tables.length; t++) {
+                        String clause = query.makeClause(db.getEntity().getSearchables(tables[t], false, false), table);
+                        nonConceptuallyRelatedTableCalueData[t] = tables[t] + "::" + clause;
+                    }
+                    searchMode = 1;
+                } else if ((userCategorySelection.equalsIgnoreCase("no") || userCategorySelection.equalsIgnoreCase("n"))) {
+                    // SEARCH in all defined tables
+                    searchableTables = "*";
+                    for (int t = 0; t < db.getEntity().getSearchableTables(0).length; t++) {
+                        String clause = query.makeClause(db.getEntity().getSearchables(db.getEntity().getSearchableTables(0)[t], false, false), table);
+                        nonConceptuallyRelatedTableCalueData[t] = db.getEntity().getSearchableTables(0)[t] + "::" + clause;
+                    }
+                    searchMode = 2;
+                } else if (this.in_array(db.getEntity().getSearchableTables (0), userCategorySelection)) {
+                    // SEARCH in the selected table
+                    searchableTables = userCategorySelection;
+                    String clause = query.makeClause(db.getEntity().getSearchables(searchableTables, false, false), table);
+                    nonConceptuallyRelatedTableCalueData[0] = searchableTables + "::" + clause;
+                    searchMode = 3;
+                }
+
+                if (searchMode == 1) {
+                    //this.vardumpArray(nonConceptuallyRelatedTableCalueData);
+                    this.getRealData(null, nonConceptuallyRelatedTableCalueData);
+                    //searchResults += this.searchResults;
+                    //System.out.println("searchResults 1 : " + searchResults);
+                    //this.searchResults = "";
+                } else if (searchMode == 2) {
+                    //this.vardumpArray(nonConceptuallyRelatedTableCalueData);
+                    this.getRealData(null, nonConceptuallyRelatedTableCalueData);
+                    //searchResults += this.searchResults;
+                    //System.out.println("searchResults 2 : " + searchResults);
+                    //this.searchResults = "";
+                } else if (searchMode == 3) { // correct
+                    // displaying the child/related tables
+                    boolean isFound = false;
+                    for (int t = 0; t < levelOneEntities.length; t++) {
+                            for (int i = 0; i < entityRelationsArray.length; i++) {
+                                String[] level = entityRelationsArray[i].split(db.COLNAMETYPESP);
+
+                                if (level[0].equalsIgnoreCase(searchableTables) && !upperLevelTable.equalsIgnoreCase(searchableTables)) {
+                                    if (this.is_array(level)) {
+                                        System.out.println("Related categories: " + level[1]); // available related entities
+                                    }
+                                    upperLevelTable = searchableTables;
+                                    isFound = true;
+                                } else if (level[0].equalsIgnoreCase(searchableTables) && this.isRelatedWithAnyTable(searchableTables) && !upperLevelTable.equalsIgnoreCase(searchableTables)) {
+                                    upperLevelTable = searchableTables;
+                                    isFound = true;
+                                }
+                            }
+
+                            if (this.isRelatedWithAnyTable(searchableTables) && !isFound) {
+                                upperLevelTable = searchableTables;
+                                isFound = true;
+                            }
+                    }
+                    String userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + searchableTables + "'  (no|category name) : ");
+                    //!userRelatedCategorySelection.equalsIgnoreCase("no") || !userRelatedCategorySelection.equalsIgnoreCase("n") || 
+                    if (this.in_array(db.getEntity().getSearchableTables(0), userRelatedCategorySelection)) {
+                        String clause_level_1 = query.makeClause(db.getEntity().getSearchables(searchableTables, false, false), table);
+                        String clause_level_2 = query.makeClause(db.getEntity().getSearchables(searchableTables, false, false), table);
+                        eachSelectedTableClauseData[0] = searchableTables + "::" + clause_level_1;
+                        eachSelectedTableClauseData[1] = userRelatedCategorySelection + "::" + clause_level_2;
+
+                        /* example join of two tables, "4images_users" with "4images_images"
+                         * eachSelectedTableClauseData[0] = "4images_images::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%' OR image_keywords LIKE '%Texas%'";
+                         * eachSelectedTableClauseData[1] = "4images_users::user_name LIKE '%sales@milezone.com%' OR user_email LIKE '%sales@milezone.com%'";
+                         */
+                        String sqlQuery = query.buildQuery (eachSelectedTableClauseData, false, false);
+                        this.getRealData(sqlQuery, null);
+                    } else {
+                        // counting the tables which have got a meta keyword
+////////////////////////////////////////////////////////////////////////////////
+                        // traversing through all the available/defined seachable tables
+                        int entityCount = db.getEntity().getSearchableTables(0).length;
+                        String[] entities = db.getEntity().getSearchableTables(0);
+
+                int countOfEntitiesWithMetaKeyword = 0;
+                for (int i = 0; i < entityCount; i++) {
+                    String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
+                    // checking for the enity description for the meta keyword/s
+                    if (eachEntityDescription.toLowerCase().contains("@\""+searchableTables.toLowerCase()+"@\"")) {
+                        countOfEntitiesWithMetaKeyword++;
+                    }
+                }
+
+                String userSelectionExtraSearch = "";
+                if (countOfEntitiesWithMetaKeyword > 0) {
+                    userSelectionExtraSearch = this.promptMessage("Enter 'yes' or 'no' to continue & consider the " + countOfEntitiesWithMetaKeyword + " extra related category/ies found: ");
+                }
+                if (countOfEntitiesWithMetaKeyword > 0 && (userSelectionExtraSearch.equalsIgnoreCase("yes") || userSelectionExtraSearch.equalsIgnoreCase("y"))) {
+                    for (int i = 0; i < entityCount; i++) {
+                        String eachEntityDescription = db.getEntity().getEntityMeta(entities[i], 4);
+
+                        // checking for the enity description for the meta keyword/s
+                        if (eachEntityDescription.toLowerCase().contains("@\""+searchableTables.toLowerCase()+"@\"")) {
+                            //System.out.println("\n##2" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
+                            String entityPreferance = this.promptMessage("\nConsider " + eachEntityDescription.replace("@\"", "") + "? (yes|no)");
+                            if ((entityPreferance.equalsIgnoreCase("y") || entityPreferance.equalsIgnoreCase("yes")) && !this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                //String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
+                                //nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+
+                                //////////////////////////////// Each entity attribute description //////////////
+                                String searchableAttributes = db.getEntity().getEntityMeta(entities[i], 5);
+                                String[] searchableAttributeData = searchableAttributes.split(",");
+
+                                //-----
+                                int countOfAttributesWithMetaKeyword = 0;
+                                for (int a = 0; a < searchableAttributeData.length; a++) {
+                                    String[] attributeData = searchableAttributeData[a].split(":");
+                                    try {
+                                        if (attributeData[1].toLowerCase().contains("@\""+searchableTables.toLowerCase()+"@\"")) {
+                                            countOfAttributesWithMetaKeyword++;
+                                        }
+                                    } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description */ }
+                                }
+                                //-----
+                                if (countOfAttributesWithMetaKeyword > 1) {
+                                    System.out.println("Found " + countOfAttributesWithMetaKeyword + " search criteria under this category. Please say 'yes' or 'no' for the following prompts");
+                                    String searchables = "";
+                                    for (int a = 0; a < searchableAttributeData.length; a++) {
+                                        String[] attributeData = searchableAttributeData[a].split(":");
+                                        try {
+                                        if (attributeData[1].toLowerCase().contains("@\""+searchableTables.toLowerCase()+"@\"")) {
+                                            //System.out.println("\n##3" + eachEntityDescription + "\n" + entities[i] + db.getEntity().getEntityMeta(entities[i], 3));
+                                            String preferance = this.promptMessage("\nConsider " + attributeData[1].replace("@\"", "") + "? (yes|no)");
+                                            if (preferance.equalsIgnoreCase("y") || preferance.equalsIgnoreCase("yes")) {
+                                                searchables += attributeData[0] + ",";
+                                            } else {
+                                                searchableAttributeData[a] = null; // unset the value (this will avoid considering this attribute later)
+                                            }
+                                        }
+                                        } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description */ }
+                                    }
+                                    // going through the  attributes again to get any attribute which did't get considered above due to the user input
+                                    for (int a = 0; a < searchableAttributeData.length; a++) {
+                                        try {
+                                            String[] attributeData = searchableAttributeData[a].split(":");
+                                            if (!searchables.toLowerCase().contains(attributeData[0].toLowerCase())) {
+                                                searchables += attributeData[0] + ",";
+                                            }
+                                        } catch (Exception ex) { }
+                                    }
+                                    ///////////////*/
+                                    if (!searchables.equalsIgnoreCase("")) {
+                                        searchables = searchables.substring(0, (searchables.length()) - 1);
+                                        if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                            String relatedEntityClause = query.makeClause(searchables, table);
+                                            nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                                        }
+                                    }
+                                } else {
+                                    if (!this.isTableSelected(nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                        String relatedEntityClause = query.makeClause(db.getEntity().getEntityMeta(entities[i], 3), table);
+                                        nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                                    }
+                                }
+                                //////////////////////////////////////*/
+                            }
+                        }
+                    }
+                }
+
+                //////////////////////
+                    //String sqlQuery = this.query.buildQuery(nonConceptuallyRelatedTableCalueData, false, true);
+                    //this.getRealData(sqlQuery, null);
+                this.getRealData(null, nonConceptuallyRelatedTableCalueData);
+                    //searchResults += this.searchResults;
+                    //System.out.println("searchResults 3 : " + searchResults);
+                    //this.searchResults = "";
+                    }
+                }
+                
+
+            //}
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            System.exit(0);
+            
+            if (this.isRelatedWithAnyTable(table) || (!this.isRelatedWithAnyTable(table) && this.in_array(db.getEntity().getSearchableTables (0), table))) {
                 selectedMainCategory = table;
                 if (!this.isTableSelected(eachSelectedTableClauseData, selectedMainCategory)) {
                     eachSelectedTableClauseData[this.nextAvailableArrayIndex(eachSelectedTableClauseData)] = table + "::";
@@ -125,7 +351,7 @@ public class Search {
                 //System.out.println("nonConceptuallyRelatedTableCalueData");
                 //this.vardumpArray(nonConceptuallyRelatedTableCalueData);//*/
                 //System.out.println("\n### Query : --------------------------------<<<");
-                String sqlQuery = query.buildQuery (eachSelectedTableClauseData, false);
+                String sqlQuery = query.buildQuery (eachSelectedTableClauseData, false, true);
                 this.getRealData (sqlQuery, null);
                 this.getRealData (null, nonConceptuallyRelatedTableCalueData);
                 //this.vardumpArray(this.getEntityRelations ());
@@ -145,8 +371,8 @@ public class Search {
                 eachSelectedTableClauseData[this.findExistingTableClausePrefixIndex(eachSelectedTableClauseData, selectedMainCategory, db.COLNAMETYPESP+db.COLNAMETYPESP)] += clause;
 
                 // traversing through all the available/defined seachable tables
-                int entityCount = db.getEntity().getSearchableTables().length;
-                String[] entities = db.getEntity().getSearchableTables();
+                int entityCount = db.getEntity().getSearchableTables(0).length;
+                String[] entities = db.getEntity().getSearchableTables(0);
 
                 // counting the tables which have got a meta keyword
                 int countOfEntitiesWithMetaKeyword = 0;
@@ -325,10 +551,15 @@ public class Search {
                     }
                 }
             } else {
+                System.out.println("\n========================\n");
                 this.vardumpArray(sqlQueryMeta);
-                for (int c = 0; c < sqlQueryMeta.length; c++) {
+                System.out.println("\n========================\n");
+                System.out.println ("sqlQueryMeta.length: " + sqlQueryMeta.length);
+
+                for (int c = 0; c < 2; c++) {
+                    
                     String[] queryMeta = sqlQueryMeta[c].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
-                    Map[] resultsets = db.sqlSelect(queryMeta[0], db.getEntity().getEntityMeta(queryMeta[0], 3), queryMeta[1], null, null, null, false);
+                    Map[] resultsets = db.sqlSelect(queryMeta[0], db.getEntity().getSearchables(queryMeta[0], false, false), queryMeta[1], null, null, null, false);
                     System.out.println("2###Query :" + db.getQuery());
 
                     // begin :traversing through each table row to display data
@@ -347,12 +578,15 @@ public class Search {
                             }
                         }
                     }
+                    //searchResults = eachRowData;
+                    //searchResults += eachRowData;
+                    //eachRowData = "";
                 }
             }
         } catch (Exception ex) {
         }
 
-        searchResults += eachRowData;
+        //searchResults += eachRowData;
     }
 
     public String[] initializeArray (String[] array) {
@@ -501,7 +735,7 @@ public class Search {
     }
 
     public String[] getEntityRelations () {
-        String[] availableEntities = this.db.getEntity().getSearchableTables();
+        String[] availableEntities = this.db.getEntity().getSearchableTables(0);
         String[] relatedEntities = new String[availableEntities.length];
         for (int t = 0; t < availableEntities.length; t++) {
             if (!this.db.getEntity().getEntityMeta(availableEntities[t], 6).toString().equalsIgnoreCase("null")) {

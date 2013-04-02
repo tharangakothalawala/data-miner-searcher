@@ -21,6 +21,7 @@
         <searchable_attributes>user_name:this is the profile name,user_email</searchable_attributes>
         <description>the users category where it contains users of the system and this may contain @"4images_images@" names</description>
         <related_entities></related_entities>
+        <isInSuggessionList></isInSuggessionList>
     </table>
     <table>
         <real_name>4images_images</real_name>
@@ -29,6 +30,7 @@
         <searchable_attributes>image_name:this is the image name,image_description,image_keywords</searchable_attributes>
         <description>This contains the image details</description>
         <related_entities>4images_users</related_entities>
+        <isInSuggessionList></isInSuggessionList>
     </table>
     <table>
         <real_name>4images_comments</real_name>
@@ -37,5 +39,6 @@
         <searchable_attributes>user_name:this is a user @"4images_images@",comment_headline:headline of the commnet. may contain @"4images_images@",comment_text:comment in details and this may contain @"4images_images@"</searchable_attributes>
         <description>the comments category where it contains comments for the @"4images_images@"</description>
         <related_entities>4images_users</related_entities>
+        <isInSuggessionList></isInSuggessionList>
     </table>
 </database>

@@ -20,6 +20,7 @@
         <dbname>CGDB</dbname>
         <dbuser>sa</dbuser>
         <dbpasswd>qwerty1</dbpasswd><!-- qwerty1 | FooBar(1)? -->
+        <entityDisplayLimit>6</entityDisplayLimit>
     </database>
     <database>
         <isEnabled>1</isEnabled>
@@ -28,5 +29,6 @@
         <dbname>diecast</dbname>
         <dbuser>root</dbuser>
         <dbpasswd></dbpasswd>
+        <entityDisplayLimit>2</entityDisplayLimit>
     </database>
 </databases>

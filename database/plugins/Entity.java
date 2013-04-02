@@ -40,7 +40,7 @@ public class Entity {
                 if (getPredefined) {
                     arr = this.getEntityMeta(table, 3).split(",");
                 } else {
-                    arr = db.getMetaData(rs, 3); // get entity coloumns with their datatypes
+                    arr = db.getMetaData(rs, 2); // get entity coloumns with their datatypes
                 }
 
                 for (int i = 0; i < arr.length; i++) {
@@ -89,13 +89,13 @@ public class Entity {
         return isSearchable;
     }
 
-    public String[] getSearchableTables () {
+    public String[] getSearchableTables (int configValueIndex) {
         //String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT", "CALENDAR", "ROLES", "DOCUMENT", "TASK"};
         String[] definedTableData = this.loadEntityConfig();
         String[] searchableTables = new String[definedTableData.length];
         for (int i = 0; i < definedTableData.length; i++) {
             String[] tableData = definedTableData[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
-            searchableTables[i] = tableData[0];
+            searchableTables[i] = tableData[configValueIndex];
         }
         
         if (this.isEnabledSearchInAllTables)
@@ -123,17 +123,24 @@ public class Entity {
 
                                 Element element = (Element) node;
 
+                                String description = element.getElementsByTagName("description").item(0).getTextContent();
+                                if (description.equalsIgnoreCase(""))
+                                    description = null;
                                 String related_entities = element.getElementsByTagName("related_entities").item(0).getTextContent();
                                 if (related_entities.equalsIgnoreCase(""))
                                     related_entities = null;
+                                String isInSuggessionList = element.getElementsByTagName("isInSuggessionList").item(0).getTextContent();
+                                if (isInSuggessionList.equalsIgnoreCase(""))
+                                    isInSuggessionList = null;
 
                                 searchableTables[i] =
                                         element.getElementsByTagName("real_name").item(0).getTextContent() +"::"+
                                         element.getElementsByTagName("display_name").item(0).getTextContent() +"::"+
                                         element.getElementsByTagName("is_a_join").item(0).getTextContent() +"::"+
                                         element.getElementsByTagName("searchable_attributes").item(0).getTextContent() +"::"+
-                                        element.getElementsByTagName("description").item(0).getTextContent() +"::"+
-                                        related_entities;
+                                        description +"::"+
+                                        related_entities + "::"+
+                                        isInSuggessionList;
                         }
                 }
                 return searchableTables;
@@ -155,6 +162,7 @@ public class Entity {
             String searchableAttributes = tableData[3];
             String eachTableDescription = tableData[4];
             String relatedEntities = tableData[5];
+            String isDisplayable = tableData[6];
 
             //System.out.println (eachTable +"|"+ searchableAttributes +"|"+ eachTableDescription);
             if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 1) {
@@ -180,8 +188,20 @@ public class Entity {
                 return relatedEntities;
             } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 7) { // returns the real_name
                 return eachEntity;
+            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 8) {
+                return isDisplayable;
             }
         }
         return null;
+    }
+
+    public int getSugesstableEntityCount () {
+        int sugesstableEntityCount = 0;
+        for (int i = 0; i < this.getSearchableTables(0).length; i++) {
+            if (this.getEntityMeta(this.getSearchableTables(0)[i], 8).equalsIgnoreCase("1")) {
+                sugesstableEntityCount++;
+            }
+        }
+        return sugesstableEntityCount;
     }
 }

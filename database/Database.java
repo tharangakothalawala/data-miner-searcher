@@ -29,6 +29,7 @@ public class Database {
     public final String COLNAMETYPESP = ":"; // to be used to identify metadata ex: username:nvarchar
     private String[] dbtableArray;
     private String[] dbviewArray;
+    public int entityDisplayLimit;
 
     public Database() {
         boolean isFoundEnabledDB = false;
@@ -56,6 +57,7 @@ public class Database {
                             this.dbname = element.getElementsByTagName("dbname").item(0).getTextContent();
                             this.dbuser = element.getElementsByTagName("dbuser").item(0).getTextContent();
                             this.dbpasswd = element.getElementsByTagName("dbpasswd").item(0).getTextContent();
+                            this.entityDisplayLimit = Integer.parseInt(element.getElementsByTagName("entityDisplayLimit").item(0).getTextContent());
                         }
                     }
                 } else {
@@ -290,8 +292,8 @@ public class Database {
     public String[] getFilteredTables() {
         String table, view = "";
 
-        if (this.getEntity().getSearchableTables() != null) {
-            dbtableArray = this.getEntity().getSearchableTables();
+        if (this.getEntity().getSearchableTables(0) != null) {
+            dbtableArray = this.getEntity().getSearchableTables(0);
 
             return dbtableArray;
         } else {
