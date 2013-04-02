@@ -1,44 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Document   : entity_config.xml
-    Created on : March 10, 2013, 3:34 PM
+    Document   : configuration.xml
+    Created on : March 19, 2013, 8:43 PM
     Author     : Tharanga
-    Description: The following meta data will be used to create the SQL.
-    
-    NOTE       : Don't specify the tables if they don't have searchable attributes
-                 You can include meta keywords within entity descriptions.
-                 Always a meta keyword should be same as an entity name (non case sensitive).
-                 This will be used to search the table where the meta keyword is in, when searching for the table corresspondance to the meta keyword.
-                 syntax: @"name_of_a_table@"
+    Description:
+	- The following meta data will be used to create the SQL.
+	- Don't specify the tables if they don't have searchable attributes
+	- You can include meta keywords within entity descriptions.
+	  They are just words which are refering to any exisitng tables in the DB.
+	  The meta description (implicit_annotation) will be used to recommend the user for the search categories.
 -->
 
 <database>
     <table>
-        <real_name>4images_users</real_name>
-        <display_name>Users</display_name>
-        <is_a_join>true</is_a_join> <!-- //correct - false because, there is no attribute to search against -->
+        <table_name>4images_users</table_name>
+        <key_concepts>Users</key_concepts>
+        <implicit_annotation>This category or the table is about the users of the system.</implicit_annotation>
+        <aliases>usr</aliases>
+        <related_tables></related_tables>
         <searchable_attributes>user_name:this is the profile name,user_email</searchable_attributes>
-        <description>the users category where it contains users of the system and this may contain @"4images_images@" names</description>
-        <related_entities></related_entities>
-        <isInSuggessionList></isInSuggessionList>
     </table>
     <table>
-        <real_name>4images_images</real_name>
-        <display_name>Images</display_name>
-        <is_a_join>true</is_a_join> <!--  -->
+        <table_name>4images_images</table_name>
+        <key_concepts>Images</key_concepts>
+        <implicit_annotation>This category or the table is about images</implicit_annotation>
+        <aliases>img</aliases>
+        <related_tables>4images_users</related_tables>
         <searchable_attributes>image_name:this is the image name,image_description,image_keywords</searchable_attributes>
-        <description>This contains the image details</description>
-        <related_entities>4images_users</related_entities>
-        <isInSuggessionList></isInSuggessionList>
     </table>
     <table>
-        <real_name>4images_comments</real_name>
-        <display_name>Comments</display_name>
-        <is_a_join>true</is_a_join> <!--  -->
-        <searchable_attributes>user_name:this is a user @"4images_images@",comment_headline:headline of the commnet. may contain @"4images_images@",comment_text:comment in details and this may contain @"4images_images@"</searchable_attributes>
-        <description>the comments category where it contains comments for the @"4images_images@"</description>
-        <related_entities>4images_users</related_entities>
-        <isInSuggessionList></isInSuggessionList>
+        <table_name>4images_comments</table_name>
+        <key_concepts>Comments</key_concepts>
+        <implicit_annotation>This category or the table is about the comments done by users for stored images.</implicit_annotation>
+        <aliases></aliases>
+        <related_tables>4images_users</related_tables>
+        <searchable_attributes>user_name:this is a user images,comment_headline:headline of the commnet. may contain images,comment_text:comment in details and this may contain images</searchable_attributes>
     </table>
 </database>

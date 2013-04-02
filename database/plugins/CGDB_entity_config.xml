@@ -15,68 +15,67 @@
 
 <database>
     <table>
-        <real_name>PROFILE</real_name>
-        <display_name>Profile</display_name>
-        <is_a_join>false</is_a_join> <!-- //correct - false because, there is no attribute to search against -->
+        <table_name>PROFILE</table_name>
+        <key_concepts>Profile</key_concepts>
+        <implicit_annotation></implicit_annotation>
+        <aliases></aliases>
+        <related_tables></related_tables>
         <searchable_attributes>prof_name:this is the profile name</searchable_attributes>
-        <description>no description</description>
-        <related_entities></related_entities>
     </table>
     <table>
-        <real_name>USERS</real_name>
-        <display_name>Users</display_name>
-        <is_a_join>true</is_a_join> <!--  -->
+        <table_name>USERS</table_name>
+        <key_concepts>Users</key_concepts>
+        <implicit_annotation>This contains the users of the system.</implicit_annotation>
+        <aliases></aliases>
+        <related_tables>Profile</related_tables>
         <searchable_attributes>name:this is the user's name</searchable_attributes>
-        <description>This contains the users of the system.</description>
-        <related_entities>Profile</related_entities>
     </table>
     <table>
-        <real_name>RSRC</real_name>
-        <display_name>Resources</display_name>
-        <is_a_join>true</is_a_join> <!--  -->
+        <table_name>RSRC</table_name>
+        <key_concepts>Resources</key_concepts>
+        <implicit_annotation>the resources category where it contains the data about resources such as users</implicit_annotation>
+        <aliases></aliases>
+        <related_tables>Calendar,Roles,USERS</related_tables>
         <searchable_attributes>rsrc_name:resource name this can be a user,office_phone:phone number of the resource,email_addr:email address of the resource</searchable_attributes>
-        <description>the resources category where it contains the data about resources such as @"users@"</description>
-        <related_entities>Calendar,Roles,Users</related_entities>
     </table>
     <table>
-        <real_name>PROJECT</real_name>
-        <display_name>Project</display_name>
-        <is_a_join>false</is_a_join> <!-- // correct - false because, there is no exact attribute to search on -->
+        <table_name>PROJECT</table_name>
+        <key_concepts>Project</key_concepts>
+        <implicit_annotation></implicit_annotation>
+        <aliases></aliases>
+        <related_tables></related_tables>
         <searchable_attributes>plan_start_date</searchable_attributes>
-        <description>no description</description>
-        <related_entities></related_entities>
     </table>
     <table>
-        <real_name>CALENDAR</real_name>
-        <display_name>Calendar</display_name>
-        <is_a_join>false</is_a_join> <!--  -->
+        <table_name>CALENDAR</table_name>
+        <key_concepts>Calendar</key_concepts>
+        <implicit_annotation></implicit_annotation>
+        <aliases></aliases>
+        <related_tables></related_tables>
         <searchable_attributes>clndr_data</searchable_attributes>
-        <description>no description</description>
-        <related_entities></related_entities>
     </table>
     <table>
-        <real_name>ROLES</real_name>
-        <display_name>Roles</display_name>
-        <is_a_join>false</is_a_join> <!-- // correct - false because, this is not directly invloved with anything -->
-        <searchable_attributes>name:the @"users@" in the roles category,short_name</searchable_attributes>
-        <description>no description</description>
-        <related_entities></related_entities>
+        <table_name>ROLES</table_name>
+        <key_concepts>Roles</key_concepts>
+        <implicit_annotation></implicit_annotation>
+        <aliases></aliases>
+        <related_tables></related_tables>
+        <searchable_attributes>name:the users in the roles category,short_name</searchable_attributes>
     </table>
     <table>
-        <real_name>DOCUMENT</real_name>
-        <display_name>Document</display_name>
-        <is_a_join>true</is_a_join>
-        <searchable_attributes>name:the @"users@" who created documents,short_name:the short names of the @"users@",author_name:
-            this testing field for users</searchable_attributes>
-        <description>the documents category where names of the @"users@" may appear as authors</description>
-        <related_entities>Project</related_entities>
+        <table_name>DOCUMENT</table_name>
+        <key_concepts>Document</key_concepts>
+        <implicit_annotation>the documents category where names of the users may appear as authors</implicit_annotation>
+        <aliases></aliases>
+        <related_tables>Project</related_tables>
+        <searchable_attributes>name:the users who created documents,short_name:the short names of the users,author_name:this testing field for users</searchable_attributes>
     </table>
     <table>
-        <real_name>TASK</real_name>
-        <display_name>Task</display_name>
-        <is_a_join>true</is_a_join> <!--  -->
-        <searchable_attributes>name:task names where @"users@" may contain</searchable_attributes>
-        <description>This contains all the tasks which are defined in all projects. So you can search for task</description>
-        <related_entities>Calendar,Roles,Resources</related_entities>
+        <table_name>TASK</table_name>
+        <key_concepts>Task</key_concepts>
+        <implicit_annotation>This contains all the tasks which are defined in all projects. So you can search for task</implicit_annotation>
+        <aliases></aliases>
+        <related_tables>Calendar,Roles,Resources</related_tables>
+        <searchable_attributes>name:task names where users may contain</searchable_attributes>
     </table>
 </database>

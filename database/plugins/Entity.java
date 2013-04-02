@@ -89,7 +89,7 @@ public class Entity {
         return isSearchable;
     }
 
-    public String[] getSearchableTables (int configValueIndex) {
+    public String[] getDefinedSearchableTables (int configValueIndex) {
         //String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT", "CALENDAR", "ROLES", "DOCUMENT", "TASK"};
         String[] definedTableData = this.loadEntityConfig();
         String[] searchableTables = new String[definedTableData.length];
@@ -106,7 +106,7 @@ public class Entity {
 
     public String[] loadEntityConfig () {
             try {
-                File entityConfigFile = new File("src/database/plugins/" + db.dbname + "_entity_config.xml");
+                File entityConfigFile = new File("config/databases/" + db.dbname + "_entity_config.xml");
                 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
                 Document document = dBuilder.parse(entityConfigFile);
@@ -123,29 +123,37 @@ public class Entity {
 
                                 Element element = (Element) node;
 
-                                String description = element.getElementsByTagName("description").item(0).getTextContent();
-                                if (description.equalsIgnoreCase(""))
-                                    description = null;
-                                String related_entities = element.getElementsByTagName("related_entities").item(0).getTextContent();
-                                if (related_entities.equalsIgnoreCase(""))
-                                    related_entities = null;
-                                String isInSuggessionList = element.getElementsByTagName("isInSuggessionList").item(0).getTextContent();
-                                if (isInSuggessionList.equalsIgnoreCase(""))
-                                    isInSuggessionList = null;
+                                String table_name = element.getElementsByTagName("table_name").item(0).getTextContent();
+                                if (table_name.equalsIgnoreCase(""))
+                                    table_name = null;
+                                String key_concepts = element.getElementsByTagName("key_concepts").item(0).getTextContent();
+                                if (key_concepts.equalsIgnoreCase(""))
+                                    key_concepts = null;
+                                String implicit_annotation = element.getElementsByTagName("implicit_annotation").item(0).getTextContent();
+                                if (implicit_annotation.equalsIgnoreCase(""))
+                                    implicit_annotation = null;
+                                String aliases = element.getElementsByTagName("aliases").item(0).getTextContent();
+                                if (aliases.equalsIgnoreCase(""))
+                                    aliases = null;
+                                String related_tables = element.getElementsByTagName("related_tables").item(0).getTextContent();
+                                if (related_tables.equalsIgnoreCase(""))
+                                    related_tables = null;
+                                String searchable_attributes = element.getElementsByTagName("searchable_attributes").item(0).getTextContent();
+                                if (searchable_attributes.equalsIgnoreCase(""))
+                                    searchable_attributes = null;
 
                                 searchableTables[i] =
-                                        element.getElementsByTagName("real_name").item(0).getTextContent() +"::"+
-                                        element.getElementsByTagName("display_name").item(0).getTextContent() +"::"+
-                                        element.getElementsByTagName("is_a_join").item(0).getTextContent() +"::"+
-                                        element.getElementsByTagName("searchable_attributes").item(0).getTextContent() +"::"+
-                                        description +"::"+
-                                        related_entities + "::"+
-                                        isInSuggessionList;
+                                        table_name +"::"+
+                                        key_concepts +"::"+
+                                        implicit_annotation +"::"+
+                                        aliases +"::"+
+                                        related_tables +"::"+
+                                        searchable_attributes;
                         }
                 }
                 return searchableTables;
             } catch (Exception e) {
-                System.out.println ("Error: " + e);
+                System.out.println ("XML Parser Error: Please check the DB Entity config file, 'config/databases/" + db.dbname + "_entity_config.xml'\n\n" + e);
                 e.printStackTrace();
             }
         return null;
@@ -156,20 +164,25 @@ public class Entity {
 
         for (int i = 0; i < definedTableData.length; i++) {
             String[] tableData = definedTableData[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
-            String eachEntity = tableData[0];
-            String eachEntityName = tableData[1]; // readable/displayable entity name
-            String isAJoin = tableData[2]; // a direct or a join candidate entity
-            String searchableAttributes = tableData[3];
-            String eachTableDescription = tableData[4];
-            String relatedEntities = tableData[5];
-            String isDisplayable = tableData[6];
+            String tableName = tableData[0];
+            String keyConcepts = tableData[1]; // what this table about
+            String implicitAnnotation = tableData[2]; // meta description
+            String aliases = tableData[3];
+            String relatedTables = tableData[4];
+            String searchableAttributes = tableData[5];
 
             //System.out.println (eachTable +"|"+ searchableAttributes +"|"+ eachTableDescription);
-            if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 1) {
-                return eachEntityName;
-            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 2) {
-                return isAJoin;
-            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 3) {
+            if ((tableName.equalsIgnoreCase(table) || keyConcepts.equalsIgnoreCase(table)) && key == 1) {
+                return tableName;
+            } else if ((tableName.equalsIgnoreCase(table) || keyConcepts.equalsIgnoreCase(table)) && key == 2) {
+                return keyConcepts;
+            } else if ((tableName.equalsIgnoreCase(table) || keyConcepts.equalsIgnoreCase(table)) && key == 3) {
+                return implicitAnnotation;
+            } else if ((tableName.equalsIgnoreCase(table) || keyConcepts.equalsIgnoreCase(table)) && key == 4) {
+                return aliases;
+            } else if ((tableName.equalsIgnoreCase(table) || keyConcepts.equalsIgnoreCase(table)) && key == 5) {
+                return relatedTables;
+            } else if ((tableName.equalsIgnoreCase(table) || keyConcepts.equalsIgnoreCase(table)) && key == 6) {
                 // sending only the attributes names in the form of <attribute1>,<attribute2>,<attribute3>,...
                 String finalAttributeList = "";
                 String[] searchableAttributeData = searchableAttributes.split(",");
@@ -179,17 +192,9 @@ public class Entity {
                 }
                 finalAttributeList = finalAttributeList.substring(0, finalAttributeList.length()-1);
                 return finalAttributeList;
-            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 4) {
-                return eachTableDescription;
-            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 5) {
-                // same as the key# 3, but with their descriptions
+            } else if ((tableName.equalsIgnoreCase(table) || keyConcepts.equalsIgnoreCase(table)) && key == 7) {
+                // same as the key# 6, but with their descriptions
                 return searchableAttributes;
-            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 6) {
-                return relatedEntities;
-            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 7) { // returns the real_name
-                return eachEntity;
-            } else if ((eachEntity.equalsIgnoreCase(table) || eachEntityName.equalsIgnoreCase(table)) && key == 8) {
-                return isDisplayable;
             }
         }
         return null;
@@ -197,8 +202,8 @@ public class Entity {
 
     public int getSugesstableEntityCount () {
         int sugesstableEntityCount = 0;
-        for (int i = 0; i < this.getSearchableTables(0).length; i++) {
-            if (this.getEntityMeta(this.getSearchableTables(0)[i], 8).equalsIgnoreCase("1")) {
+        for (int i = 0; i < this.getDefinedSearchableTables(0).length; i++) {
+            if (this.getEntityMeta(this.getDefinedSearchableTables(0)[i], 8).equalsIgnoreCase("1")) {
                 sugesstableEntityCount++;
             }
         }

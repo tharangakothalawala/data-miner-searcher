@@ -57,7 +57,7 @@ public class Query {
                 // only select table attributes if we have a condition to join with the first/parent selection. (array index 2 contains the condition)
                 if (tableData.length > 1) {
                     if (i != 0 && !tableData[1].equalsIgnoreCase("")) {
-                        sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], false, false) + ",";
+                        sqlSelects +=  " " + tableData[1] + ",";
                     }
                 }
             }

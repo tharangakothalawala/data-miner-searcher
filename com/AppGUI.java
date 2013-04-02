@@ -37,6 +37,9 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
     private boolean isCategorySelected = false;
 
     public AppGUI() {
+        // starting the AppLogic here as I don't need the GUI right now!
+        search.doSearch("");
+        
         btnSearch = new JButton("go cmd line");
         btnSetData = new JButton("Set Test Data");
         btnTestSearch = new JButton("Test Search");
@@ -217,8 +220,8 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
 
             //String value = "ad";
             // traversing through all the available/defined seachable tables
-                int entityCount = db.getEntity().getSearchableTables(0).length;
-                String[] entities = db.getEntity().getSearchableTables(0);
+                int entityCount = db.getEntity().getDefinedSearchableTables(0).length;
+                String[] entities = db.getEntity().getDefinedSearchableTables(0);
 
                 // counting the tables which have got a meta keyword
                 int countOfEntitiesWithMetaKeyword = 0;

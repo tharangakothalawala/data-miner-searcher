@@ -34,7 +34,7 @@ public class Database {
     public Database() {
         boolean isFoundEnabledDB = false;
         try {
-            File DBConfigFile = new File("src/database/configuration.xml");
+            File DBConfigFile = new File("config/configuration.xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document document = dBuilder.parse(DBConfigFile);
@@ -68,7 +68,7 @@ public class Database {
             e.printStackTrace();
         }
         if (!isFoundEnabledDB) { // if it is not found an enabled db configuration
-            System.out.println("Error : No database connection parameters found!");
+            System.out.println("Error : No database connection parameters found! or a configuration error in the 'config/configuration.xml'");
             System.exit(0);
         }
     }
@@ -84,7 +84,7 @@ public class Database {
         return DriverManager.getConnection(this.connurl, this.dbuser, this.dbpasswd);
         //return DriverManager.getDbConnection("jdbc:sqlserver://176.250.128.96:1433;databaseName=" + this.dbname + ";", this.dbuser, this.dbpasswd); // this is to connect to the database at home remotely
         } catch (Exception ex) {
-            System.out.println("Error : Cannot connect to the database, '" + this.dbname + "'");
+            System.out.println("Error : Unable to Connect to the Database, '" + this.dbname + "'.\nPlease look at the configuration.xml for the connection parameters.");
             System.exit(0);
         }
         return null;
@@ -292,8 +292,8 @@ public class Database {
     public String[] getFilteredTables() {
         String table, view = "";
 
-        if (this.getEntity().getSearchableTables(0) != null) {
-            dbtableArray = this.getEntity().getSearchableTables(0);
+        if (this.getEntity().getDefinedSearchableTables(0) != null) {
+            dbtableArray = this.getEntity().getDefinedSearchableTables(0);
 
             return dbtableArray;
         } else {
