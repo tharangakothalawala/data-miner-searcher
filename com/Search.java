@@ -116,6 +116,7 @@ public class Search {
         String searchKeywordValue = "Texas";
 
 
+        do {
         table = this.promptMessage("For what are you searching for?\n: ", false);
 
         //if (this.getSuggestableTables(table).length)
@@ -189,6 +190,7 @@ public class Search {
         if (searchMode == 1) {
             // displaying the child/related tables
                     boolean isFound = false;
+                    boolean isRelatedTableAvailable = false;
                     for (int t = 0; t < levelOneEntities.length; t++) {
                             for (int i = 0; i < entityRelationsArray.length; i++) {
                                 String[] level = entityRelationsArray[i].split(db.COLNAMETYPESP);
@@ -196,6 +198,7 @@ public class Search {
                                 if (level[0].equalsIgnoreCase(searchableTables) && !upperLevelTable.equalsIgnoreCase(searchableTables)) {
                                     if (this.is_array(level)) {
                                         System.out.println("Related categories: " + level[1]); // available related entities
+                                        isRelatedTableAvailable = true;
                                     }
                                     upperLevelTable = searchableTables;
                                     isFound = true;
@@ -210,8 +213,12 @@ public class Search {
                                 isFound = true;
                             }
                     }
-                    String userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + searchableTables + "'. Please select a related category or say 'no'. (no|category)\n: ", false);
-                    if (this.in_array(db.getEntity().getDefinedSearchableTables(0), userRelatedCategorySelection)) {
+
+                    String userRelatedCategorySelection = "";
+                    if (isRelatedTableAvailable) {
+                        userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + searchableTables + "'. Please select a related category or say 'no'. (no|category)\n: ", false);
+                    }
+                    if (this.in_array(db.getEntity().getDefinedSearchableTables(0), userRelatedCategorySelection) && isRelatedTableAvailable) {
                         String userRelatedCategoryAttributeSelection = this.promptMessage("\nPlease select the related attributes/fields which you require. Seperate by commas for multiple entries. (all|<attribute1>,<attribute2>)\nAvailable related attributes: " + db.getEntity().getSearchables(userRelatedCategorySelection, false, false) + "\n: ", true);
                         if (userRelatedCategoryAttributeSelection.equalsIgnoreCase("all") || userRelatedCategoryAttributeSelection.equalsIgnoreCase("a")) {
                             userRelatedCategoryAttributeSelection = db.getEntity().getSearchables(userRelatedCategorySelection, true, false);
@@ -254,8 +261,9 @@ public class Search {
             this.getRealData(null, nonConceptuallyRelatedTableCalueData);
         }
 
-        
 
+        System.out.println("\n\n----------------------------------------------------------------");
+        } while (!table.equalsIgnoreCase(""));
         // Stopping the execution
         System.exit(0);
 
