@@ -52,7 +52,7 @@ public class Query {
 
                 // always need to select first user slection (first category/entity)
                 if (i == 0) {
-                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], false, false) + ",";
+                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true, false) + ",";
                 }
                 // only select table attributes if we have a condition to join with the first/parent selection. (array index 2 contains the condition)
                 if (tableData.length > 1) {
@@ -118,8 +118,8 @@ public class Query {
 
     public String makeClause (String searchables, String keyword) {
         if (searchables != null) {
-            searchables = searchables.replaceAll(",", " LIKE \"%" + keyword + "%\" OR ");
-            searchables += " LIKE \"%" + keyword + "%\"";
+            searchables = searchables.replaceAll(",", " LIKE '%" + keyword + "%' OR ");
+            searchables += " LIKE '%" + keyword + "%'";
 
             return searchables;
         } else {
@@ -131,7 +131,7 @@ public class Query {
         String[] conditions = rawDataArray[1].split(db.COLNAMETYPESP);
         String whereClause = "";
         for (int k = 0; k < conditions.length; k++) {
-            whereClause += rawDataArray[0] + "." + conditions[k] + " OR ";
+            whereClause += conditions[k] + " OR ";
         }
         whereClause = whereClause.substring(0, (whereClause.length()) - 4);
         if (isWithinJoin)

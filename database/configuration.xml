@@ -5,6 +5,7 @@
     Created on : March 19, 2013, 8:43 PM
     Author     : Tharanga
     Description:
+	- Currently this application supports MS SQL Server and MySQL only!
 	- Database configuration. You can store multiple databases in this file.
           BUT for the database you need to consider, you need to make the "isEnabled" to the value "1" and the rest to the value, "0".
         - Also you will need to create a entity_config.xml file named as the following way (you also need to put the config content into that):

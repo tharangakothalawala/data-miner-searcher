@@ -212,19 +212,19 @@ public class Search {
                     }
                     String userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + searchableTables + "'. Please select a related category or say 'no'. (no|category)\n: ", false);
                     if (this.in_array(db.getEntity().getDefinedSearchableTables(0), userRelatedCategorySelection)) {
-                        String relatedTableAttributes = db.getEntity().getSearchables(userRelatedCategorySelection, false, false);
-
-                        String userRelatedCategoryAttributeSelection = this.promptMessage("\nPlease select the related attributes/fields which you require. Seperate by commas for multiple entries. (all|<attribute1>,<attribute2>)\nAvailable related attributes: " + relatedTableAttributes + "\n: ", true);
+                        String userRelatedCategoryAttributeSelection = this.promptMessage("\nPlease select the related attributes/fields which you require. Seperate by commas for multiple entries. (all|<attribute1>,<attribute2>)\nAvailable related attributes: " + db.getEntity().getSearchables(userRelatedCategorySelection, false, false) + "\n: ", true);
                         if (userRelatedCategoryAttributeSelection.equalsIgnoreCase("all") || userRelatedCategoryAttributeSelection.equalsIgnoreCase("a")) {
-                            userRelatedCategoryAttributeSelection = relatedTableAttributes;
+                            userRelatedCategoryAttributeSelection = db.getEntity().getSearchables(userRelatedCategorySelection, true, false);
+                        } else {
+                            userRelatedCategoryAttributeSelection = userRelatedCategoryAttributeSelection.replaceAll(",", "," + userRelatedCategorySelection + ".");
                         }
 
-                        String userSearchValue = this.promptMessage("\nPlease enter a keyword to search in the selected category, '"+ userRelatedCategorySelection +"'\n: ", false);
+                        String userSearchValue = this.promptMessage("\nPlease enter a keyword to search in the selected category, '"+ userTableSelection +"'\n: ", false);
                         if (!userSearchValue.equalsIgnoreCase("")) {
                             searchKeywordValue = userSearchValue;
                         }
 
-                        String clause_level_1 = query.makeClause(db.getEntity().getSearchables(searchableTables, false, false), searchKeywordValue);
+                        String clause_level_1 = query.makeClause(db.getEntity().getSearchables(searchableTables, true, false), searchKeywordValue);
                         eachSelectedTableClauseData[0] = searchableTables + "::" + clause_level_1;
                         //String clause_level_2 = query.makeClause(userRelatedCategoryAttributeSelection, searchKeywordValue);
                         eachSelectedTableClauseData[1] = userRelatedCategorySelection + "::" + userRelatedCategoryAttributeSelection;
@@ -236,7 +236,7 @@ public class Search {
                         String sqlQuery = query.buildQuery (eachSelectedTableClauseData, false, false);
                         this.getRealData(sqlQuery, null);
                     } else {
-                        String userSearchValue = this.promptMessage("\nPlease enter a keyword to search\n: ", false);
+                        String userSearchValue = this.promptMessage("\nPlease enter a keyword to search in the selected category, '"+ userTableSelection +"'\n: ", false);
                         if (!userSearchValue.equalsIgnoreCase("")) {
                             searchKeywordValue = userSearchValue;
                         }
