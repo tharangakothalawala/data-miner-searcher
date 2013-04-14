@@ -38,9 +38,9 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
 
     public AppGUI() {
         // starting the AppLogic here as I don't need the GUI right now!
-        search.doSearch("");
+        search.doSearch();
         
-        btnSearch = new JButton("go cmd line");
+        /*btnSearch = new JButton("go cmd line");
         btnSetData = new JButton("Set Test Data");
         btnTestSearch = new JButton("Test Search");
         btnReset = new JButton("Reset");
@@ -149,7 +149,7 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
     }
 
     public void itemStateChanged(ItemEvent ie) {
-            String[] labels = search.showInitialView(true);
+            /*String[] labels = search.showInitialView(true);
             if (!isCategorySelected) {
 		for (int i = 0; i < categoryCheckboxes.length; i++) {
                     String[] entityData = labels[i].split(db.COLNAMETYPESP);
@@ -160,11 +160,11 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
 			selectedCategoryIndex = i;
 			String clause = query.makeClause(db.getEntity().getEntityMeta(entityData[0], 3), txtSearchKeyword.getText());
 			System.out.println(db.getEntity().getEntityMeta(entityData[0], 7) + "::" + clause);
-			search.eachSelectedTableClauseData[0] = db.getEntity().getEntityMeta(entityData[0], 7) + "::" + clause;
+			search.rawUserInputData[0] = db.getEntity().getEntityMeta(entityData[0], 7) + "::" + clause;
 			search.selectedMainCategory = db.getEntity().getEntityMeta(entityData[0], 7);
 
-			query.buildQuery(search.eachSelectedTableClauseData, true, true);
-			System.out.println(query.getSqlQuery());
+			//query.buildQuery(search.rawUserInputData, true, true);
+			//System.out.println(query.getSqlQuery());
                     }
 		}
             } else {
@@ -188,16 +188,16 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                     }
                     String clause = query.makeClause(db.getEntity().getEntityMeta(relatedCheckboxArray[i].getText(), 3), relatedSearchText);
                     System.out.println(relatedCheckboxArray[i].getText() + "::" + clause);
-                    search.eachSelectedTableClauseData[1] = db.getEntity().getEntityMeta(relatedCheckboxArray[i].getText(), 7) + "::" + clause;
+                    search.rawUserInputData[1] = db.getEntity().getEntityMeta(relatedCheckboxArray[i].getText(), 7) + "::" + clause;
 
-                    query.buildQuery(search.eachSelectedTableClauseData, true, true);
-                    System.out.println(query.getSqlQuery());
+                    //query.buildQuery(search.rawUserInputData, true, true);
+                    //System.out.println(query.getSqlQuery());
 		}
-            }
+            }//*/
     }
 
     public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == btnSearch) {
+        /*if (event.getSource() == btnSearch) {
             String searchKeyword = txtSearchKeyword.getText();
 
             // triggering the search method
@@ -207,15 +207,15 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
             textarea.setText(search.searchResults);
         } else if (event.getSource() == btnSetData) {
 
-            search.eachSelectedTableClauseData[0] = "4images_images::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%' OR image_keywords LIKE '%Texas%'";
-            search.eachSelectedTableClauseData[1] = "4images_users::user_name LIKE '%sales@milezone.com%' OR user_email LIKE '%sales@milezone.com%'";
+            search.rawUserInputData[0] = "4images_images::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%' OR image_keywords LIKE '%Texas%'";
+            search.rawUserInputData[1] = "4images_users::user_name LIKE '%sales@milezone.com%' OR user_email LIKE '%sales@milezone.com%'";
             search.selectedMainCategory = "4images_images";
 
             //textarea.setText(search.searchResults);
         } else if (event.getSource() == btnTestSearch) {
             String searchResults = "";
             String searchKeyword = txtSearchKeyword.getText();
-            //search.buildQuery(search.eachSelectedTableClauseData, true);
+            //search.buildQuery(search.rawUserInputData, true);
             //textarea.setText(search.searchResults);
 
             //String value = "ad";
@@ -252,9 +252,9 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                             if (JOptionPane.showConfirmDialog(null, "Consider " + eachEntityDescription.replace("@\"", "") + "? (yes|no)") == 0) {
                                 entityPreferance = true;
                             }
-                            if (entityPreferance && !search.isTableSelected(search.nonConceptuallyRelatedTableCalueData, entities[i])) {
+                            if (entityPreferance && !search.isTableSelected(search.unrelationalRawUserInputData, entities[i])) {
                                 //String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
-                                //nonConceptuallyRelatedTableCalueData[this.nextAvailableArrayIndex(nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                                //unrelationalRawUserInputData[this.nextAvailableArrayIndex(unrelationalRawUserInputData)] = entities[i] + "::" + relatedEntityClause;
 
                                 //////////////////////////////// Each entity attribute description //////////////
                                 String searchableAttributes = db.getEntity().getEntityMeta(entities[i], 5);
@@ -268,7 +268,7 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                                         if (attributeData[1].toLowerCase().contains("@\""+search.selectedMainCategory.toLowerCase()+"@\"")) {
                                             countOfAttributesWithMetaKeyword++;
                                         }
-                                    } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description */ }
+                                    } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description * }
                                 }
                                 //-----
                                 if (countOfAttributesWithMetaKeyword > 1) {
@@ -290,7 +290,7 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                                                 searchableAttributeData[a] = null; // unset the value (this will avoid considering this attribute later)
                                             }
                                         }
-                                        } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description */ }
+                                        } catch (Exception ex) { /* caught ArrayIndexOutOfBoundsException for attributes which got no meta description * }
                                     }
                                     // going through the  attributes again to get any attribute which did't get considered above due to the user input
                                     for (int a = 0; a < searchableAttributeData.length; a++) {
@@ -301,45 +301,45 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                                             }
                                         } catch (Exception ex) { }
                                     }
-                                    ///////////////*/
+                                    ///////////////*
                                     if (!searchables.equalsIgnoreCase("")) {
                                         searchables = searchables.substring(0, (searchables.length()) - 1);
-                                        if (!search.isTableSelected(search.nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                        if (!search.isTableSelected(search.unrelationalRawUserInputData, entities[i])) {
                                             String relatedEntityClause = query.makeClause(searchables, searchKeyword);
-                                            search.nonConceptuallyRelatedTableCalueData[search.nextAvailableArrayIndex(search.nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                                            search.unrelationalRawUserInputData[search.nextAvailableArrayIndex(search.unrelationalRawUserInputData)] = entities[i] + "::" + relatedEntityClause;
                                         }
                                     }
                                 } else {
-                                    if (!search.isTableSelected(search.nonConceptuallyRelatedTableCalueData, entities[i])) {
+                                    if (!search.isTableSelected(search.unrelationalRawUserInputData, entities[i])) {
                                         String relatedEntityClause = query.makeClause(db.getEntity().getEntityMeta(entities[i], 3), searchKeyword);
-                                        search.nonConceptuallyRelatedTableCalueData[search.nextAvailableArrayIndex(search.nonConceptuallyRelatedTableCalueData)] = entities[i] + "::" + relatedEntityClause;
+                                        search.unrelationalRawUserInputData[search.nextAvailableArrayIndex(search.unrelationalRawUserInputData)] = entities[i] + "::" + relatedEntityClause;
                                     }
                                 }
-                                //////////////////////////////////////*/
+                                //////////////////////////////////////*
                             }
                         }
                     }
                 }
 
             // getting the result count
-            String sqlCountQuery = query.buildQuery(search.eachSelectedTableClauseData, true, true);
-            lblSearchResultInfo.setText(query.getCount(sqlCountQuery) + " results found");
+            //String sqlCountQuery = query.buildQuery(search.rawUserInputData, true, true);
+            //lblSearchResultInfo.setText(query.getCount(sqlCountQuery) + " results found");
 
-            String sqlQuery = query.buildQuery(search.eachSelectedTableClauseData, false, true);
+            String sqlQuery = query.buildQuery(search.rawUserInputData, true);
             search.getRealData(sqlQuery, null);
             searchResults = search.searchResults;
             search.searchResults = "";
-            //sqlQuery = search.buildQuery(search.nonConceptuallyRelatedTableCalueData);
-            search.getRealData(null, search.nonConceptuallyRelatedTableCalueData);
+            //sqlQuery = search.buildQuery(search.unrelationalRawUserInputData);
+            search.getRealData(null, search.unrelationalRawUserInputData);
             searchResults += search.searchResults;
             textarea.setText(searchResults);
             search.searchResults = "";
         } else if (event.getSource() == btnReset) {
-            search.eachSelectedTableClauseData = search.initializeArray(search.eachSelectedTableClauseData);
-            search.nonConceptuallyRelatedTableCalueData = search.initializeArray(search.nonConceptuallyRelatedTableCalueData);
+            search.rawUserInputData = search.initializeArray(search.rawUserInputData);
+            search.unrelationalRawUserInputData = search.initializeArray(search.unrelationalRawUserInputData);
             search.searchResults = "";
             textarea.setText("");
-        }
+        }//*/
     }
 
     public static void showSearchGUI() {

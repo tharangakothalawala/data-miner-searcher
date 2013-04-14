@@ -17,19 +17,21 @@
     <database>
         <isEnabled>0</isEnabled>
         <dbdriver>com.microsoft.sqlserver.jdbc.SQLServerDriver</dbdriver>
-        <connurl>jdbc:sqlserver://localhost:1433;databaseName=CGDB;</connurl><!-- localhost | 192.168.232.134 -->
+        <connurl>jdbc:sqlserver://localhost:1433;databaseName=CGDB;</connurl>
         <dbname>CGDB</dbname>
         <dbuser>sa</dbuser>
-        <dbpasswd>qwerty1</dbpasswd><!-- qwerty1 | FooBar(1)? -->
+        <dbpasswd>qwerty1</dbpasswd>
+        <searchable_data_types>nvarchar,varchar,ntext,text</searchable_data_types>
         <entityDisplayLimit>6</entityDisplayLimit>
     </database>
     <database>
         <isEnabled>1</isEnabled>
         <dbdriver>com.mysql.jdbc.Driver</dbdriver>
-        <connurl>jdbc:mysql://localhost:3306/diecast</connurl>
+        <connurl>jdbc:mysql://localhost:3306/diecast</connurl><!-- localhost | 192.168.232.134 -->
         <dbname>diecast</dbname>
         <dbuser>tharanga</dbuser>
-        <dbpasswd>qwerty</dbpasswd>
-        <entityDisplayLimit>3</entityDisplayLimit>
+        <dbpasswd>qwerty</dbpasswd><!-- qwerty1 | FooBar(1)? -->
+        <searchable_data_types>nvarchar,varchar,ntext,text</searchable_data_types>
+        <entityDisplayLimit>4</entityDisplayLimit>
     </database>
 </databases>

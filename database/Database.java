@@ -29,6 +29,7 @@ public class Database {
     public final String COLNAMETYPESP = ":"; // to be used to identify metadata ex: username:nvarchar
     private String[] dbtableArray;
     private String[] dbviewArray;
+    public String searchable_data_types;
     public int entityDisplayLimit;
 
     public Database() {
@@ -57,6 +58,7 @@ public class Database {
                             this.dbname = element.getElementsByTagName("dbname").item(0).getTextContent();
                             this.dbuser = element.getElementsByTagName("dbuser").item(0).getTextContent();
                             this.dbpasswd = element.getElementsByTagName("dbpasswd").item(0).getTextContent();
+                            this.searchable_data_types = element.getElementsByTagName("searchable_data_types").item(0).getTextContent();
                             this.entityDisplayLimit = Integer.parseInt(element.getElementsByTagName("entityDisplayLimit").item(0).getTextContent());
                         }
                     }
@@ -214,130 +216,6 @@ public class Database {
         ResultSet rs = s.getResultSet(); // get any ResultSet that came from the query
 
         return rs;
-    }
-
-    public String[] getDatabaseTableList() {
-
-        try {
-            Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "' OR TABLE_SCHEMA = '" + dbname + "'", null, null, null, false);
-            //Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "'", null, null, null, null);
-            //Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.TABLES", "TABLE_NAME", "TABLE_SCHEMA = '" + dbname + "'", null, null, null, null);
-
-            // set is_callable type codes in here to check for any plugins/functions in Entity to get a pre-defined tables to the 'dbtableArray'
-            dbtableArray = new String[resultsets.length];
-
-            for (int i = 0; i < resultsets.length; i++) {
-                Map<String, String> rs = resultsets[i];
-                // System.out.println("Table: "+ rs.get("TABLE_NAME"));
-                dbtableArray[i] = rs.get("TABLE_NAME");
-            }
-        } catch (Exception error) {
-            System.out.println("\n" + error);
-            System.exit(0);
-        }
-
-        return dbtableArray;
-    }
-
-    public String[] getDatabaseViewList() {
-
-        try {
-            Map[] resultsets = this.sqlSelect("INFORMATION_SCHEMA.VIEWS", "TABLE_NAME", "TABLE_CATALOG = '" + dbname + "' OR TABLE_SCHEMA = '" + dbname + "'", null, null, null, false);
-
-            dbviewArray = new String[resultsets.length];
-
-            for (int i = 0; i < resultsets.length; i++) {
-                Map<String, String> rs = resultsets[i];
-                // System.out.println("Table: "+ rs.get("TABLE_NAME"));
-                dbviewArray[i] = rs.get("TABLE_NAME");
-            }
-        } catch (Exception error) {
-            System.out.println("\n" + error);
-            System.exit(0);
-        }
-
-        return dbviewArray;
-    }
-
-    /*
-     * This is used only to call this.getDatabaseTableList();
-     * TODO : this needs to be deprecated
-     */
-    public String getTables() {
-        String[] tableArray = this.getDatabaseTableList();
-
-        String tables = "";
-        for (int i = 0; i < tableArray.length; i++) {
-            tables += tableArray[i] + ", ";
-        }
-        tables = tables.substring(0, (tables.length()) - 2);
-        return tables;
-    }
-
-    /*
-     * This is used only to call this.getDatabaseViewList();
-     * TODO : this needs to be deprecated
-     */
-    public String getViews() {
-        String[] tableArray = this.getDatabaseViewList();
-
-        String tables = "";
-        for (int i = 0; i < tableArray.length; i++) {
-            tables += tableArray[i] + ", ";
-        }
-        tables = tables.substring(0, (tables.length()) - 2);
-        return tables;
-    }
-
-    public String[] getFilteredTables() {
-        String table, view = "";
-
-        if (this.getEntity().getDefinedSearchableTables(0) != null) {
-            dbtableArray = this.getEntity().getDefinedSearchableTables(0);
-
-            return dbtableArray;
-        } else {
-            // creating the search context by retrieving searchable tables from the database
-            this.getTables();
-            this.getViews();
-
-            for (int j = 0; j < dbtableArray.length; j++) {
-                //System.out.println("Table: "+ dbtableArray[j]);
-                for (int i = 0; i < dbviewArray.length; i++) {
-                    table = dbtableArray[j];
-                    view = dbviewArray[i];
-                    //System.out.println(table + " || "+ view);
-                    if (table.equalsIgnoreCase(view)) {
-
-                        //System.out.println("VIEWS: " + dbtableArray[j]);
-                        dbtableArray[j] = "null";
-                        //      dbtableArray2[j] = rs.get("TABLE_NAME");
-                    }
-                }
-            }
-            //   }
-            int viewCount = 0;
-            for (int i = 0; i < dbtableArray.length; i++) {
-                if (dbtableArray[i].equalsIgnoreCase("null")) {
-                    viewCount++;
-                }
-                //System.out.println(i + "). Table: " + dbtableArray[i]);
-            }
-
-            System.out.println("viewCount: " + viewCount);
-
-            String[] finalArray = new String[dbtableArray.length - viewCount];
-            int c = 0;
-            for (int i = 0; i < dbtableArray.length; i++) {
-                if (!dbtableArray[i].equalsIgnoreCase("null")) {
-                    finalArray[c] = dbtableArray[i];
-                    c++;
-                    //System.out.println("Table: " + dbtableArray[i]);
-                }
-            }
-
-            return finalArray;
-        }
     }
 
     /*

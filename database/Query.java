@@ -20,12 +20,12 @@ public class Query {
     //private boolean fetchCount;
 
     private String[] primaryKeyArray;
-    private String[] foreignKeyArray;
+    //private String[] foreignKeyArray;
 
     public Query (String[] primaryKeyArray, String[] foreignKeyArray) {
         this.init();
         this.primaryKeyArray = primaryKeyArray;
-        this.foreignKeyArray = foreignKeyArray;
+        //this.foreignKeyArray = foreignKeyArray;
     }
 
     public void init () {
@@ -33,13 +33,12 @@ public class Query {
         this.selectClause = "SELECT";
         this.whereCondition = " WHERE ";
         this.joinStatement = "";
-        //this.fetchCount = false;
     }
 
     /*
      * this will creat the SQL join statement. ex. input: USERS s name a s name ad PROFILE s prof_name min s prof_name dmin
      */
-    public String buildQuery (String[] queryRawDataArray, boolean fetchCount, boolean includeJoinCondition) {
+    public String buildQuery (String[] queryRawDataArray, boolean includeJoinCondition) {
         this.init();
         String parentJoinTable = "";
         String parentTableCondition = "";
@@ -52,7 +51,7 @@ public class Query {
 
                 // always need to select first user slection (first category/entity)
                 if (i == 0) {
-                    sqlSelects +=  " " + db.getEntity().getSearchables(tableData[0], true, false) + ",";
+                    sqlSelects +=  " " + tableData[1] + ",";
                 }
                 // only select table attributes if we have a condition to join with the first/parent selection. (array index 2 contains the condition)
                 if (tableData.length > 1) {
@@ -74,11 +73,7 @@ public class Query {
                         parentTableCondition = this.whereCondition;
                     }
 
-                    if (!fetchCount) {
-                        this.selectClause += sqlSelects.substring(0, (sqlSelects.length()) - 1) + " FROM " + mainTableData[0]; // SELECT * FROM <selected_first_table>
-                    } else {
-                        this.selectClause += " COUNT(*) FROM " + mainTableData[0];
-                    }
+                    this.selectClause += sqlSelects.substring(0, (sqlSelects.length()) - 1) + " FROM " + mainTableData[0]; // SELECT * FROM <selected_first_table>
                 } else {
                     // JOINs will be set in here
                     String[] mainTableData = queryRawDataArray[i-1].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP);
@@ -128,7 +123,7 @@ public class Query {
     }
 
     public String createJoinWhereClause (String[] rawDataArray, boolean isWithinJoin) {
-        String[] conditions = rawDataArray[1].split(db.COLNAMETYPESP);
+        String[] conditions = rawDataArray[2].split(db.COLNAMETYPESP);
         String whereClause = "";
         for (int k = 0; k < conditions.length; k++) {
             whereClause += conditions[k] + " OR ";

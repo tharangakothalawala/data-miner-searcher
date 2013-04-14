@@ -1,81 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Document   : entity_config.xml
-    Created on : March 10, 2013, 3:34 PM
+    Document   : configuration.xml
+    Created on : March 19, 2013, 8:43 PM
     Author     : Tharanga
-    Description: The following meta data will be used to create the SQL.
-    
-    NOTE       : Don't specify the tables if they don't have searchable attributes
-                 You can include meta keywords within entity descriptions.
-                 Always a meta keyword should be same as an entity name (non case sensitive).
-                 This will be used to search the table where the meta keyword is in, when searching for the table corresspondance to the meta keyword.
-                 syntax: @"name_of_a_table@"
+    Description:
+	- The following meta data will be used to create the SQL.
+	- Don't specify the tables if they don't have searchable attributes
+	- You can include meta keywords within entity descriptions.
+	  They are just words which are refering to any exisitng tables in the DB.
+	  The meta description (implicit_annotation) will be used to recommend the user for the search categories.
+	- You can specify searchable attributes / fields of a table in the searchable_attributes tag. So that application
+	  will get them from here apart from generating automatically.
 -->
 
 <database>
     <table>
         <table_name>PROFILE</table_name>
-        <key_concepts>Profile</key_concepts>
+        <display_name>Profile</display_name>
         <implicit_annotation></implicit_annotation>
         <aliases></aliases>
         <related_tables></related_tables>
-        <searchable_attributes>prof_name:this is the profile name</searchable_attributes>
+        <searchable_attributes force="1">prof_name:this is the profile name</searchable_attributes>
     </table>
     <table>
         <table_name>USERS</table_name>
-        <key_concepts>Users</key_concepts>
+        <display_name>Users</display_name>
         <implicit_annotation>This contains the users of the system.</implicit_annotation>
         <aliases></aliases>
         <related_tables>Profile</related_tables>
-        <searchable_attributes>name:this is the user's name</searchable_attributes>
+        <searchable_attributes force="1">name:this is the user's name</searchable_attributes>
     </table>
     <table>
         <table_name>RSRC</table_name>
-        <key_concepts>Resources</key_concepts>
+        <display_name>Resources</display_name>
         <implicit_annotation>the resources category where it contains the data about resources such as users</implicit_annotation>
         <aliases></aliases>
         <related_tables>Calendar,Roles,USERS</related_tables>
-        <searchable_attributes>rsrc_name:resource name this can be a user,office_phone:phone number of the resource,email_addr:email address of the resource</searchable_attributes>
+        <searchable_attributes force="1">rsrc_name:resource name this can be a user,office_phone:phone number of the resource,email_addr:email address of the resource</searchable_attributes>
     </table>
     <table>
         <table_name>PROJECT</table_name>
-        <key_concepts>Project</key_concepts>
+        <display_name>Project</display_name>
         <implicit_annotation></implicit_annotation>
         <aliases></aliases>
         <related_tables></related_tables>
-        <searchable_attributes>plan_start_date</searchable_attributes>
+        <searchable_attributes force="1">plan_start_date</searchable_attributes>
     </table>
     <table>
         <table_name>CALENDAR</table_name>
-        <key_concepts>Calendar</key_concepts>
+        <display_name>Calendar</display_name>
         <implicit_annotation></implicit_annotation>
         <aliases></aliases>
         <related_tables></related_tables>
-        <searchable_attributes>clndr_data</searchable_attributes>
+        <searchable_attributes force="1">clndr_data</searchable_attributes>
     </table>
     <table>
         <table_name>ROLES</table_name>
-        <key_concepts>Roles</key_concepts>
+        <display_name>Roles</display_name>
         <implicit_annotation></implicit_annotation>
         <aliases></aliases>
         <related_tables></related_tables>
-        <searchable_attributes>name:the users in the roles category,short_name</searchable_attributes>
+        <searchable_attributes force="1">name:the users in the roles category,short_name</searchable_attributes>
     </table>
     <table>
         <table_name>DOCUMENT</table_name>
-        <key_concepts>Document</key_concepts>
+        <display_name>Document</display_name>
         <implicit_annotation>the documents category where names of the users may appear as authors</implicit_annotation>
         <aliases></aliases>
         <related_tables>Project</related_tables>
-        <searchable_attributes>name:the users who created documents,short_name:the short names of the users,author_name:this testing field for users</searchable_attributes>
+        <searchable_attributes force="1">name:the users who created documents,short_name:the short names of the users,author_name:this testing field for users</searchable_attributes>
     </table>
     <table>
         <table_name>TASK</table_name>
-        <key_concepts>Task</key_concepts>
+        <display_name>Task</display_name>
         <implicit_annotation>This contains all the tasks which are defined in all projects. So you can search for task</implicit_annotation>
         <aliases></aliases>
         <related_tables>Calendar,Roles,Resources</related_tables>
-        <searchable_attributes>name:task names where users may contain</searchable_attributes>
+        <searchable_attributes force="1">name:task names where users may contain</searchable_attributes>
     </table>
 </database>
