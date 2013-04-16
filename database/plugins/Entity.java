@@ -1,9 +1,11 @@
-package database.plugins;
 
 /**
- *
- * @author Tharanga
+ * @Author	Tharanga S Kothalawala <tharanga.kothalawala@my.westminster.ac.uk>
+ * @StudentNo	w1278462
  */
+
+package database.plugins;
+
 import database.Database;
 import java.sql.*;
 
@@ -34,10 +36,10 @@ public class Entity {
 
             String[] arr = {""};
 
-            if (this.getEntityMeta(table, 6).equalsIgnoreCase("null")) {
+            if (this.getEntityMeta(table, 6, true).equalsIgnoreCase("null")) {
                 arr = db.getMetaData(rs, 2); // get entity coloumns with their datatypes
             } else {
-                arr = this.getEntityMeta(table, 6).split(","); // get the defined searchable attributes
+                arr = this.getEntityMeta(table, 6, true).split(","); // get the defined searchable attributes
                 getPredefined = true;
             }
 
@@ -85,19 +87,27 @@ public class Entity {
         return isSearchable;
     }
 
-    public String[] getDefinedSearchableTables(int configValueIndex) {
-        //String[] searchableTables = {"PROFILE", "USERS", "RSRC", "PROJECT", "CALENDAR", "ROLES", "DOCUMENT", "TASK"};
-        String[] definedTableData = this.loadEntityConfig();
-        String[] searchableTables = new String[definedTableData.length];
+    /*
+     * @param (int)	configValueIndex	: get only the values at the specified index from the xml xonfig array
+     * @return (String)	searchableTableData	: returns the array of values at index, <configValueIndex>
+     */
+    public String[] getEntityConfigValuesAtIndex(int configValueIndex) {
+        String[] definedTableData = this.loadEntityConfig(true);
+        String[] searchableTableData = new String[definedTableData.length];
         for (int i = 0; i < definedTableData.length; i++) {
             String[] tableData = definedTableData[i].split(db.COLNAMETYPESP + db.COLNAMETYPESP);
-            searchableTables[i] = tableData[configValueIndex];
+            searchableTableData[i] = tableData[configValueIndex];
         }
 
-        return searchableTables;
+        return searchableTableData;
     }
 
-    public String[] loadEntityConfig() {
+    /*
+     * @param (boolean)	isInit			: load data from the XML according to the formal way.
+						  If false, it will load restricted data even they are hidden
+     * @return (String)	searchableTableData	: returns the full db entity configuration information as a form of an array
+     */
+    public String[] loadEntityConfig(boolean isInit) {
         try {
             File entityConfigFile = new File("config/databases/" + db.dbname + "_entity_config.xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -137,7 +147,7 @@ public class Entity {
                         related_tables = null;
                     }
                     String searchable_attributes = element.getElementsByTagName("searchable_attributes").item(0).getTextContent();
-                    if (searchable_attributes.equalsIgnoreCase("") || element.getElementsByTagName("searchable_attributes").item(0).getAttributes().getNamedItem("force").getNodeValue().equalsIgnoreCase("0")) {
+                    if (searchable_attributes.equalsIgnoreCase("") || (element.getElementsByTagName("searchable_attributes").item(0).getAttributes().getNamedItem("force").getNodeValue().equalsIgnoreCase("0") && isInit)) {
                         searchable_attributes = null;
                     }
 
@@ -158,8 +168,8 @@ public class Entity {
         return null;
     }
 
-    public String getEntityMeta(String table, int key) {
-        String[] definedTableData = this.loadEntityConfig();
+    public String getEntityMeta(String table, int key, boolean isInit) {
+        String[] definedTableData = this.loadEntityConfig(isInit);
 
         for (int i = 0; i < definedTableData.length; i++) {
             String[] tableData = definedTableData[i].split(db.COLNAMETYPESP + db.COLNAMETYPESP);
@@ -201,8 +211,8 @@ public class Entity {
 
     public int getSugesstableEntityCount() {
         int sugesstableEntityCount = 0;
-        for (int i = 0; i < this.getDefinedSearchableTables(0).length; i++) {
-            if (this.getEntityMeta(this.getDefinedSearchableTables(0)[i], 8).equalsIgnoreCase("1")) {
+        for (int i = 0; i < this.getEntityConfigValuesAtIndex(0).length; i++) {
+            if (this.getEntityMeta(this.getEntityConfigValuesAtIndex(0)[i], 8, true).equalsIgnoreCase("1")) {
                 sugesstableEntityCount++;
             }
         }

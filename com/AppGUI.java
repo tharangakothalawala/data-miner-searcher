@@ -1,14 +1,14 @@
-package com;
 
 /**
- *
- * @author Tharanga
- * @description This is the gui which I developed for my second year cw1. This class will be removed in future!
+ * @Author	Tharanga S Kothalawala <tharanga.kothalawala@my.westminster.ac.uk>
+ * @StudentNo	w1278462
  */
+
+package com;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-//import java.util.*;
 import database.*;
 
 public class AppGUI extends JPanel implements ActionListener, ItemListener {
@@ -16,7 +16,7 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
     private static final int WIDTH = 760;
     private static final int HEIGHT = 600;
 
-    private JButton btnSearch, btnSetData, btnTestSearch, btnReset;
+    /*private JButton btnSearch, btnSetData, btnTestSearch, btnReset;
     private JLabel lblSearchResultInfo;
     private JTextField txtSearchKeyword;
     private JTextArea textarea;
@@ -24,22 +24,27 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
     private Database db = new Database();
     private Search search = new Search();
     Query query = new Query(search.primaryKeyArray, search.foreignKeyArray);
-    private int categoryCount = 0;
+
+    private AppTest apptest = new AppTest(); // for testing the app
+    //private int categoryCount = 0;
 
 
-    //JCheckBox[] relatedCheckboxes;
-    JTextField[] relatedTextfieldArray;
+    /*JTextField[] relatedTextfieldArray;
     JCheckBox[] categoryCheckboxes;
-    //JCheckBox relatedCheckbox;
     JCheckBox[] relatedCheckboxArray;
     int selectedCategoryIndex = 0;
 
-    private boolean isCategorySelected = false;
+    private boolean isCategorySelected = false;//*/
 
     public AppGUI() {
         // starting the AppLogic here as I don't need the GUI right now!
         search.doSearch();
-        
+
+        // a simple test demonstration
+        /*apptest.testJoinSearch();
+        apptest.testSearch();
+        System.exit(0);//*/
+
         /*btnSearch = new JButton("go cmd line");
         btnSetData = new JButton("Set Test Data");
         btnTestSearch = new JButton("Test Search");
@@ -252,9 +257,9 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                             if (JOptionPane.showConfirmDialog(null, "Consider " + eachEntityDescription.replace("@\"", "") + "? (yes|no)") == 0) {
                                 entityPreferance = true;
                             }
-                            if (entityPreferance && !search.isTableSelected(search.unrelationalRawUserInputData, entities[i])) {
+                            if (entityPreferance && !search.isTableSelected(search.irrelationalRawUserInputData, entities[i])) {
                                 //String relatedEntityClause = db.getEntity().makeClause(db.getEntity().getEntityMeta(entities[i], 3), value);
-                                //unrelationalRawUserInputData[this.nextAvailableArrayIndex(unrelationalRawUserInputData)] = entities[i] + "::" + relatedEntityClause;
+                                //irrelationalRawUserInputData[this.nextAvailableArrayIndex(irrelationalRawUserInputData)] = entities[i] + "::" + relatedEntityClause;
 
                                 //////////////////////////////// Each entity attribute description //////////////
                                 String searchableAttributes = db.getEntity().getEntityMeta(entities[i], 5);
@@ -304,15 +309,15 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
                                     ///////////////*
                                     if (!searchables.equalsIgnoreCase("")) {
                                         searchables = searchables.substring(0, (searchables.length()) - 1);
-                                        if (!search.isTableSelected(search.unrelationalRawUserInputData, entities[i])) {
+                                        if (!search.isTableSelected(search.irrelationalRawUserInputData, entities[i])) {
                                             String relatedEntityClause = query.makeClause(searchables, searchKeyword);
-                                            search.unrelationalRawUserInputData[search.nextAvailableArrayIndex(search.unrelationalRawUserInputData)] = entities[i] + "::" + relatedEntityClause;
+                                            search.irrelationalRawUserInputData[search.nextAvailableArrayIndex(search.irrelationalRawUserInputData)] = entities[i] + "::" + relatedEntityClause;
                                         }
                                     }
                                 } else {
-                                    if (!search.isTableSelected(search.unrelationalRawUserInputData, entities[i])) {
+                                    if (!search.isTableSelected(search.irrelationalRawUserInputData, entities[i])) {
                                         String relatedEntityClause = query.makeClause(db.getEntity().getEntityMeta(entities[i], 3), searchKeyword);
-                                        search.unrelationalRawUserInputData[search.nextAvailableArrayIndex(search.unrelationalRawUserInputData)] = entities[i] + "::" + relatedEntityClause;
+                                        search.irrelationalRawUserInputData[search.nextAvailableArrayIndex(search.irrelationalRawUserInputData)] = entities[i] + "::" + relatedEntityClause;
                                     }
                                 }
                                 //////////////////////////////////////*
@@ -329,14 +334,14 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
             search.getRealData(sqlQuery, null);
             searchResults = search.searchResults;
             search.searchResults = "";
-            //sqlQuery = search.buildQuery(search.unrelationalRawUserInputData);
-            search.getRealData(null, search.unrelationalRawUserInputData);
+            //sqlQuery = search.buildQuery(search.irrelationalRawUserInputData);
+            search.getRealData(null, search.irrelationalRawUserInputData);
             searchResults += search.searchResults;
             textarea.setText(searchResults);
             search.searchResults = "";
         } else if (event.getSource() == btnReset) {
             search.rawUserInputData = search.initializeArray(search.rawUserInputData);
-            search.unrelationalRawUserInputData = search.initializeArray(search.unrelationalRawUserInputData);
+            search.irrelationalRawUserInputData = search.initializeArray(search.irrelationalRawUserInputData);
             search.searchResults = "";
             textarea.setText("");
         }//*/

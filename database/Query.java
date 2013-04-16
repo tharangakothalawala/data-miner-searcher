@@ -1,14 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+
+/**
+ * @Author	Tharanga S Kothalawala <tharanga.kothalawala@my.westminster.ac.uk>
+ * @StudentNo	w1278462
  */
 
 package database;
+
 import java.util.*;
-/**
- *
- * @author Tharanga
- */
+
 public class Query {
 
     private Database db = new Database();

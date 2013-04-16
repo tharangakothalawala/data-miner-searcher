@@ -1,9 +1,11 @@
-package com;
 
 /**
- *
- * @author Tharanga
+ * @Author	Tharanga S Kothalawala <tharanga.kothalawala@my.westminster.ac.uk>
+ * @StudentNo	w1278462
  */
+
+package com;
+
 import database.*;
 import java.util.*;
 
@@ -37,7 +39,7 @@ public class Search {
     /*
      * This will store the SQL query generation support data for single SQL statements.
      */
-    String[] unrelationalRawUserInputData;
+    String[] irrelationalRawUserInputData;
 
     String[] primaryKeyArray;
     String[] foreignKeyArray;
@@ -49,8 +51,8 @@ public class Search {
     public Search () {
         ENTITYDISPLAYLIMIT = db.entityDisplayLimit;
         this.loadEntityRelations ();
-        rawUserInputData = new String[db.getEntity().getDefinedSearchableTables(0).length];
-        unrelationalRawUserInputData = new String[db.getEntity().getDefinedSearchableTables(0).length];
+        rawUserInputData = new String[db.getEntity().getEntityConfigValuesAtIndex(0).length];
+        irrelationalRawUserInputData = new String[db.getEntity().getEntityConfigValuesAtIndex(0).length];
     }
 
     /*
@@ -95,7 +97,7 @@ public class Search {
             String[] suggestableTables = this.getSuggestableTables(initialUserInput);
             for (int i = 0; i < suggestableTables.length; i++) {
                 tableSugessions += suggestableTables[i] + ",";
-                System.out.println("- " + suggestableTables[i] + " : " + db.getEntity().getEntityMeta(suggestableTables[i], 3));
+                System.out.println("- " + suggestableTables[i] + " : " + db.getEntity().getEntityMeta(suggestableTables[i], 3, true));
             }
         
 
@@ -114,9 +116,10 @@ public class Search {
                             searchKeywordValue = userSearchValue;
                         }
                         
-                        for (int t = 0; t < db.getEntity().getDefinedSearchableTables(0).length; t++) {
-                            String clause = query.makeClause(db.getEntity().getSearchables(db.getEntity().getDefinedSearchableTables(0)[t], false), searchKeywordValue);
-                            unrelationalRawUserInputData[t] = db.getEntity().getDefinedSearchableTables(0)[t] + "::" + clause;
+                        for (int t = 0; t < db.getEntity().getEntityConfigValuesAtIndex(0).length; t++) {
+                            //String clause = query.makeClause(db.getEntity().getSearchables(db.getEntity().getEntityConfigValuesAtIndex(0)[t], false), searchKeywordValue);
+                            //irrelationalRawUserInputData[t] = db.getEntity().getEntityConfigValuesAtIndex(0)[t] + "::" + clause;
+                            irrelationalRawUserInputData[t] = this.getQueryRawData(db.getEntity().getEntityConfigValuesAtIndex(0)[t], "a", searchKeywordValue);
                         }
                         searchMode = 2;
             } else if ((userTableSelection.equalsIgnoreCase("yes") || userTableSelection.equalsIgnoreCase("y"))) {
@@ -128,8 +131,9 @@ public class Search {
                         }
                         String[] tables = searchableTables.split(",");
                         for (int t = 0; t < tables.length; t++) {
-                            String clause = query.makeClause(db.getEntity().getSearchables(tables[t], false), searchKeywordValue);
-                            unrelationalRawUserInputData[t] = tables[t] + "::" + clause;
+                            //String clause = query.makeClause(db.getEntity().getSearchables(tables[t], false), searchKeywordValue);
+                            //irrelationalRawUserInputData[t] = tables[t] + "::" + clause;
+                            irrelationalRawUserInputData[t] = this.getQueryRawData(tables[t], "a", searchKeywordValue);
                         }
                         searchMode = 3;
             } else if ((userTableSelection.equalsIgnoreCase("exit") || userTableSelection.equalsIgnoreCase("quit") || userTableSelection.equalsIgnoreCase("q"))) {
@@ -147,9 +151,10 @@ public class Search {
                             searchKeywordValue = userSearchValue;
                         }
 
-                        for (int t = 0; t < db.getEntity().getDefinedSearchableTables(0).length; t++) {
-                            String clause = query.makeClause(db.getEntity().getSearchables(db.getEntity().getDefinedSearchableTables(0)[t], false), searchKeywordValue);
-                            unrelationalRawUserInputData[t] = db.getEntity().getDefinedSearchableTables(0)[t] + "::" + clause;
+                        for (int t = 0; t < db.getEntity().getEntityConfigValuesAtIndex(0).length; t++) {
+                            //String clause = query.makeClause(db.getEntity().getSearchables(db.getEntity().getEntityConfigValuesAtIndex(0)[t], false), searchKeywordValue);
+                            //irrelationalRawUserInputData[t] = db.getEntity().getEntityConfigValuesAtIndex(0)[t] + "::" + clause;
+                            irrelationalRawUserInputData[t] = this.getQueryRawData(db.getEntity().getEntityConfigValuesAtIndex(0)[t], "a", searchKeywordValue);
                         }
                         searchMode = 2;
         }
@@ -160,7 +165,7 @@ public class Search {
         }
 
         if (searchMode == 1) {
-            searchableTables = db.getEntity().getEntityMeta(searchableTables, 1); // getting the table_name
+            searchableTables = db.getEntity().getEntityMeta(searchableTables, 1, true); // getting the table_name
             String userCategoryAttributeSelection = this.promptMessage("\nPlease select the attributes/fields which you require. Seperate by commas for multiple entries. (all|<attribute1>,<attribute2>)\nAvailable related attributes: " + db.getEntity().getSearchables(searchableTables, false) + "\n: ", true);
             if (userCategoryAttributeSelection.equalsIgnoreCase("all") || userCategoryAttributeSelection.equalsIgnoreCase("a")) {
                 userCategoryAttributeSelection = db.getEntity().getSearchables(searchableTables, true);
@@ -180,7 +185,7 @@ public class Search {
                                         String[] relatedCategories = level[1].split(",");
                                         String relatedCategoriesDsp = "";
                                         for (int j = 0; j < relatedCategories.length; j++) {
-                                            relatedCategoriesDsp += db.getEntity().getEntityMeta(relatedCategories[j], 2) + ", ";
+                                            relatedCategoriesDsp += db.getEntity().getEntityMeta(relatedCategories[j], 2, true) + ", ";
                                         }
                                         relatedCategoriesDsp = relatedCategoriesDsp.substring(0, (relatedCategoriesDsp.length()) - 2); // #2: display_name
                                         System.out.println("Related categories: " + relatedCategoriesDsp); // available related entities
@@ -202,10 +207,10 @@ public class Search {
 
                     String userRelatedCategorySelection = "";
                     if (isRelatedTableAvailable) {
-                        userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + db.getEntity().getEntityMeta(searchableTables, 2) + "'. Please select a related category or say 'no'. (no|category)\n: ", false);
+                        userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + db.getEntity().getEntityMeta(searchableTables, 2, true) + "'. Please select a related category or say 'no'. (no|category)\n: ", false);
                     }
-                    if (this.in_array(db.getEntity().getDefinedSearchableTables(1), userRelatedCategorySelection) && isRelatedTableAvailable) {
-                        userRelatedCategorySelection = db.getEntity().getEntityMeta(userRelatedCategorySelection, 1); // getting the real_name
+                    if (this.in_array(db.getEntity().getEntityConfigValuesAtIndex(1), userRelatedCategorySelection) && isRelatedTableAvailable) {
+                        userRelatedCategorySelection = db.getEntity().getEntityMeta(userRelatedCategorySelection, 1, true); // getting the real_name
                         String userRelatedCategoryAttributeSelection = this.promptMessage("\nPlease select the related attributes/fields which you require. Seperate by commas for multiple entries. (all|<attribute1>,<attribute2>)\nAvailable related attributes: " + db.getEntity().getSearchables(userRelatedCategorySelection, false) + "\n: ", true);
                         if (userRelatedCategoryAttributeSelection.equalsIgnoreCase("all") || userRelatedCategoryAttributeSelection.equalsIgnoreCase("a")) {
                             userRelatedCategoryAttributeSelection = db.getEntity().getSearchables(userRelatedCategorySelection, true);
@@ -218,15 +223,9 @@ public class Search {
                             searchKeywordValue = userSearchValue;
                         }
 
-                        String clause_level_1 = query.makeClause(db.getEntity().getSearchables(searchableTables, true), searchKeywordValue);
-                        rawUserInputData[0] = searchableTables + "::" + userCategoryAttributeSelection + "::" + clause_level_1;
-                        //String clause_level_2 = query.makeClause(userRelatedCategoryAttributeSelection, searchKeywordValue);
-                        rawUserInputData[1] = userRelatedCategorySelection + "::" + userRelatedCategoryAttributeSelection;
+                        rawUserInputData[0] = this.getQueryRawData(searchableTables, userCategoryAttributeSelection, searchKeywordValue);
+                        rawUserInputData[1] = this.getQueryRawData(userRelatedCategorySelection, userRelatedCategoryAttributeSelection, "");
 
-                        /* example join of two tables, "4images_users" with "4images_images"
-                         * rawUserInputData[0] = "4images_images::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%' OR image_keywords LIKE '%Texas%'";
-                         * rawUserInputData[1] = "4images_users::user_name LIKE '%sales@milezone.com%' OR user_email LIKE '%sales@milezone.com%'";
-                         */
                         String sqlQuery = query.buildQuery (rawUserInputData, false);
                         this.getRealData(sqlQuery, null);
                     } else {
@@ -235,17 +234,16 @@ public class Search {
                             searchKeywordValue = userSearchValue;
                         }
                         
-                        String clause_level_1 = query.makeClause(db.getEntity().getSearchables(searchableTables, false), searchKeywordValue);
-                        unrelationalRawUserInputData[0] = searchableTables + "::" + clause_level_1;
-                        this.getRealData(null, unrelationalRawUserInputData);
+                        irrelationalRawUserInputData[0] = this.getQueryRawData(searchableTables, userCategoryAttributeSelection, searchKeywordValue);
+                        this.getRealData(null, irrelationalRawUserInputData);
                     }
                     
 
-            //this.getRealData(null, unrelationalRawUserInputData);
+            //this.getRealData(null, irrelationalRawUserInputData);
         } else if (searchMode == 2) {
-            this.getRealData(null, unrelationalRawUserInputData);
+            this.getRealData(null, irrelationalRawUserInputData);
         } else if (searchMode == 3) {
-            this.getRealData(null, unrelationalRawUserInputData);
+            this.getRealData(null, irrelationalRawUserInputData);
         }
 
 
@@ -254,20 +252,34 @@ public class Search {
 
     } // function end
 
+    public String getQueryRawData (String tableName, String requiredDataFields, String searchKeyword) {
+        tableName = db.getEntity().getEntityMeta(tableName, 1, true);
+        if (requiredDataFields.equalsIgnoreCase("a")) { // all
+            requiredDataFields = db.getEntity().getSearchables(tableName, false);
+        }
+        String clause = query.makeClause(db.getEntity().getSearchables(tableName, true), searchKeyword);
+        String dataSeperator = db.COLNAMETYPESP + db.COLNAMETYPESP;
+
+        return tableName + dataSeperator +
+                requiredDataFields + dataSeperator +
+                clause;
+    }
+
     public String[] getSuggestableTables (String keyword) {
 	// traversing through all the available/defined seachable tables
-	String[] tables = db.getEntity().getDefinedSearchableTables(0);
+	String[] tables = db.getEntity().getEntityConfigValuesAtIndex(0);
 
 	// counting the tables which have got a meta keyword
 	int countOfTablesWithMetaKeyword = 0;
 	String tableList = "";
 	for (int i = 0; i < tables.length; i++) {
-		String eachTableMetaDescription = db.getEntity().getEntityMeta(tables[i], 3); // #3: implicit_annotation
+		String eachTableMetaDescription = db.getEntity().getEntityMeta(tables[i], 3, true); // #3: implicit_annotation
+		String eachTableAttributeMetaDescription = db.getEntity().getEntityMeta(tables[i], 7, false); // #7: searchable_attributes
 
 		// checking for the initialUserInput meta description for any available keyword/s
-		if (eachTableMetaDescription.toLowerCase().contains(keyword.toLowerCase())) {
+		if (eachTableMetaDescription.toLowerCase().contains(keyword.toLowerCase()) || eachTableAttributeMetaDescription.toLowerCase().contains(keyword.toLowerCase())) {
 			//tableList += tables[i] + ",";
-                        tableList += db.getEntity().getEntityMeta(tables[i], 2) + ",";
+                        tableList += db.getEntity().getEntityMeta(tables[i], 2, true) + ",";
 			countOfTablesWithMetaKeyword++;
 		}
 	}
@@ -282,15 +294,6 @@ public class Search {
 		return null;
 	}
     }
-
-    /*public void identifyAttributes (String[] attributes) {
-        for (int a = 0; a < attributes.length; a++) {
-            String[] attributeData = attributes[a].split(":");
-            System.out.println(attributeData[0]);
-        }
-
-        System.exit(0);
-    }//*/
 
     public String promptMessage (String message, boolean doTrim) {
         String returnValue = "";
@@ -316,19 +319,6 @@ public class Search {
         } while (returnValue.length() == 0);
         return returnValue;
     }
-
-    /*public String createWhereClause (String[] rawDataArray, boolean isWithinJoin) {
-        String[] conditions = rawDataArray[1].split(db.COLNAMETYPESP);
-        String whereClause = "";
-        for (int k = 0; k < conditions.length; k++) {
-            whereClause += rawDataArray[0] + "." + conditions[k] + " OR ";
-        }
-        whereClause = whereClause.substring(0, (whereClause.length()) - 4);
-        if (isWithinJoin)
-            return "(" + whereClause + ")";
-        else
-            return whereClause;
-    }//*/
 
     public void getRealData(String sqlQuery, String[] sqlQueryMeta) {
         String eachRowData = "";
@@ -363,7 +353,7 @@ public class Search {
                 for (int c = 0; c < sqlQueryMeta.length; c++) {
                     
                     String[] queryMeta = sqlQueryMeta[c].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
-                    Map[] resultsets = db.sqlSelect(queryMeta[0], db.getEntity().getSearchables(queryMeta[0], false), queryMeta[1], null, null, null, false);
+                    Map[] resultsets = db.sqlSelect(queryMeta[0], queryMeta[1], queryMeta[2], null, null, null, false);
                     System.out.println("2###Query :" + db.getQuery());
 
                     String sqlCountQuery = db.getQuery().replaceAll("SELECT([^<]*)FROM", "SELECT COUNT(*) FROM");
@@ -397,58 +387,12 @@ public class Search {
         //searchResults += eachRowData;
     }
 
-    /*public String[] initializeArray (String[] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = null;
-        }
-        return array;
-    }//*/
-
     public void vardumpArray (String[] array) {
         for (int i = 0; i < array.length; i++) {
             if (array[i] != null)
                 System.out.println(array[i]);
         }
     }
-
-    /*public int findExistingTableClausePrefixIndex (String[] array, String value, String splitter) {
-        int index = 0; // the very first array insertion index
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] != null){
-                String[] tableClause = array[i].split(splitter);
-                if (tableClause[0].toString().equalsIgnoreCase(value)) {
-                    index = i;
-                    break;
-                }
-            }
-        }
-        return index;
-    }//*/
-
-    /*
-     * return the next insertion position for a given array
-     */
-    /*public int nextAvailableArrayIndex (String[] array) {
-        int nextIndex = 0; // the very first array insertion index
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] == null) {
-                nextIndex = i;
-                break;
-            }
-        }
-        return nextIndex;
-    }//*/
-
-    /*public boolean isTableSelected (String[] array, String table) {
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] != null) {
-            String[] tableClause = array[i].split(db.COLNAMETYPESP+db.COLNAMETYPESP);
-            if (tableClause[0].matches(".*"+table+".*"))
-                return true;
-            }
-        }
-        return false;
-    }//*/
 
     public boolean in_array (String[] array, String searchValue) {
         for (int i = 0; i < array.length; i++)
@@ -489,7 +433,7 @@ public class Search {
     }
 
     public void loadEntityRelations () {
-        String[] tableArray = this.db.getEntity().getDefinedSearchableTables(0);
+        String[] tableArray = this.db.getEntity().getEntityConfigValuesAtIndex(0);
 
         int totalKeyColumns = 0;
         for (int t = 0; t < tableArray.length; t++) {
@@ -543,11 +487,11 @@ public class Search {
     }
 
     public String[] getEntityRelations () {
-        String[] availableEntities = this.db.getEntity().getDefinedSearchableTables(0);
+        String[] availableEntities = this.db.getEntity().getEntityConfigValuesAtIndex(0);
         String[] relatedEntities = new String[availableEntities.length];
         for (int t = 0; t < availableEntities.length; t++) {
-            if (!this.db.getEntity().getEntityMeta(availableEntities[t], 5).toString().equalsIgnoreCase("null")) {
-                relatedEntities[t] = availableEntities[t] + ":" + this.db.getEntity().getEntityMeta(availableEntities[t], 5);
+            if (!this.db.getEntity().getEntityMeta(availableEntities[t], 5, true).toString().equalsIgnoreCase("null")) {
+                relatedEntities[t] = availableEntities[t] + ":" + this.db.getEntity().getEntityMeta(availableEntities[t], 5, true);
             } else {
                 relatedEntities[t] = availableEntities[t];
             }
