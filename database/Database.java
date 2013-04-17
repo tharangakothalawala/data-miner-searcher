@@ -24,20 +24,22 @@ public class Database {
     private String connurl;
     public String dbname;
     private String dbuser;
-    private String dbpasswd;//*/
+    private String dbpasswd;
 
     // query parameters
     private String query = "";
     private Map[] resultset; // to return all the loaded data
     private Map<String, String> map; // to hold each row
-    // other parameters
-    public final String COLNAMETYPESP = ":"; // to be used to identify metadata ex: username:nvarchar
-    private String[] dbtableArray;
-    private String[] dbviewArray;
+
+    // other configuration parameters
+    public final String COLNAMETYPESP = ":"; // to be used to identify metadata ex: username:nvarchar. And also act as data seperator
     public String searchable_data_types;
     public int entityDisplayLimit;
     public boolean considerUserAttributeSelectionForWhereClause;
 
+    /*
+     * Constructor intializes the database configuration
+     */
     public Database() {
         this.considerUserAttributeSelectionForWhereClause = false;
         boolean isFoundEnabledDB = false;
@@ -68,7 +70,7 @@ public class Database {
                             this.searchable_data_types = element.getElementsByTagName("searchable_data_types").item(0).getTextContent();
                             this.entityDisplayLimit = Integer.parseInt(element.getElementsByTagName("entityDisplayLimit").item(0).getTextContent());
                             if (element.getElementsByTagName("acceptAttributeRequestValuesForClause").item(0).getTextContent().equalsIgnoreCase("1")) {
-                                considerUserAttributeSelectionForWhereClause = true;
+                                this.considerUserAttributeSelectionForWhereClause = true;
                             }
                         }
                     }
@@ -93,13 +95,10 @@ public class Database {
     // establish a connection between database and returns the connection
     public Connection getDbConnection() {
         try {
-        // loading the driver for the MS SQL server
-        Class.forName(this.dbdriver);
-        //Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            // loading the driver for the MS SQL server
+            Class.forName(this.dbdriver);
 
-        //return DriverManager.getConnection("jdbc:sqlserver://" + this.host + ":" + this.port + ";databaseName=" + this.dbname + ";", this.dbuser, this.dbpasswd);
-        return DriverManager.getConnection(this.connurl, this.dbuser, this.dbpasswd);
-        //return DriverManager.getDbConnection("jdbc:sqlserver://176.250.128.96:1433;databaseName=" + this.dbname + ";", this.dbuser, this.dbpasswd); // this is to connect to the database at home remotely
+            return DriverManager.getConnection(this.connurl, this.dbuser, this.dbpasswd);
         } catch (Exception ex) {
             System.out.println("Error : Unable to Connect to the Database, '" + this.dbname + "'.\nPlease look at the configuration.xml for the connection parameters.");
             System.exit(0);
@@ -107,10 +106,16 @@ public class Database {
         return null;
     }
 
+    /*
+     * @param (String)	query	: SQL query to set
+     */
     public void setQuery(String query) {
         this.query = query;
     }
 
+    /*
+     * @return (String)	query	: return the SQL query
+     */
     public String getQuery() {
         return this.query;
     }
@@ -129,11 +134,11 @@ public class Database {
         int numberOfColumns = rsMetaData.getColumnCount();
 
         switch (key) {
-            case 1: // will get the number of attributes
+            case 1: // will get the number of attributes per table
                 entityMetaArray = new String[2];
                 entityMetaArray[0] = numberOfColumns + "";
 
-                // will get the row count
+                // will get the count of data rows
                 int rowCount = 0;
                 while (rs.next()) {
                     rowCount++;
@@ -141,7 +146,7 @@ public class Database {
 
                 entityMetaArray[1] = rowCount + "";
                 break;
-            case 2: // will get the data type of each attribute
+            case 2: // will get the data type for each attribute
                 entityMetaArray = new String[numberOfColumns];
 
                 String columnName = "",
@@ -157,7 +162,17 @@ public class Database {
         return entityMetaArray;
     }
 
-    // SQL select
+    /*
+     * @desc				: SQL statement creation and database query function
+     * @param (String)	table		: the table name. Also when the "isForced" is true, it identifies this param, "table" as the pre-created SQL statement to execute
+     * @param (String)	columns		: the SQL SELECT columns
+     * @param (String)	clause		: the SQL WHERE clause
+     * @param (String)	group		: the SQL GROUP BY
+     * @param (String)	order		: the SQL ORDER BY
+     * @param (String)	limit		: the SQL LIMIT
+     * @param (boolean)	isForced	: send true to force the pre-created SQL statment to excute
+     * @return (Map[])	resultset	: the results came out of the database
+     */
     public Map[] sqlSelect(String table, String columns, String clause, String group, String order, String limit, boolean isForced) {
         try {
             if (table != null && columns != null) {
@@ -210,7 +225,6 @@ public class Database {
                         map = new HashMap<String, String>();
                         for (int column = 1; column <= numberOfColumns; column++) {
                             map.put(rs.getMetaData().getColumnName(column), rs.getString(column));
-                            //System.out.println("(" + i + "," + column + ") ['" + rs.getMetaData().getColumnName(column) + "'] = " + map.get(rs.getMetaData().getColumnName(column)));
                         }
                         resultset[i] = map;
                         i++;
@@ -224,6 +238,9 @@ public class Database {
         return resultset;
     }
 
+    /*
+     * @return (ResultSet)	rs	: the results came directly out of the database after the query execution
+     */
     public ResultSet loadData() throws Exception {
         Statement s = getDbConnection().createStatement();
 
