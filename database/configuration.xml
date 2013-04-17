@@ -17,7 +17,7 @@
     <database>
         <isEnabled>0</isEnabled>
         <dbdriver>com.microsoft.sqlserver.jdbc.SQLServerDriver</dbdriver>
-        <connurl>jdbc:sqlserver://localhost:1433;databaseName=CGDB;</connurl>
+        <connurl>jdbc:sqlserver://localhost:1433;databaseName=CGDB;</connurl><!-- localhost | 192.168.232.134 -->
         <dbname>CGDB</dbname>
         <dbuser>sa</dbuser>
         <dbpasswd>qwerty1</dbpasswd>
@@ -27,10 +27,10 @@
     <database>
         <isEnabled>1</isEnabled>
         <dbdriver>com.mysql.jdbc.Driver</dbdriver>
-        <connurl>jdbc:mysql://localhost:3306/diecast</connurl><!-- localhost | 192.168.232.134 -->
-        <dbname>diecast</dbname>
+        <connurl>jdbc:mysql://localhost:3306/fproject_test</connurl>
+        <dbname>fproject_test</dbname>
         <dbuser>tharanga</dbuser>
-        <dbpasswd>qwerty</dbpasswd><!-- qwerty1 | FooBar(1)? -->
+        <dbpasswd>qwerty</dbpasswd>
         <searchable_data_types>nvarchar,varchar,ntext,text</searchable_data_types>
         <entityDisplayLimit>4</entityDisplayLimit>
     </database>

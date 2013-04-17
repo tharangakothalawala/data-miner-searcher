@@ -38,10 +38,10 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
 
     public AppGUI() {
         // starting the AppLogic here as I don't need the GUI right now!
-        search.doSearch();
+        //search.doSearch();
 
         // a simple test demonstration
-        /*apptest.testJoinSearch();
+        apptest.testJoinSearch();
         apptest.testSearch();
         System.exit(0);//*/
 

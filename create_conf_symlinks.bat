@@ -10,11 +10,11 @@ del /f configuration.xml
 mklink /H configuration.xml ..\src\database\configuration.xml
 
 cd databases
-:: Communigram DB entity_config
-del /f diecast_entity_config.xml
-mklink /H diecast_entity_config.xml ..\..\src\database\databases\diecast_entity_config.xml
+:: Project Test DB entity_config
+del /f fproject_test_entity_config.xml
+mklink /H fproject_test_entity_config.xml ..\..\src\database\databases\fproject_test_entity_config.xml
 
-:: Diecast DB entity_config
+:: Communigram DB entity_config
 del /f CGDB_entity_config.xml
 mklink /H CGDB_entity_config.xml ..\..\src\database\databases\CGDB_entity_config.xml
 

@@ -71,11 +71,16 @@ public class Database {
                     break;
                 }
             }
+        } catch (java.io.FileNotFoundException e) {
+            System.out.println("Error : The system cannot find the configuration.xml file! Check the file at 'config/configuration.xml'\n\n" + e);
+            System.exit(0);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.out.println("Error : XML configuration file error! Check the content of the file at 'config/configuration.xml'\n\n" + e);
+            System.exit(0);
         }
         if (!isFoundEnabledDB) { // if it is not found an enabled db configuration
-            System.out.println("Error : No database connection parameters found! or a configuration error in the 'config/configuration.xml'");
+            System.out.println("Error : No database connection parameters found!");
             System.exit(0);
         }
     }

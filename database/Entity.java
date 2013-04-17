@@ -160,9 +160,13 @@ public class Entity {
                 }
             }
             return searchableTables;
+        } catch (java.io.FileNotFoundException e) {
+            System.out.println("Error : The system cannot find the 'config/databases/" + db.dbname + "_entity_config.xml' file\n\n" + e);
+            System.exit(0);
         } catch (Exception e) {
             System.out.println("XML Parser Error: Please check the DB Entity config file, 'config/databases/" + db.dbname + "_entity_config.xml'\n\n" + e);
-            e.printStackTrace();
+            System.exit(0);
+            //e.printStackTrace();
         }
         return null;
     }
