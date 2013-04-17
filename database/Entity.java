@@ -4,9 +4,8 @@
  * @StudentNo	w1278462
  */
 
-package database.plugins;
+package database;
 
-import database.Database;
 import java.sql.*;
 
 import java.io.File;
