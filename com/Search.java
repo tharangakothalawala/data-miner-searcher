@@ -176,76 +176,73 @@ public class Search {
             }
 
             // displaying the child/related tables
-                    boolean isFound = false;
-                    boolean isRelatedTableAvailable = false;
-                    for (int t = 0; t < levelOneEntities.length; t++) {
-                            for (int i = 0; i < entityRelationsArray.length; i++) {
-                                String[] level = entityRelationsArray[i].split(db.COLNAMETYPESP);
+            // by default it is assuming as we have related table. After that it will find out the reality and stop where necessary
+            boolean isRelatedTableAvailable = true;
+            int count = 1;
+            String rootTable = searchableTables;
+            String userRelatedCategorySelection = "";
+            boolean isAjoin = false;
+            while (isRelatedTableAvailable) {
 
-                                if (level[0].equalsIgnoreCase(searchableTables) && !upperLevelTable.equalsIgnoreCase(searchableTables)) {
-                                    if (this.is_array(level)) {
-                                        String[] relatedCategories = level[1].split(",");
-                                        String relatedCategoriesDsp = "";
-                                        for (int j = 0; j < relatedCategories.length; j++) {
-                                            relatedCategoriesDsp += db.getEntity().getEntityMeta(relatedCategories[j], 2, true) + ", ";
-                                        }
-                                        relatedCategoriesDsp = relatedCategoriesDsp.substring(0, (relatedCategoriesDsp.length()) - 2); // #2: display_name
-                                        System.out.println("Related categories: " + relatedCategoriesDsp); // available related entities
-                                        isRelatedTableAvailable = true;
-                                    }
-                                    upperLevelTable = searchableTables;
-                                    isFound = true;
-                                } else if (level[0].equalsIgnoreCase(searchableTables) && this.isRelatedWithAnyTable(searchableTables) && !upperLevelTable.equalsIgnoreCase(searchableTables)) {
-                                    upperLevelTable = searchableTables;
-                                    isFound = true;
-                                }
+                            isRelatedTableAvailable = false;
+                            if (!this.db.getEntity().getEntityMeta(searchableTables, 5, true).toString().equalsIgnoreCase("null")) {
+                                String relatedTables = this.db.getEntity().getEntityMeta(searchableTables, 5, true);
+                                relatedTables = db.getEntity().getEntityMeta(relatedTables, 2, true); // #2: display_name
+                                System.out.println("Related categories: " + relatedTables); // available related entities
+                                isRelatedTableAvailable = true;
                             }
 
-                            if (this.isRelatedWithAnyTable(searchableTables) && !isFound) {
-                                upperLevelTable = searchableTables;
-                                isFound = true;
+                        if (isRelatedTableAvailable) {
+                            userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + db.getEntity().getEntityMeta(searchableTables, 2, true) + "'. Please select a related category or say 'no'. (no|category)\n: ", false);
+                        }
+                        if (this.in_array(db.getEntity().getEntityConfigValuesAtIndex(1), userRelatedCategorySelection) && isRelatedTableAvailable) {
+                            userRelatedCategorySelection = db.getEntity().getEntityMeta(userRelatedCategorySelection, 1, true); // getting the real_name
+                            String userRelatedCategoryAttributeSelection = this.promptMessage("\nPlease select the related attributes/fields which you require. Seperate by commas for multiple entries. (all|<attribute1>,<attribute2>)\nAvailable related attributes: " + db.getEntity().getSearchables(userRelatedCategorySelection, false) + "\n: ", true);
+                            if (userRelatedCategoryAttributeSelection.equalsIgnoreCase("all") || userRelatedCategoryAttributeSelection.equalsIgnoreCase("a")) {
+                                userRelatedCategoryAttributeSelection = db.getEntity().getSearchables(userRelatedCategorySelection, true);
+                            } else {
+                                userRelatedCategoryAttributeSelection = userRelatedCategorySelection + "." + userRelatedCategoryAttributeSelection.replaceAll(",", "," + userRelatedCategorySelection + ".");
                             }
-                    }
 
-                    String userRelatedCategorySelection = "";
-                    if (isRelatedTableAvailable) {
-                        userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + db.getEntity().getEntityMeta(searchableTables, 2, true) + "'. Please select a related category or say 'no'. (no|category)\n: ", false);
-                    }
-                    if (this.in_array(db.getEntity().getEntityConfigValuesAtIndex(1), userRelatedCategorySelection) && isRelatedTableAvailable) {
-                        userRelatedCategorySelection = db.getEntity().getEntityMeta(userRelatedCategorySelection, 1, true); // getting the real_name
-                        String userRelatedCategoryAttributeSelection = this.promptMessage("\nPlease select the related attributes/fields which you require. Seperate by commas for multiple entries. (all|<attribute1>,<attribute2>)\nAvailable related attributes: " + db.getEntity().getSearchables(userRelatedCategorySelection, false) + "\n: ", true);
-                        if (userRelatedCategoryAttributeSelection.equalsIgnoreCase("all") || userRelatedCategoryAttributeSelection.equalsIgnoreCase("a")) {
-                            userRelatedCategoryAttributeSelection = db.getEntity().getSearchables(userRelatedCategorySelection, true);
+                            isAjoin = true;
+                            rawUserInputData[count] = this.getQueryRawData(userRelatedCategorySelection, userRelatedCategoryAttributeSelection, "");
+                            searchableTables = userRelatedCategorySelection;
+                            count++;
                         } else {
-                            userRelatedCategoryAttributeSelection = userRelatedCategorySelection + "." + userRelatedCategoryAttributeSelection.replaceAll(",", "," + userRelatedCategorySelection + ".");
+                            isRelatedTableAvailable = false;
                         }
-
-                        String userSearchValue = this.promptMessage("\nPlease enter a keyword to search in the selected category, '"+ userTableSelection +"'\n: ", false);
-                        if (!userSearchValue.equalsIgnoreCase("")) {
-                            searchKeywordValue = userSearchValue;
-                        }
-
-                        rawUserInputData[0] = this.getQueryRawData(searchableTables, userCategoryAttributeSelection, searchKeywordValue);
-                        rawUserInputData[1] = this.getQueryRawData(userRelatedCategorySelection, userRelatedCategoryAttributeSelection, "");
-
-                        String sqlQuery = query.buildQuery (rawUserInputData, false);
-                        this.getRealData(sqlQuery, null);
-                    } else {
-                        String userSearchValue = this.promptMessage("\nPlease enter a keyword to search in the selected category, '"+ userTableSelection +"'\n: ", false);
-                        if (!userSearchValue.equalsIgnoreCase("")) {
-                            searchKeywordValue = userSearchValue;
-                        }
-                        
-                        irrelationalRawUserInputData[0] = this.getQueryRawData(searchableTables, userCategoryAttributeSelection, searchKeywordValue);
-                        this.getRealData(null, irrelationalRawUserInputData);
                     }
+
+                        if (isAjoin) {
+                            String userSearchValue = this.promptMessage("\nPlease enter a keyword to search in the selected category, '"+ userTableSelection +"'\n: ", false);
+                            if (!userSearchValue.equalsIgnoreCase("")) {
+                                searchKeywordValue = userSearchValue;
+                            }
+
+                            // index 0 contains the root category
+                            rawUserInputData[0] = this.getQueryRawData(rootTable, userCategoryAttributeSelection, searchKeywordValue);
+
+                            String sqlQuery = query.buildQuery (rawUserInputData, false);
+                            this.getRealData(sqlQuery, null);
+                        } else {
+                            String userSearchValue = this.promptMessage("\nPlease enter a keyword to search in the selected category, '"+ userTableSelection +"'\n: ", false);
+                            if (!userSearchValue.equalsIgnoreCase("")) {
+                                searchKeywordValue = userSearchValue;
+                            }
+
+                            irrelationalRawUserInputData[0] = this.getQueryRawData(searchableTables, userCategoryAttributeSelection, searchKeywordValue);
+                            this.getRealData(null, irrelationalRawUserInputData);
+                        }
                     
 
-            //this.getRealData(null, irrelationalRawUserInputData);
+            // re-initialize the array to prevent the old values being considered during the command line execution
+            this.initializeArray(rawUserInputData);
         } else if (searchMode == 2) {
             this.getRealData(null, irrelationalRawUserInputData);
+            this.initializeArray(irrelationalRawUserInputData);
         } else if (searchMode == 3) {
             this.getRealData(null, irrelationalRawUserInputData);
+            this.initializeArray(irrelationalRawUserInputData);
         }
 
 
@@ -406,6 +403,12 @@ public class Search {
         }
 
         //searchResults += eachRowData;
+    }
+
+    public void initializeArray (String[] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = null;
+        }
     }
 
     public void vardumpArray (String[] array) {
