@@ -37,13 +37,15 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
     private boolean isCategorySelected = false;//*/
 
     public AppGUI() {
-        // starting the AppLogic here as I don't need the GUI right now!
-        search.doSearch();
-
-        // a simple test demonstration
+        // A Unit Test to demonstrate the application functionlity
         /*apptest.testJoinSearch();
         apptest.testSearch();
         System.exit(0);//*/
+
+
+        // starting the AppLogic here as I don't need the GUI right now!
+        search.doSearch();
+
 
         /*btnSearch = new JButton("go cmd line");
         btnSetData = new JButton("Set Test Data");

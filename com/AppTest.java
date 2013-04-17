@@ -31,8 +31,8 @@ public class AppTest {
 	 * rawUserInputData[0] = "4images_images::a::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%' OR image_keywords LIKE '%Texas%'";
 	 * rawUserInputData[1] = "4images_users::user_name,user_email,user_location::";
 	 */
-	rawUserInputData[0] = search.getQueryRawData("Images", "a", "Texas");
-	rawUserInputData[1] = search.getQueryRawData("Users", "user_name,user_email,user_location", "");
+	rawUserInputData[0] = search.getQueryRawData("Images", "a", "Texas"); // "a" means to fetch all available data attributes
+	rawUserInputData[1] = search.getQueryRawData("Users", "user_name,user_email,user_location", ""); // here the required data attributes are defined
 
 	String sqlQuery = query.buildQuery(rawUserInputData, false);
 	search.getRealData(sqlQuery, null);//*/
@@ -45,7 +45,7 @@ public class AppTest {
 
 
 	// *********************************************************************
-	// The following is just a demo to show how we can integrate this API as a web service to provide search facility
+	// The following is just a demo to show how we can modify this API as a web service to provide search facility. To function RestFully
 	/*try {
             URL url1 = new URL("http://localhost:80/fproject/?collection=Images&attributes=a&q=Texas");
             URL url2 = new URL("http://localhost:80/fproject/?collection=Users&attributes=user_name,user_email,user_location&q=Texas");
