@@ -252,17 +252,33 @@ public class Search {
 
     } // function end
 
+    /*
+     * @param (String)	tableName		: selected table name
+     * @param (String)	requiredDataFields	: requested data fields
+     * @param (String)	searchKeyword		: search keyword
+     * @return (String)	queryRawData		: this returns the query raw data which will be used to create the SQL statement
+     * 							ex: "<table_name>::<requested_fields>::<where_clause>"
+     */
     public String getQueryRawData (String tableName, String requiredDataFields, String searchKeyword) {
         tableName = db.getEntity().getEntityMeta(tableName, 1, true);
+        String dataSeperator = db.COLNAMETYPESP + db.COLNAMETYPESP;
+        String queryRawData = "";
+
         if (requiredDataFields.equalsIgnoreCase("a")) { // all
             requiredDataFields = db.getEntity().getSearchables(tableName, false);
         }
-        String clause = query.makeClause(db.getEntity().getSearchables(tableName, true), searchKeyword);
-        String dataSeperator = db.COLNAMETYPESP + db.COLNAMETYPESP;
 
-        return tableName + dataSeperator +
+        String clause = "";
+        if (db.considerUserAttributeSelectionForWhereClause) {
+            clause = query.makeClause(requiredDataFields, searchKeyword);
+        } else {
+            clause = query.makeClause(db.getEntity().getSearchables(tableName, true), searchKeyword);
+        }
+
+        queryRawData =  tableName + dataSeperator +
                 requiredDataFields + dataSeperator +
                 clause;
+        return queryRawData;
     }
 
     public String[] getSuggestableTables (String keyword) {

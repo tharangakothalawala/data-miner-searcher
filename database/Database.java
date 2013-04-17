@@ -36,8 +36,10 @@ public class Database {
     private String[] dbviewArray;
     public String searchable_data_types;
     public int entityDisplayLimit;
+    public boolean considerUserAttributeSelectionForWhereClause;
 
     public Database() {
+        this.considerUserAttributeSelectionForWhereClause = false;
         boolean isFoundEnabledDB = false;
         try {
             File DBConfigFile = new File("config/configuration.xml");
@@ -65,6 +67,9 @@ public class Database {
                             this.dbpasswd = element.getElementsByTagName("dbpasswd").item(0).getTextContent();
                             this.searchable_data_types = element.getElementsByTagName("searchable_data_types").item(0).getTextContent();
                             this.entityDisplayLimit = Integer.parseInt(element.getElementsByTagName("entityDisplayLimit").item(0).getTextContent());
+                            if (element.getElementsByTagName("acceptAttributeRequestValuesForClause").item(0).getTextContent().equalsIgnoreCase("1")) {
+                                considerUserAttributeSelectionForWhereClause = true;
+                            }
                         }
                     }
                 } else {

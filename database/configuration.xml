@@ -23,6 +23,7 @@
         <dbpasswd>qwerty1</dbpasswd>
         <searchable_data_types>nvarchar,varchar,ntext,text</searchable_data_types>
         <entityDisplayLimit>6</entityDisplayLimit>
+        <acceptAttributeRequestValuesForClause>0</acceptAttributeRequestValuesForClause>
     </database>
     <database>
         <isEnabled>1</isEnabled>
@@ -33,5 +34,6 @@
         <dbpasswd>qwerty</dbpasswd>
         <searchable_data_types>nvarchar,varchar,ntext,text</searchable_data_types>
         <entityDisplayLimit>4</entityDisplayLimit>
+        <acceptAttributeRequestValuesForClause>0</acceptAttributeRequestValuesForClause>
     </database>
 </databases>
