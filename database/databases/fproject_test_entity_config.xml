@@ -19,7 +19,7 @@
         <table_name>4images_users</table_name>
         <display_name>Users</display_name>
         <implicit_annotation>This category or the table is about the users of the system.</implicit_annotation>
-        <aliases>usr</aliases>
+        <aliases>People,Customers</aliases>
         <related_tables></related_tables>
         <searchable_attributes force="0">user_name:this is the profile name,user_email</searchable_attributes>
     </table>
@@ -27,7 +27,7 @@
         <table_name>4images_images</table_name>
         <display_name>Images</display_name>
         <implicit_annotation>This category or the table is about images</implicit_annotation>
-        <aliases>img</aliases>
+        <aliases>Pictures</aliases>
         <related_tables>4images_users</related_tables>
         <searchable_attributes force="0">image_name:this is the image name,image_description,image_keywords</searchable_attributes>
     </table>

@@ -143,6 +143,8 @@ public class Search {
         } else {
             if (!detectedSuggestableTables.toString().equalsIgnoreCase(OVERFLOW)) {
                 System.out.println("No matching category found! Will search in ALL");
+            } else {
+                System.out.println("Too many categories found! Will search in ALL");
             }
 
             searchableTables = "*";
@@ -290,12 +292,15 @@ public class Search {
 	String tableList = "";
 	for (int i = 0; i < tables.length; i++) {
 		String eachTableMetaDescription = db.getEntity().getEntityMeta(tables[i], 3, true); // #3: implicit_annotation
+		String eachTableAliases = db.getEntity().getEntityMeta(tables[i], 4, false); // #4: aliases
 		String eachTableAttributeMetaDescription = db.getEntity().getEntityMeta(tables[i], 7, false); // #7: searchable_attributes
 
 		// checking for the initialUserInput meta description for any available keyword/s
-		if (eachTableMetaDescription.toLowerCase().contains(keyword.toLowerCase()) || eachTableAttributeMetaDescription.toLowerCase().contains(keyword.toLowerCase())) {
-			//tableList += tables[i] + ",";
-                        tableList += db.getEntity().getEntityMeta(tables[i], 2, true) + ",";
+		if (eachTableMetaDescription.toLowerCase().contains(keyword.toLowerCase())
+			|| eachTableAttributeMetaDescription.toLowerCase().contains(keyword.toLowerCase())
+			|| eachTableAliases.toLowerCase().contains(keyword.toLowerCase())) {
+
+			tableList += db.getEntity().getEntityMeta(tables[i], 2, true) + ",";
 			countOfTablesWithMetaKeyword++;
 		}
 	}
@@ -303,7 +308,7 @@ public class Search {
 		tableList = tableList.substring(0, tableList.length()-1);
         }
            
-	if (countOfTablesWithMetaKeyword < ENTITYDISPLAYLIMIT) {
+	if (countOfTablesWithMetaKeyword <= ENTITYDISPLAYLIMIT) {
 		String[] suggestableTables = tableList.split(",");
 		return suggestableTables;
 	} else {
