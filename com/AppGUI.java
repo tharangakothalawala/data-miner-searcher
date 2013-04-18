@@ -333,11 +333,11 @@ public class AppGUI extends JPanel implements ActionListener, ItemListener {
             //lblSearchResultInfo.setText(query.getCount(sqlCountQuery) + " results found");
 
             String sqlQuery = query.buildQuery(search.rawUserInputData, true);
-            search.getRealData(sqlQuery, null);
+            search.displayRealData(sqlQuery, null);
             searchResults = search.searchResults;
             search.searchResults = "";
             //sqlQuery = search.buildQuery(search.irrelationalRawUserInputData);
-            search.getRealData(null, search.irrelationalRawUserInputData);
+            search.displayRealData(null, search.irrelationalRawUserInputData);
             searchResults += search.searchResults;
             textarea.setText(searchResults);
             search.searchResults = "";

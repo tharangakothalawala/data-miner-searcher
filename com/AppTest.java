@@ -20,7 +20,7 @@ public class AppTest {
 	// This is a single query statment without JOINs
 	rawUserInputData[0] = search.getQueryRawData("Images", "image_name,image_description,image_keywords", "Texas");
 
-	search.getRealData(null, rawUserInputData);
+	search.displayRealData(null, rawUserInputData);
     }
 
     public void testJoinSearch() {
@@ -35,7 +35,7 @@ public class AppTest {
 	rawUserInputData[1] = search.getQueryRawData("Users", "user_name,user_email,user_location", ""); // here the required data attributes are defined
 
 	String sqlQuery = query.buildQuery(rawUserInputData, false);
-	search.getRealData(sqlQuery, null);//*/
+	search.displayRealData(sqlQuery, null);//*/
 
 
 
@@ -57,7 +57,7 @@ public class AppTest {
             rawUserInputData[1] = search.getQueryRawData(query2[0].split("=")[1], query2[1].split("=")[1], query2[2].split("=")[1]);
 
             String sqlQuery = query.buildQuery(rawUserInputData, false);
-            search.getRealData(sqlQuery, null);
+            search.displayRealData(sqlQuery, null);
 
 	} catch (Exception ex) { }//*/
     }

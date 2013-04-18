@@ -42,7 +42,7 @@ public class Search {
     String[] irrelationalRawUserInputData;
     String[] primaryKeyArray;
     String[] foreignKeyArray;
-    private Query query = new Query(primaryKeyArray, foreignKeyArray);
+    private Query query;
 
     /*
      * Constructor loads the entity relatonships from the XML for further processing.
@@ -50,6 +50,7 @@ public class Search {
     public Search() {
         ENTITYDISPLAYLIMIT = db.entityDisplayLimit;
         this.loadEntityRelations();
+        query = new Query(this.primaryKeyArray, this.foreignKeyArray);
         rawUserInputData = new String[db.getEntity().getEntityConfigValuesAtIndex(0).length];
         irrelationalRawUserInputData = new String[db.getEntity().getEntityConfigValuesAtIndex(0).length];
     }
@@ -59,13 +60,7 @@ public class Search {
      * USERS s name a s name ad PROFILE s prof_name min s prof_name dmin
      */
     public void doSearch() {
-        String[] entityRelationsArray = this.getEntityRelations();
-        //this.vardumpArray(entityRelationsArray);
-
-        String[] levelOneEntities = new String[entityRelationsArray.length];
-
         String initialUserInput = "";
-        String upperLevelTable = "";
         String userTableSelection = "";
         String tableSugessions = "";
         String searchableTables = "";
@@ -83,7 +78,7 @@ public class Search {
             initialUserInput = this.promptMessage("For what are you searching for?\n: ", false);
 
             // exit
-            if (initialUserInput.equalsIgnoreCase("x")) {
+            if (initialUserInput.equalsIgnoreCase("q") || initialUserInput.equalsIgnoreCase("exit") || initialUserInput.equalsIgnoreCase("quit")) {
                 System.exit(0); //break;
             }
 
@@ -183,6 +178,7 @@ public class Search {
                 String rootTable = searchableTables;
                 String userRelatedCategorySelection = "";
                 boolean isAjoin = false;
+
                 while (isRelatedTableAvailable) {
 
                     isRelatedTableAvailable = false;
@@ -220,11 +216,11 @@ public class Search {
                         searchKeywordValue = userSearchValue;
                     }
 
-                    // according to the procedure, always the index 0 should contain the selected root category
+                    // according to this application logic, always the index 0 should contain the selected root category (look at the Query Class)
                     rawUserInputData[0] = this.getQueryRawData(rootTable, userCategoryAttributeSelection, searchKeywordValue);
 
                     String sqlQuery = query.buildQuery(rawUserInputData, false);
-                    this.getRealData(sqlQuery, null);
+                    this.displayRealData(sqlQuery, null);
                 } else {
                     String userSearchValue = this.promptMessage("\nPlease enter a keyword to search in the selected category, '" + userTableSelection + "'\n: ", false);
                     if (!userSearchValue.equalsIgnoreCase("")) {
@@ -232,16 +228,16 @@ public class Search {
                     }
 
                     irrelationalRawUserInputData[0] = this.getQueryRawData(searchableTables, userCategoryAttributeSelection, searchKeywordValue);
-                    this.getRealData(null, irrelationalRawUserInputData);
+                    this.displayRealData(null, irrelationalRawUserInputData);
                 }
 
                 // re-initialize the array to prevent the old values being considered during the command line execution
                 this.initializeArray(rawUserInputData);
             } else if (searchMode == 2) {
-                this.getRealData(null, irrelationalRawUserInputData);
+                this.displayRealData(null, irrelationalRawUserInputData);
                 this.initializeArray(irrelationalRawUserInputData);
             } else if (searchMode == 3) {
-                this.getRealData(null, irrelationalRawUserInputData);
+                this.displayRealData(null, irrelationalRawUserInputData);
                 this.initializeArray(irrelationalRawUserInputData);
             }
 
@@ -292,7 +288,7 @@ public class Search {
             String eachTableAliases = db.getEntity().getEntityMeta(tables[i], 4, false); // #4: aliases
             String eachTableAttributeMetaDescription = db.getEntity().getEntityMeta(tables[i], 7, false); // #7: searchable_attributes
 
-            // checking for the initialUserInput meta description for any available keyword/s
+            // checking for the meta descriptions for any available keyword/s
             if (eachTableMetaDescription.toLowerCase().contains(keyword.toLowerCase())
                     || eachTableAttributeMetaDescription.toLowerCase().contains(keyword.toLowerCase())
                     || eachTableAliases.toLowerCase().contains(keyword.toLowerCase())) {
@@ -338,71 +334,60 @@ public class Search {
         return returnValue;
     }
 
-    public void getRealData(String sqlQuery, String[] sqlQueryMeta) {
-        String eachRowData = "";
+    public void displayRealData(String sqlQuery, String[] sqlQueryMeta) {
         try {
             if (sqlQuery != null) {
                 Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, true);
-                System.out.println("1###Query :" + db.getQuery());
+                System.out.println("SQL :" + db.getQuery());
                 String sqlCountQuery = sqlQuery.replaceAll("SELECT([^<]*)FROM", "SELECT COUNT(*) FROM");
                 System.out.println("--- " + query.getCount(sqlCountQuery) + " results found ---");
 
-                // begin :traversing through each initialUserInput row to display data
+                // begin :traversing through each row to display data
                 if (resultsets.length > 0) {
                     for (int i = 0; i < resultsets.length; i++) {
                         Map<String, String> resultset = resultsets[i];
                         System.out.println("== ROW: " + (i + 1) + " ========================");
-                        eachRowData += "\n== ROW: " + (i + 1) + " ========================";
                         for (Map.Entry<String, String> entry : resultset.entrySet()) {
                             String key = entry.getKey();
                             String value = entry.getValue();
                             if (value != null) {
                                 System.out.println("['" + key + "'] = " + value);
-                                eachRowData += "\n['" + key + "'] = " + value;
                             }
                         }
                     }
                 }
             } else {
-                System.out.println("\n========================\n");
+                /*System.out.println("\n========================\n");
                 this.vardumpArray(sqlQueryMeta);
-                System.out.println("\n========================\n");
+                System.out.println("\n========================\n");//*/
 
                 for (int c = 0; c < sqlQueryMeta.length; c++) {
 
                     String[] queryMeta = sqlQueryMeta[c].split(db.COLNAMETYPESP + db.COLNAMETYPESP);
                     Map[] resultsets = db.sqlSelect(queryMeta[0], queryMeta[1], queryMeta[2], null, null, null, false);
-                    System.out.println("2###Query :" + db.getQuery());
+                    System.out.println("SQL :" + db.getQuery());
 
                     String sqlCountQuery = db.getQuery().replaceAll("SELECT([^<]*)FROM", "SELECT COUNT(*) FROM");
                     System.out.println("--- " + query.getCount(sqlCountQuery) + " results found ---");
 
-
-                    // begin :traversing through each initialUserInput row to display data
+                    // begin :traversing through each row to display data
                     if (resultsets.length > 0) {
                         for (int i = 0; i < resultsets.length; i++) {
                             Map<String, String> resultset = resultsets[i];
                             System.out.println("== ROW: " + (i + 1) + " ========================");
-                            eachRowData += "\n== ROW: " + (i + 1) + " ========================";
                             for (Map.Entry<String, String> entry : resultset.entrySet()) {
                                 String key = entry.getKey();
                                 String value = entry.getValue();
                                 if (value != null) {
                                     System.out.println("['" + key + "'] = " + value);
-                                    eachRowData += "\n['" + key + "'] = " + value;
                                 }
                             }
                         }
                     }
-                    //searchResults = eachRowData;
-                    //searchResults += eachRowData;
-                    //eachRowData = "";
                 }
             }
         } catch (Exception ex) {
         }
-
-        //searchResults += eachRowData;
     }
 
     public void initializeArray(String[] array) {
@@ -429,37 +414,8 @@ public class Search {
         return false;
     }
 
-    public boolean is_array(String[] array) {
-        try {
-            String attempToGetTheValueAtArrayIndexTwo = array[1];
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public boolean isRelatedWithAnyTable(String table) {
-        boolean result = false;
-        String[] relatedEntities = this.getEntityRelations();
-
-        for (int i = 0; i < relatedEntities.length; i++) {
-            if (!result && relatedEntities[i].matches(".*" + table + ".*")) {
-                String[] tableInfo = relatedEntities[i].split(db.COLNAMETYPESP);
-                if (this.is_array(tableInfo)) {
-                    String[] tables = tableInfo[1].split(",");
-                    if (this.in_array(tables, table)) {
-                        result = true;
-                    }
-                }
-            }
-        }
-
-        //System.out.println("related tables : " + result);
-        return result;
-    }
-
     public void loadEntityRelations() {
+        // get the tables which have been defined in the <db-name>_entity_config.xml
         String[] tableArray = this.db.getEntity().getEntityConfigValuesAtIndex(0);
 
         int totalKeyColumns = 0;
@@ -472,57 +428,29 @@ public class Search {
 
         int primarykeycount = 0;
         int foreignkeycount = 0;
-        // begin: traversing through each initialUserInput
+        // begin: traversing through each defined table
         for (int t = 0; t < tableArray.length; t++) {
-            // need only the tables which contain searchable attributes
-            if (!db.getEntity().getSearchables(tableArray[t], false).equalsIgnoreCase("")) {
-                // sending the query to the database to retrieve data
-                Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, false);
+            // getting meta data from the database information schema table related to primary/foreign keys
+            Map[] resultsets = db.sqlSelect("INFORMATION_SCHEMA.KEY_COLUMN_USAGE", "*", "table_name = '" + tableArray[t] + "'", null, null, null, false);
 
-                // begin :traversing through each initialUserInput row to display data
-                if (resultsets.length > 0) {
-                    for (int i = 0; i < resultsets.length; i++) {
-                        Map<String, String> resultset = resultsets[i];
-                        String columnname = "";
-                        for (Map.Entry<String, String> entry : resultset.entrySet()) {
-                            String key = entry.getKey();
-                            String value = entry.getValue();
+            // begin :traversing through each row
+            if (resultsets.length > 0) {
+                for (int i = 0; i < resultsets.length; i++) {
+                    // Each data record/row
+                    Map<String, String> resultset = resultsets[i];
 
-                            if (key.equalsIgnoreCase("COLUMN_NAME")) {
-                                columnname = value;
-                            }
-
-                            if (key.equalsIgnoreCase("CONSTRAINT_NAME")) {
-                                if (value.matches(".*fk.*")) {
-                                    foreignKeyArray[foreignkeycount] = tableArray[t] + db.COLNAMETYPESP + columnname;
-                                    //System.out.println("FK: "+ tableArray[t] + db.COLNAMETYPESP + columnname);
-                                    foreignkeycount++;
-                                }
-                                if (value.matches(".*PK.*") || value.matches(".*PRIMARY.*")) { // "PRIMARY" is used in mysql
-
-                                    primaryKeyArray[primarykeycount] = tableArray[t] + db.COLNAMETYPESP + columnname;
-                                    //System.out.println("PK: "+ tableArray[t] + db.COLNAMETYPESP + columnname);
-                                    primarykeycount++;
-                                }
-                            }
-                        }
+                    if (resultset.get("CONSTRAINT_NAME").matches(".*fk.*") && resultset.get("CONSTRAINT_NAME") != null) {
+                        foreignKeyArray[foreignkeycount] = tableArray[t] + db.COLNAMETYPESP + resultset.get("COLUMN_NAME");
+                        //System.out.println("FK: " + foreignKeyArray[foreignkeycount]);
+                        foreignkeycount++;
                     }
-                } // end :traversing through each initialUserInput row to display data
+                    if (resultset.get("CONSTRAINT_NAME").matches(".*PK.*") || resultset.get("CONSTRAINT_NAME").matches(".*PRIMARY.*")) { // "PRIMARY" is used in mysql
+                        primaryKeyArray[primarykeycount] = tableArray[t] + db.COLNAMETYPESP + resultset.get("COLUMN_NAME");
+                        //System.out.println("PK: " + primaryKeyArray[primarykeycount]);
+                        primarykeycount++;
+                    }
+                }// end :traversing through each row
             }
-        } // end: traversing through each initialUserInput
-        query = new Query(this.primaryKeyArray, this.foreignKeyArray);
-    }
-
-    public String[] getEntityRelations() {
-        String[] availableEntities = this.db.getEntity().getEntityConfigValuesAtIndex(0);
-        String[] relatedEntities = new String[availableEntities.length];
-        for (int t = 0; t < availableEntities.length; t++) {
-            if (!this.db.getEntity().getEntityMeta(availableEntities[t], 5, true).toString().equalsIgnoreCase("null")) {
-                relatedEntities[t] = availableEntities[t] + ":" + this.db.getEntity().getEntityMeta(availableEntities[t], 5, true);
-            } else {
-                relatedEntities[t] = availableEntities[t];
-            }
-        }
-        return relatedEntities;
+        } // end: traversing through each table
     }
 }
