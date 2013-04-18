@@ -17,7 +17,7 @@ public class Main {
 
     public static void runApp() {
 	// Unit Tests to demonstrate the application functionality
-	apptest.testSearch(); // a normal search
+	/*apptest.testSearch(); // a normal search
 	apptest.testJoinSearch(); // joined search
 	apptest.testFacetedSearch(); // faceted search
 	apptest.testWithURLFormat(); // just a demo to show how we can improve this application to run as a web service
