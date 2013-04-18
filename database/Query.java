@@ -11,12 +11,10 @@ import java.util.*;
 public class Query {
 
     private Database db = new Database();
-    
-    private String sqlQuery;
+
     private String selectClause;
     private String whereCondition;
     private String joinStatement;
-    //private boolean fetchCount;
 
     private String[] primaryKeyArray;
     private String[] foreignKeyArray;
@@ -27,8 +25,10 @@ public class Query {
         this.foreignKeyArray = foreignKeyArray;
     }
 
+    /*
+     * Initializes the key variables
+     */
     public void init () {
-        this.sqlQuery = "";
         this.selectClause = "SELECT";
         this.whereCondition = " WHERE ";
         this.joinStatement = "";
@@ -88,10 +88,14 @@ public class Query {
         }
         joinStatement += parentTableCondition;
 
-        this.setSqlQuery(this.selectClause + joinStatement + ";");
-        return this.getSqlQuery();
+        return this.selectClause + joinStatement + ";";
     }
 
+    /*
+     * This returns the query result count
+     * @param	(String)	sqlQuery	: the pre-generated SQL COUNT query
+     * @return	(int)		count		: number of data rows
+     */
     public int getCount (String sqlQuery) {
         if (sqlQuery != null) {
             Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, true);
@@ -102,6 +106,11 @@ public class Query {
         return 0;
     }
 
+    /*
+     * This creates the formatted WHERE clause
+     * @param	(String)	searchables	: attributes which are needed in the WHERE clause
+     * @param	(String)	keyword		: user search keyword
+     */
     public String makeClause (String searchables, String keyword) {
         if (searchables != null) {
             searchables = searchables.replaceAll(",", " LIKE '%" + keyword + "%' OR ");
@@ -113,6 +122,10 @@ public class Query {
         }
     }
 
+    /*
+     * Similar version of the above function to create the WHERE clause,
+	But here it is not creating the clause but passing the already created clause
+     */
     public String createJoinWhereClause (String[] rawDataArray, boolean isWithinJoin) {
         String[] conditions = rawDataArray[2].split(db.COLNAMETYPESP);
         String whereClause = "";
@@ -126,6 +139,12 @@ public class Query {
             return whereClause;
     }
 
+    /*
+     * Returns the index of any given array where a matching value is found in the first splited part of any value
+     * @param	(String[])	array		: the array with values
+     * @param	(String)	value		: the value to be matched against
+     * @param	(String)	splitter	: the value splitter symbol
+     */
     public int getArrayIndexAtValue (String[] array, String value, String splitter) {
         int index = 0; // the very first array insertion index
         for (int i = 0; i < array.length; i++) {
@@ -138,14 +157,6 @@ public class Query {
             }
         }
         return index;
-    }
-
-    public String getSqlQuery() {
-        return sqlQuery;
-    }
-
-    public void setSqlQuery(String sqlQuery) {
-        this.sqlQuery = sqlQuery;
     }
 
 }

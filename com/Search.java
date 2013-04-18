@@ -17,14 +17,15 @@ public class Search {
     /*
      * this is the limit where we can display the suggestable tables
      */
-    private static int ENTITYDISPLAYLIMIT;
+    private static int ENTITY_DISPLAY_LIMIT;
 
     /*
-     * If the searchable table count is more than the ENTITYDISPLAYLIMIT, the number of suggestable table is too much to select from. So it will search in all.
+     * If the searchable table count is more than the ENTITY_DISPLAY_LIMIT, the number of suggestable table is too much to select from. So it will search in all.
      */
     private static String OVERFLOW = "too_much_suggesstable_tables";
 
     /*
+     * Used Values,
      * 1: searching the specified table / category
      * 2: searching in ALL tables which have been defined in the XML
      * 3: searching in ALL tables which have been suggested
@@ -62,7 +63,7 @@ public class Search {
      * Constructor loads the entity relatonships from the XML for further processing and intializes the table key arrays
      */
     public Search() {
-        ENTITYDISPLAYLIMIT = db.entityDisplayLimit;
+        ENTITY_DISPLAY_LIMIT = db.entityDisplayLimit;
         this.loadEntityRelations();
         query = new Query(this.primaryKeyArray, this.foreignKeyArray);
         rawUserInputData = new String[db.getEntity().getEntityConfigValuesAtIndex(0).length];
@@ -70,8 +71,8 @@ public class Search {
     }
 
     /*
-     * ex. inputs:
-     * USERS s name a s name ad PROFILE s prof_name min s prof_name dmin
+     *	This is the function which contain the user interaction codes.
+     *	This also creates the SQL Query raw data arrays to get real data.
      */
     public void doSearch() {
         String initialUserInput = "";
@@ -144,7 +145,6 @@ public class Search {
                     System.out.println("Too many categories found! Will search in ALL");
                 }
 
-                searchableTables = "*";
                 String userSearchValue = this.promptMessage("\nPlease enter a keyword to search.\n: ", false);
                 if (!userSearchValue.equalsIgnoreCase("")) {
                     searchKeywordValue = userSearchValue;
@@ -153,10 +153,11 @@ public class Search {
                 for (int t = 0; t < db.getEntity().getEntityConfigValuesAtIndex(0).length; t++) {
                     irrelationalRawUserInputData[t] = this.getQueryRawData(db.getEntity().getEntityConfigValuesAtIndex(0)[t], "a", searchKeywordValue);
                 }
-                searchMode = 2;
+                searchMode = 2; // this is equal to the step: 2 as this is searching in all tables
             }
 
-            // @TODO: seems can be removed as never executed!
+
+            // "0" means nothing (1, 2, 3) is triggered above. Definetly due to an invalid input
             if (searchMode == 0) {
                 System.out.println("Invalid Category!");
             }
@@ -243,8 +244,7 @@ public class Search {
 
             System.out.println("\n\n----------------------------------------------------------------");
         } while (!initialUserInput.equalsIgnoreCase(""));
-
-    } // function end
+    }
 
     /*
      * @param (String)	tableName		: selected table name
@@ -275,11 +275,16 @@ public class Search {
         return queryRawData;
     }
 
+    /*
+     * This returns the suggestable table according to the users category lookup value.
+     * @param (String)      keyword             : the category search keyword
+     * @return (String[])   suggestableTables   : an array of tables with their descriptions
+     */
     public String[] getSuggestableTables(String keyword) {
         // traversing through all the available/defined seachable tables
         String[] tables = db.getEntity().getEntityConfigValuesAtIndex(0);
 
-        // counting the tables which have got a meta keyword
+        // counting the tables which has got a meta keyword
         int countOfTablesWithMetaKeyword = 0;
         String tableList = "";
         for (int i = 0; i < tables.length; i++) {
@@ -300,7 +305,7 @@ public class Search {
             tableList = tableList.substring(0, tableList.length() - 1);
         }
 
-        if (countOfTablesWithMetaKeyword <= ENTITYDISPLAYLIMIT) {
+        if (countOfTablesWithMetaKeyword <= ENTITY_DISPLAY_LIMIT) {
             String[] suggestableTables = tableList.split(",");
             return suggestableTables;
         } else {
@@ -308,6 +313,12 @@ public class Search {
         }
     }
 
+    /*
+     * Get the user input from the command line interface
+     * @param (String)  message     : the message for the user
+     * @param (boolean) doTrim      : to remove white spaces according ot the value
+     * @return (String) returnValue : returns the user input value
+     */
     public String promptMessage(String message, boolean doTrim) {
         String returnValue = "";
         int inputAttemptCount = 0;
@@ -333,6 +344,11 @@ public class Search {
         return returnValue;
     }
 
+    /*
+     * The place where it triggers the Database SQL execution method to get the data out of the database
+     * @param (String)      sqlQuery        : the pre-generated SQL query
+     * @param (String[])    sqlQueryMeta    : an array containing the raw data for single SQL SELECT query generation
+     */
     public void displayRealData(String sqlQuery, String[] sqlQueryMeta) {
         try {
             if (sqlQuery != null) {
@@ -356,12 +372,7 @@ public class Search {
                     }
                 }
             } else {
-                /*System.out.println("\n========================\n");
-                this.vardumpArray(sqlQueryMeta);
-                System.out.println("\n========================\n");//*/
-
                 for (int c = 0; c < sqlQueryMeta.length; c++) {
-
                     String[] queryMeta = sqlQueryMeta[c].split(db.COLNAMETYPESP + db.COLNAMETYPESP);
                     Map[] resultsets = db.sqlSelect(queryMeta[0], queryMeta[1], queryMeta[2], null, null, null, false);
                     System.out.println("SQL :" + db.getQuery());
@@ -385,24 +396,21 @@ public class Search {
                     }
                 }
             }
-        } catch (Exception ex) {
-        }
+        } catch (Exception ex) { }
     }
 
+    /*
+     * This initializes any given array
+     */
     public void initializeArray(String[] array) {
         for (int i = 0; i < array.length; i++) {
             array[i] = null;
         }
     }
 
-    public void vardumpArray(String[] array) {
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] != null) {
-                System.out.println(array[i]);
-            }
-        }
-    }
-
+    /*
+     * This is equivalent to the PHP in_array function to detect values in any given array
+     */
     public boolean in_array(String[] array, String searchValue) {
         for (int i = 0; i < array.length; i++) {
             if (array[i].equalsIgnoreCase(searchValue)) {
@@ -413,6 +421,10 @@ public class Search {
         return false;
     }
 
+    /*
+     * This loads the table relationships in terms of primary and foreign keys.
+	And this will fill the primary and foreignkey arrays
+     */
     public void loadEntityRelations() {
         // get the tables which have been defined in the <db-name>_entity_config.xml
         String[] tableArray = this.db.getEntity().getEntityConfigValuesAtIndex(0);

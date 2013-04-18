@@ -21,7 +21,7 @@ public class Entity {
     Database db = new Database();
 
     /*
-     * @param (String)      table           : The table which it going to search
+     * @param (String)      table           : The table which it needs the attributes from
      * @param (boolean)     appendTableName : true, if we need in the form of <table>.<attribute>, <table>.<attribute> ...
      * @return (String)     attributes      : returns a set of possible searchable attributes to a given table
      */
@@ -74,6 +74,11 @@ public class Entity {
         return attributes;
     }
 
+    /*
+     * Check if a datatype of an attribute is searchable or not, by looking from the database configuration data. (configuration.xml)
+     * @param	(String)	datatype	: any datatype. e.g.: nvarchar, varchar, ntext, text
+     * @return	(boolean)	isSearchable	: true or false depending on the XML config
+     */
     public boolean isSearchable(String datatype) {
         String[] searchableTypes = this.db.searchable_data_types.split(",");
         boolean isSearchable = false;
@@ -87,7 +92,7 @@ public class Entity {
     }
 
     /*
-     * @param (int)	configValueIndex	: get only the values at the specified index from the xml xonfig array
+     * @param (int)	configValueIndex	: get only the values at the specified index from the xml config array
      * @return (String)	searchableTableData	: returns the array of values at index, <configValueIndex>
      */
     public String[] getEntityConfigValuesAtIndex(int configValueIndex) {
@@ -102,8 +107,8 @@ public class Entity {
     }
 
     /*
-     * @param (boolean)	isInit			: load data from the XML according to the formal way.
-						  If false, it will load restricted data even they are hidden
+     * @param (boolean)	isInit			: load data from the XML (<db-name>_entity_config.xml) according to the formal way.
+						  If false, it will load restricted data even if they are restricted
      * @return (String)	searchableTableData	: returns the full db entity configuration information as a form of an array
      */
     public String[] loadEntityConfig(boolean isInit) {
@@ -171,19 +176,24 @@ public class Entity {
         return null;
     }
 
+    /*
+     * This is the main function to deal with the XML file values. (<db-name>_entity_config.xml)
+     * @param	(String)	table	: the table name
+     * @param	(String)	key	: this indicates what value is needed
+     * @param	(boolean)	isInit	: indicate whether this is a call during the App Init or not
+     */
     public String getEntityMeta(String table, int key, boolean isInit) {
         String[] definedTableData = this.loadEntityConfig(isInit);
 
         for (int i = 0; i < definedTableData.length; i++) {
             String[] tableData = definedTableData[i].split(db.COLNAMETYPESP + db.COLNAMETYPESP);
             String tableName = tableData[0];
-            String displayName = tableData[1]; // what this table about
+            String displayName = tableData[1];
             String implicitAnnotation = tableData[2]; // meta description
             String aliases = tableData[3];
             String relatedTables = tableData[4];
             String searchableAttributes = tableData[5];
 
-            //System.out.println (eachTable +"|"+ searchableAttributes +"|"+ eachTableDescription);
             if ((tableName.equalsIgnoreCase(table) || displayName.equalsIgnoreCase(table)) && key == 1) {
                 return tableName;
             } else if ((tableName.equalsIgnoreCase(table) || displayName.equalsIgnoreCase(table)) && key == 2) {
@@ -210,15 +220,5 @@ public class Entity {
             }
         }
         return null;
-    }
-
-    public int getSugesstableEntityCount() {
-        int sugesstableEntityCount = 0;
-        for (int i = 0; i < this.getEntityConfigValuesAtIndex(0).length; i++) {
-            if (this.getEntityMeta(this.getEntityConfigValuesAtIndex(0)[i], 8, true).equalsIgnoreCase("1")) {
-                sugesstableEntityCount++;
-            }
-        }
-        return sugesstableEntityCount;
     }
 }
