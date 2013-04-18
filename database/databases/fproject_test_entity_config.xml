@@ -16,7 +16,7 @@
 
 <database>
     <table>
-        <table_name>4images_users</table_name>
+        <table_name>fproject_users</table_name>
         <display_name>Users</display_name>
         <implicit_annotation>This category or the table is about the users of the system.</implicit_annotation>
         <aliases>People,Customers</aliases>
@@ -24,19 +24,19 @@
         <searchable_attributes force="0">user_name:this is the profile name,user_email</searchable_attributes>
     </table>
     <table>
-        <table_name>4images_images</table_name>
+        <table_name>fproject_images</table_name>
         <display_name>Images</display_name>
         <implicit_annotation>This category or the table is about images</implicit_annotation>
         <aliases>Pictures</aliases>
-        <related_tables>4images_users</related_tables>
+        <related_tables>fproject_users</related_tables>
         <searchable_attributes force="0">image_name:this is the image name,image_description,image_keywords</searchable_attributes>
     </table>
     <table>
-        <table_name>4images_comments</table_name>
+        <table_name>fproject_comments</table_name>
         <display_name>Comments</display_name>
         <implicit_annotation>This category or the table is about the comments done by users for stored images.</implicit_annotation>
         <aliases></aliases>
-        <related_tables>4images_users</related_tables>
+        <related_tables>fproject_users</related_tables>
         <searchable_attributes force="0">user_name:this is a user images,comment_headline:headline of the comment. may contain images,comment_text:comment in details and this may contain images</searchable_attributes>
     </table>
 </database>

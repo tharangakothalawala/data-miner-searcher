@@ -34,9 +34,9 @@ public class AppTest {
 	System.out.println("\n\n *** Joined Search *** ");
 	String[] rawUserInputData = new String[2];
 
-	/*example QueryRawData for the two tables, "4images_users" with "4images_images" (a JOIN)
-	rawUserInputData[0] = "4images_images::image_name::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%' OR image_keywords LIKE '%Texas%'";
-	rawUserInputData[1] = "4images_users::user_name,user_email,user_location::";//*/
+	/*example QueryRawData for the two tables, "fproject_users" with "fproject_images" (a JOIN)
+	rawUserInputData[0] = "fproject_images::image_name::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%' OR image_keywords LIKE '%Texas%'";
+	rawUserInputData[1] = "fproject_users::user_name,user_email,user_location::";//*/
 
 	rawUserInputData[0] = search.getQueryRawData("Images", "a", "Texas"); // "a" means to fetch all available data attributes
 	rawUserInputData[1] = search.getQueryRawData("Users", "user_name,user_email,user_location", ""); // here the required data attributes are defined
@@ -53,9 +53,9 @@ public class AppTest {
 	String[] rawUserInputData = new String[3];
 
 	// the following is an example of a raw data for a SQL join query which contains two Facets, "user_name" and "user_email"
-	rawUserInputData[0] = "4images_images::image_name,image_description::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%'";
-	rawUserInputData[1] = "4images_users::user_name,user_email::user_name LIKE '%rb808%' OR user_email LIKE '%rb808%'";
-	//rawUserInputData[2] = "4images_comments::comments_name,comments_description::comments_name LIKE '%Texas%' OR comments_description LIKE '%Texas%' OR comments_keywords LIKE '%Texas%'";
+	rawUserInputData[0] = "fproject_images::image_name,image_description::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%'";
+	rawUserInputData[1] = "fproject_users::user_name,user_email::user_name LIKE '%rb808%' OR user_email LIKE '%rb808%'";
+	//rawUserInputData[2] = "fproject_comments::comments_name,comments_description::comments_name LIKE '%Texas%' OR comments_description LIKE '%Texas%' OR comments_keywords LIKE '%Texas%'";
 
         // Second parameter sends a "true" value to create the SQL with JOIN with Facets
 	String sampleDemo = query.buildQuery (rawUserInputData, true);
@@ -78,7 +78,7 @@ public class AppTest {
             String[] query1 = url1.getQuery().split("&");
             String[] query2 = url2.getQuery().split("&");
 
-            // To create the raw data and to parse any data as well. E.g.: "Images" into real table name, "4images_images"
+            // To create the raw data and to parse any data as well. E.g.: "Images" into real table name, "fproject_images"
             rawUserInputData[0] = search.getQueryRawData(query1[0].split("=")[1], query1[1].split("=")[1], query1[2].split("=")[1]);
             rawUserInputData[1] = search.getQueryRawData(query2[0].split("=")[1], query2[1].split("=")[1], query2[2].split("=")[1]);
 
