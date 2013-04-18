@@ -16,23 +16,23 @@
 <databases>
     <database>
         <isEnabled>0</isEnabled>
-        <dbdriver>com.microsoft.sqlserver.jdbc.SQLServerDriver</dbdriver>
-        <connurl>jdbc:sqlserver://localhost:1433;databaseName=CGDB;</connurl><!-- localhost | 192.168.232.134 -->
-        <dbname>CGDB</dbname>
-        <dbuser>sa</dbuser>
-        <dbpasswd>qwerty1</dbpasswd>
-        <searchable_data_types>nvarchar,varchar,ntext,text</searchable_data_types>
+        <dbDriver>com.microsoft.sqlserver.jdbc.SQLServerDriver</dbDriver>
+        <connectionUrl>jdbc:sqlserver://localhost:1433;databaseName=CGDB;</connectionUrl><!-- localhost | 192.168.232.134 -->
+        <dbName>CGDB</dbName>
+        <dbUser>sa</dbUser>
+        <dbPasswd>qwerty1</dbPasswd>
+        <searchableDataTypes>nvarchar,varchar,ntext,text</searchableDataTypes>
         <entityDisplayLimit>6</entityDisplayLimit>
         <acceptAttributeRequestValuesForClause>0</acceptAttributeRequestValuesForClause>
     </database>
     <database>
         <isEnabled>1</isEnabled>
-        <dbdriver>com.mysql.jdbc.Driver</dbdriver>
-        <connurl>jdbc:mysql://localhost:3306/fproject_test</connurl>
-        <dbname>fproject_test</dbname>
-        <dbuser>tharanga</dbuser>
-        <dbpasswd>qwerty</dbpasswd>
-        <searchable_data_types>nvarchar,varchar,ntext,text</searchable_data_types>
+        <dbDriver>com.mysql.jdbc.Driver</dbDriver>
+        <connectionUrl>jdbc:mysql://localhost:3306/fproject_test</connectionUrl>
+        <dbName>fproject_test</dbName>
+        <dbUser>tharanga</dbUser>
+        <dbPasswd>qwerty</dbPasswd>
+        <searchableDataTypes>nvarchar,varchar,ntext,text</searchableDataTypes>
         <entityDisplayLimit>4</entityDisplayLimit>
         <acceptAttributeRequestValuesForClause>0</acceptAttributeRequestValuesForClause>
     </database>

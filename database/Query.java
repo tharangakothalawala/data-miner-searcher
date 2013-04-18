@@ -36,12 +36,12 @@ public class Query {
 
     /*
      * @param (String[])    queryRawDataArray   : This contains the processed raw user input data
-     * @param (boolean)     includeJoinCondition: This indicates where the query needs a conditions for the JOINing table
+     * @param (boolean)     includeJoinCondition: This indicates whether the query needs a conditions for the JOINing table or not
      */
-    public String buildQuery (String[] queryRawDataArray, boolean includeJoinCondition) {
+    public String buildQuery (String[] queryRawDataArray, boolean isFacetedSearchMode) {
         this.init();
         String parentJoinTable = "";
-        String parentTableCondition = "";
+        String condition = "";
 
         // creating the select clause
         String sqlSelects = "";
@@ -58,26 +58,24 @@ public class Query {
 
         for (int i = 0; i < queryRawDataArray.length; i++) {
             if (queryRawDataArray[i] != null) {
-                // index 0 means to consider the 0th index values as related to levelOne table
+                // index 0 means to consider the 0th index values as <selected_root_table> data
                 if (i == 0) {
                     String[] rootTableData = queryRawDataArray[0].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP); // seperating the data by "::"
                     parentJoinTable = rootTableData[0];
 
                     this.whereCondition += this.createJoinWhereClause(rootTableData, false);
-                    parentTableCondition = this.whereCondition;
 
-                    this.selectClause += sqlSelects.substring(0, (sqlSelects.length()) - 1) + " FROM " + rootTableData[0]; // SELECT * FROM <selected_root_table>
+                    this.selectClause += sqlSelects.substring(0, (sqlSelects.length()) - 1) + " FROM " + rootTableData[0]; // SELECT <attributes> FROM <selected_root_table>
                 } else {
                     // creating the rest of the SQL statement including the JOINs
                     String[] parentJoinTableData = queryRawDataArray[i-1].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP);
                     parentJoinTable = parentJoinTableData[0];
                     String[] joinTableClause = queryRawDataArray[i].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP);
 
-                    String[] joinTableKeyData = primaryKeyArray[this.getArrayIndexAtValue(primaryKeyArray, joinTableClause[0], db.COLNAMETYPESP)].split(db.COLNAMETYPESP); // getting the primary key for a table
-                    String[] parentTableKeyData = foreignKeyArray[this.getArrayIndexAtValue(foreignKeyArray, parentJoinTable, db.COLNAMETYPESP)].split(db.COLNAMETYPESP); // getting the foreign key for a table
-                    String condition = "";
+                    String[] joinTableKeyData = primaryKeyArray[this.getArrayIndexAtValue(primaryKeyArray, joinTableClause[0], db.COLNAMETYPESP, false)].split(db.COLNAMETYPESP); // getting the primary key for a table
+                    String[] parentTableKeyData = foreignKeyArray[this.getArrayIndexAtValue(foreignKeyArray, parentJoinTable + db.COLNAMETYPESP + joinTableClause[0], db.COLNAMETYPESP, true)].split(db.COLNAMETYPESP); // getting the foreign key for a table
 
-                    if (includeJoinCondition) {
+                    if (isFacetedSearchMode) { // include conditions for the JOIN table
                         // this is used to specify conditions for the join table (Facets)
                         condition = " AND " + this.createJoinWhereClause(joinTableClause, true);
                     }
@@ -86,7 +84,7 @@ public class Query {
                 }
             }
         }
-        joinStatement += parentTableCondition;
+        joinStatement += this.whereCondition;
 
         return this.selectClause + joinStatement + ";";
     }
@@ -140,19 +138,30 @@ public class Query {
     }
 
     /*
-     * Returns the index of any given array where a matching value is found in the first splited part of any value
+     * Returns the index of a primary/foreign array where a matching value is found in the first splited part of any value
      * @param	(String[])	array		: the array with values
      * @param	(String)	value		: the value to be matched against
+     * @param	(boolean)	isForeignKeyLookup	: true value indicates a foreign key lookup,
+	it will check for two value to get the correct foreign key table reference
      * @param	(String)	splitter	: the value splitter symbol
      */
-    public int getArrayIndexAtValue (String[] array, String value, String splitter) {
+    public int getArrayIndexAtValue (String[] array, String value, String splitter, boolean isForeignKeyLookup) {
         int index = 0; // the very first array insertion index
         for (int i = 0; i < array.length; i++) {
             if (array[i] != null){
-                String[] arrayValue = array[i].split(splitter);
-                if (arrayValue[0].toString().equalsIgnoreCase(value)) {
-                    index = i;
-                    break;
+                if (!isForeignKeyLookup) {
+                    String[] arrayValue = array[i].split(splitter);
+                    if (arrayValue[0].toString().equalsIgnoreCase(value)) {
+                        index = i;
+                        break;
+                    }
+                } else {
+                    String[] arrayValue = array[i].split(splitter);
+                    String[] valueSplit = value.split(splitter);
+                    if (arrayValue[0].toString().equalsIgnoreCase(valueSplit[0]) && arrayValue[2].toString().equalsIgnoreCase(valueSplit[1])) {
+                        index = i;
+                        break;
+                    }
                 }
             }
         }

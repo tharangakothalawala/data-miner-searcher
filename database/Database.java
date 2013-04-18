@@ -62,12 +62,12 @@ public class Database {
 
                         if (element.getElementsByTagName("isEnabled").item(0).getTextContent().equalsIgnoreCase("1")) {
                             isFoundEnabledDB = true;
-                            this.dbdriver = element.getElementsByTagName("dbdriver").item(0).getTextContent();
-                            this.connurl = element.getElementsByTagName("connurl").item(0).getTextContent();
-                            this.dbname = element.getElementsByTagName("dbname").item(0).getTextContent();
-                            this.dbuser = element.getElementsByTagName("dbuser").item(0).getTextContent();
-                            this.dbpasswd = element.getElementsByTagName("dbpasswd").item(0).getTextContent();
-                            this.searchable_data_types = element.getElementsByTagName("searchable_data_types").item(0).getTextContent();
+                            this.dbdriver = element.getElementsByTagName("dbDriver").item(0).getTextContent();
+                            this.connurl = element.getElementsByTagName("connectionUrl").item(0).getTextContent();
+                            this.dbname = element.getElementsByTagName("dbName").item(0).getTextContent();
+                            this.dbuser = element.getElementsByTagName("dbUser").item(0).getTextContent();
+                            this.dbpasswd = element.getElementsByTagName("dbPasswd").item(0).getTextContent();
+                            this.searchable_data_types = element.getElementsByTagName("searchableDataTypes").item(0).getTextContent();
                             this.entityDisplayLimit = Integer.parseInt(element.getElementsByTagName("entityDisplayLimit").item(0).getTextContent());
                             if (element.getElementsByTagName("acceptAttributeRequestValuesForClause").item(0).getTextContent().equalsIgnoreCase("1")) {
                                 this.considerUserAttributeSelectionForWhereClause = true;

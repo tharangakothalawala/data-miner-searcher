@@ -22,7 +22,7 @@ public class Search {
     /*
      * If the searchable table count is more than the ENTITY_DISPLAY_LIMIT, the number of suggestable table is too much to select from. So it will search in all.
      */
-    private static String OVERFLOW = "too_much_suggesstable_tables";
+    private static String OVERFLOW = "Too many categories found! Will search in ALL";
 
     /*
      * Used Values,
@@ -112,7 +112,6 @@ public class Search {
                     searchMode = 1;
                 } else if ((userTableSelection.equalsIgnoreCase("no") || userTableSelection.equalsIgnoreCase("n"))) {
                     // SEARCH in all defined tables
-                    searchableTables = "*";
                     String userSearchValue = this.promptMessage("\nPlease enter a keyword to search.\n: ", false);
                     if (!userSearchValue.equalsIgnoreCase("")) {
                         searchKeywordValue = userSearchValue;
@@ -142,7 +141,7 @@ public class Search {
                 if (!detectedSuggestableTables.toString().equalsIgnoreCase(OVERFLOW)) {
                     System.out.println("No matching category found! Will search in ALL");
                 } else {
-                    System.out.println("Too many categories found! Will search in ALL");
+                    System.out.println(OVERFLOW);
                 }
 
                 String userSearchValue = this.promptMessage("\nPlease enter a keyword to search.\n: ", false);
@@ -451,7 +450,7 @@ public class Search {
                     Map<String, String> resultset = resultsets[i];
 
                     if (resultset.get("CONSTRAINT_NAME").matches(".*fk.*") && resultset.get("CONSTRAINT_NAME") != null) {
-                        foreignKeyArray[foreignkeycount] = tableArray[t] + db.COLNAMETYPESP + resultset.get("COLUMN_NAME");
+                        foreignKeyArray[foreignkeycount] = tableArray[t] + db.COLNAMETYPESP + resultset.get("COLUMN_NAME") + ":" + resultset.get("REFERENCED_TABLE_NAME");
                         //System.out.println("FK: " + foreignKeyArray[foreignkeycount]);
                         foreignkeycount++;
                     }
