@@ -12,6 +12,7 @@ import java.util.*;
 public class Search {
 
     private Database db = new Database();
+    private Query query;
 
     /*
      * this is the limit where we can display the suggestable tables
@@ -40,12 +41,25 @@ public class Search {
      * This will store the SQL query generation support data for single SQL statements.
      */
     String[] irrelationalRawUserInputData;
-    String[] primaryKeyArray;
-    String[] foreignKeyArray;
-    private Query query;
 
     /*
-     * Constructor loads the entity relatonships from the XML for further processing.
+     * This stores all the tables with their primary keys
+     */
+    String[] primaryKeyArray;
+
+    /*
+     * This stores all the tables with their foreign keys
+     */
+    String[] foreignKeyArray;
+
+
+    /*
+     * User search keyword
+     */
+    String searchKeywordValue = "";
+
+    /*
+     * Constructor loads the entity relatonships from the XML for further processing and intializes the table key arrays
      */
     public Search() {
         ENTITYDISPLAYLIMIT = db.entityDisplayLimit;
@@ -64,15 +78,6 @@ public class Search {
         String userTableSelection = "";
         String tableSugessions = "";
         String searchableTables = "";
-        String searchKeywordValue = "";
-
-        /* the following is an example of a raw data for a SQL join query
-        rawUserInputData[0] = "images::image_name,image_description::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%'";
-        rawUserInputData[1] = "users::user_name::user_name LIKE '%mike%' OR user_email LIKE '%mike%'";
-        //rawUserInputData[2] = "4images_comments::comments_name,comments_description::comments_name LIKE '%Texas%' OR comments_description LIKE '%Texas%' OR comments_keywords LIKE '%Texas%'";
-        String sqlQuery1 = query.buildQuery (rawUserInputData, true);
-        System.out.println("sqlQuery : \n" + sqlQuery1);
-        System.exit(0);//*/
 
         do {
             initialUserInput = this.promptMessage("For what are you searching for?\n: ", false);
@@ -113,8 +118,6 @@ public class Search {
                     }
 
                     for (int t = 0; t < db.getEntity().getEntityConfigValuesAtIndex(0).length; t++) {
-                        //String clause = query.makeClause(db.getEntity().getSearchables(db.getEntity().getEntityConfigValuesAtIndex(0)[t], false), searchKeywordValue);
-                        //irrelationalRawUserInputData[t] = db.getEntity().getEntityConfigValuesAtIndex(0)[t] + "::" + clause;
                         irrelationalRawUserInputData[t] = this.getQueryRawData(db.getEntity().getEntityConfigValuesAtIndex(0)[t], "a", searchKeywordValue);
                     }
                     searchMode = 2;
@@ -127,8 +130,6 @@ public class Search {
                     }
                     String[] tables = searchableTables.split(",");
                     for (int t = 0; t < tables.length; t++) {
-                        //String clause = query.makeClause(db.getEntity().getSearchables(tables[t], false), searchKeywordValue);
-                        //irrelationalRawUserInputData[t] = tables[t] + "::" + clause;
                         irrelationalRawUserInputData[t] = this.getQueryRawData(tables[t], "a", searchKeywordValue);
                     }
                     searchMode = 3;
@@ -150,8 +151,6 @@ public class Search {
                 }
 
                 for (int t = 0; t < db.getEntity().getEntityConfigValuesAtIndex(0).length; t++) {
-                    //String clause = query.makeClause(db.getEntity().getSearchables(db.getEntity().getEntityConfigValuesAtIndex(0)[t], false), searchKeywordValue);
-                    //irrelationalRawUserInputData[t] = db.getEntity().getEntityConfigValuesAtIndex(0)[t] + "::" + clause;
                     irrelationalRawUserInputData[t] = this.getQueryRawData(db.getEntity().getEntityConfigValuesAtIndex(0)[t], "a", searchKeywordValue);
                 }
                 searchMode = 2;
