@@ -73,14 +73,20 @@ public class Query {
                     String[] joinTableClause = queryRawDataArray[i].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP);
 
                     String[] joinTableKeyData = primaryKeyArray[this.getArrayIndexAtValue(primaryKeyArray, joinTableClause[0], db.COLNAMETYPESP, false)].split(db.COLNAMETYPESP); // getting the primary key for a table
-                    String[] parentTableKeyData = foreignKeyArray[this.getArrayIndexAtValue(foreignKeyArray, parentJoinTable + db.COLNAMETYPESP + joinTableClause[0], db.COLNAMETYPESP, true)].split(db.COLNAMETYPESP); // getting the foreign key for a table
+                    try {
+                        String[] parentTableKeyData = foreignKeyArray[this.getArrayIndexAtValue(foreignKeyArray, parentJoinTable + db.COLNAMETYPESP + joinTableClause[0], db.COLNAMETYPESP, true)].split(db.COLNAMETYPESP); // getting the foreign key for a table
 
-                    if (isFacetedSearchMode) { // include conditions for the JOIN table
-                        // this is used to specify conditions for the join table (Facets)
-                        condition = " AND " + this.createJoinWhereClause(joinTableClause, true);
+                        if (isFacetedSearchMode) { // include conditions for the JOIN table
+                            // this is used to specify conditions for the join table (Facets)
+                            condition = " AND " + this.createJoinWhereClause(joinTableClause, true);
+                        }
+
+                        joinStatement += " JOIN " + joinTableClause[0] + " ON " + joinTableKeyData[0] + "." + joinTableKeyData[1] + " = " + parentTableKeyData[0] + "." + parentTableKeyData[1] + condition;
+                    } catch (NumberFormatException nfe) {
+                        // getArrayIndexAtValue function send a null value if there is no foreign key found in the foreignKeyArray, means a schema error
+                        System.out.println("Error : Entity relations are invalid or incomplete. Check for the table constraints in the database schema!");
+                        System.exit(0);
                     }
-
-                    joinStatement += " JOIN " + joinTableClause[0] + " ON " + joinTableKeyData[0] + "." + joinTableKeyData[1] + " = " + parentTableKeyData[0] + "." + parentTableKeyData[1] + condition;
                 }
             }
         }
@@ -144,28 +150,30 @@ public class Query {
      * @param	(boolean)	isForeignKeyLookup	: true value indicates a foreign key lookup,
 	it will check for two value to get the correct foreign key table reference
      * @param	(String)	splitter	: the value splitter symbol
+     * @return	(int)		i		: the index of the array where the matching value are in
      */
     public int getArrayIndexAtValue (String[] array, String value, String splitter, boolean isForeignKeyLookup) {
-        int index = 0; // the very first array insertion index
         for (int i = 0; i < array.length; i++) {
             if (array[i] != null){
                 if (!isForeignKeyLookup) {
                     String[] arrayValue = array[i].split(splitter);
                     if (arrayValue[0].toString().equalsIgnoreCase(value)) {
-                        index = i;
-                        break;
+                        return i;
                     }
                 } else {
                     String[] arrayValue = array[i].split(splitter);
                     String[] valueSplit = value.split(splitter);
+                    /*
+                     * E.g. of a "foreignKeyArray" value : "fproject_images:cat_id:fproject_categories"
+                     * It tries to match the current table with its foreign table to get the foreign key name from the current table.
+                     */
                     if (arrayValue[0].toString().equalsIgnoreCase(valueSplit[0]) && arrayValue[2].toString().equalsIgnoreCase(valueSplit[1])) {
-                        index = i;
-                        break;
+                        return i;
                     }
                 }
             }
         }
-        return index;
+        return Integer.parseInt(null);
     }
 
 }

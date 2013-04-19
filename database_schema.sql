@@ -16,6 +16,33 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `fproject_categories`
+--
+
+CREATE TABLE IF NOT EXISTS `fproject_categories` (
+  `cat_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cat_name` varchar(255) NOT NULL DEFAULT '',
+  `cat_description` text NOT NULL,
+  `cat_parent_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `cat_hits` int(10) unsigned NOT NULL DEFAULT '0',
+  `cat_order` int(10) unsigned NOT NULL DEFAULT '0',
+  `auth_viewcat` tinyint(2) NOT NULL DEFAULT '0',
+  `auth_viewimage` tinyint(2) NOT NULL DEFAULT '0',
+  `auth_download` tinyint(2) NOT NULL DEFAULT '0',
+  `auth_upload` tinyint(2) NOT NULL DEFAULT '0',
+  `auth_directupload` tinyint(2) NOT NULL DEFAULT '0',
+  `auth_vote` tinyint(2) NOT NULL DEFAULT '0',
+  `auth_sendpostcard` tinyint(2) NOT NULL DEFAULT '0',
+  `auth_readcomment` tinyint(2) NOT NULL DEFAULT '0',
+  `auth_postcomment` tinyint(2) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`cat_id`),
+  KEY `cat_parent_id` (`cat_parent_id`),
+  KEY `cat_order` (`cat_order`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=397 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `fproject_comments`
 --
 
@@ -116,4 +143,5 @@ ALTER TABLE `fproject_comments`
 -- Constraints for table `fproject_images`
 --
 ALTER TABLE `fproject_images`
+  ADD CONSTRAINT `fproject_images_ibfk_2` FOREIGN KEY (`cat_id`) REFERENCES `fproject_categories` (`cat_id`),
   ADD CONSTRAINT `fproject_images_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `fproject_users` (`user_id`);

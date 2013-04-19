@@ -163,7 +163,7 @@ public class Search {
 
             if (searchMode == 1) {
                 searchableTables = db.getEntity().getEntityMeta(searchableTables, 1, true); // getting the table_name
-                String userCategoryAttributeSelection = this.promptMessage("\nPlease select the attributes/fields which you require. Seperate by commas for multiple entries. (all|<attribute1>,<attribute2>)\nAvailable related attributes: " + db.getEntity().getSearchables(searchableTables, false) + "\n: ", true);
+                String userCategoryAttributeSelection = this.promptMessage("\nPlease select the attributes/fields which you require. Seperate by commas for multiple entries. (all|<attribute1>,<attribute2>)\nAvailable attributes: " + db.getEntity().getSearchables(searchableTables, false) + "\n: ", true);
                 if (userCategoryAttributeSelection.equalsIgnoreCase("all") || userCategoryAttributeSelection.equalsIgnoreCase("a")) {
                     userCategoryAttributeSelection = db.getEntity().getSearchables(searchableTables, true);
                 } else {
@@ -183,7 +183,17 @@ public class Search {
                     isRelatedTableAvailable = false;
                     if (!this.db.getEntity().getEntityMeta(searchableTables, 5, true).toString().equalsIgnoreCase("null")) {
                         String relatedTables = this.db.getEntity().getEntityMeta(searchableTables, 5, true);
-                        relatedTables = db.getEntity().getEntityMeta(relatedTables, 2, true); // #2: display_name
+                        String[] relatedTablesSplit = relatedTables.split(",");
+                        // If exists more than one related tables
+                        if (this.is_array(relatedTablesSplit)) {
+                            relatedTables = ""; // initialize again to put new multiple table names
+                            for (int r = 0; r < relatedTablesSplit.length; r++) {
+                                relatedTables += db.getEntity().getEntityMeta(relatedTablesSplit[r], 2, true) + ", "; // #2: display_name
+                            }
+                            relatedTables = relatedTables.substring(0, (relatedTables.length()) - 2); // trims the extra comma at the end: ", "
+                        } else {
+                            relatedTables = db.getEntity().getEntityMeta(relatedTables, 2, true); // #2: display_name
+                        }
                         System.out.println("Related categories: " + relatedTables); // available related entities
                         isRelatedTableAvailable = true;
                     }
@@ -418,6 +428,16 @@ public class Search {
         }
 
         return false;
+    }
+
+    public boolean is_array (String[] array) {
+        try {
+            String attempToGetTheValueAtArrayIndexTwo = array[1];
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            return false;
+        }
+
+        return true;
     }
 
     /*

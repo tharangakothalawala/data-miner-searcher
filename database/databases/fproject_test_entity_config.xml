@@ -28,7 +28,7 @@
         <display_name>Images</display_name>
         <implicit_annotation>This category or the table is about images</implicit_annotation>
         <aliases>Pictures</aliases>
-        <related_tables>fproject_users</related_tables>
+        <related_tables>fproject_users,fproject_categories</related_tables>
         <searchable_attributes force="0">image_name:this is the image name,image_description,image_keywords</searchable_attributes>
     </table>
     <table>
@@ -38,5 +38,13 @@
         <aliases></aliases>
         <related_tables>fproject_users</related_tables>
         <searchable_attributes force="0">user_name:this is a user images,comment_headline:headline of the comment. may contain images,comment_text:comment in details and this may contain images</searchable_attributes>
+    </table>
+    <table>
+        <table_name>fproject_categories</table_name>
+        <display_name>Image Categories</display_name>
+        <implicit_annotation>This table contains the image category names.</implicit_annotation>
+        <aliases></aliases>
+        <related_tables></related_tables>
+        <searchable_attributes force="1">cat_name:category name</searchable_attributes>
     </table>
 </database>
