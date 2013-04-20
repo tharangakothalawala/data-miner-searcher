@@ -18,7 +18,7 @@ public class AppTest {
      * This is to test normal SQL statements. That is, SELECT queries without any joins.
      */
     public void testSearch() {
-	System.out.println("\n\n *** Normal Search *** ");
+	System.out.println("\n\n############################### *** Normal Search *** ");
 	String[] rawUserInputData = new String[2];
 
 	// This is a single query statment without JOINs
@@ -31,17 +31,28 @@ public class AppTest {
      * This is to test the generation of SQL JOIN queries
      */
     public void testJoinSearch() {
-	System.out.println("\n\n *** Joined Search *** ");
-	String[] rawUserInputData = new String[2];
+	System.out.println("\n\n############################### *** Joined Search 1 (Data from 2 tables) *** ");
+	String[] rawUserInputData = new String[3];
 
 	/*example QueryRawData for the two tables, "fproject_users" with "fproject_images" (a JOIN)
 	rawUserInputData[0] = "fproject_images::image_name::image_name LIKE '%Texas%' OR image_description LIKE '%Texas%' OR image_keywords LIKE '%Texas%'";
 	rawUserInputData[1] = "fproject_users::user_name,user_email,user_location::";//*/
 
+	// Data from 2 tables
 	rawUserInputData[0] = search.getQueryRawData("Images", "a", "Texas"); // "a" means to fetch all available data attributes
 	rawUserInputData[1] = search.getQueryRawData("Users", "user_name,user_email,user_location", ""); // here the required data attributes are defined
 
 	String sqlQuery = query.buildQuery(rawUserInputData, false);
+	search.displayRealData(sqlQuery, null);
+
+
+	System.out.println("\n\n############################### *** Joined Search 2 (Data from 3 tables) *** ");
+	// Data from 3 tables
+	rawUserInputData[0] = search.getQueryRawData("Comments", "comment_id,fproject_comments.user_name,comment_headline, comment_text", "nice");
+	rawUserInputData[1] = search.getQueryRawData("Images", "fproject_images.image_id,image_name", "");
+        rawUserInputData[2] = search.getQueryRawData("Users", "fproject_users.user_id,user_email", "");
+
+	sqlQuery = query.buildQuery(rawUserInputData, false);
 	search.displayRealData(sqlQuery, null);
     }
 
@@ -49,7 +60,7 @@ public class AppTest {
      * This is also to test the generation of SQL JOIN queries, but with extra conditions. (Facets)
      */
     public void testFacetedSearch () {
-	System.out.println("\n\n *** Faceted Search *** ");
+	System.out.println("\n\n############################### *** Faceted Search *** ");
 	String[] rawUserInputData = new String[3];
 
 	// the following is an example of a raw data for a SQL join query which contains two Facets, "user_name" and "user_email"
@@ -68,7 +79,7 @@ public class AppTest {
     public void testWithURLFormat () {
 	String url1Value = "http://localhost:80/fproject_test/?collection=Images&attributes=a&q=Texas";
 	String url2Value = "http://localhost:80/fproject_test/?collection=Users&attributes=user_name,user_email,user_location&q=Texas";
-	System.out.println("\n\n *** URL Demo Joined Search ***\n" + url1Value + "\n" + url2Value + "\n");
+	System.out.println("\n\n############################### *** URL Demo Joined Search ***\n" + url1Value + "\n" + url2Value + "\n");
 	String[] rawUserInputData = new String[2];
 
 	try {

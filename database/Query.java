@@ -57,12 +57,14 @@ public class Query {
             }
         }
 
+        String rootTable = "";
         for (int i = 0; i < queryRawDataArray.length; i++) {
             if (queryRawDataArray[i] != null) {
                 // index 0 means to consider the 0th index values as <selected_root_table> data
                 if (i == 0) {
                     String[] rootTableData = queryRawDataArray[0].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP); // seperating the data by "::"
                     parentJoinTable = rootTableData[0];
+                    rootTable = rootTableData[0];
 
                     this.whereCondition += rootTableData[2];
 
@@ -80,7 +82,7 @@ public class Query {
                         // this is used to specify conditions for the join table (Facets)
                         condition = " AND (" + joinTableData[2] + ")";
                     }
-                    joinStatement += " JOIN " + joinTableData[0] + " ON " + joinTableKeyData[0] + "." + joinTableKeyData[1] + " = " + parentTableKeyData[0] + "." + parentTableKeyData[1] + condition;
+                    joinStatement += " JOIN " + joinTableData[0] + " ON " + joinTableKeyData[0] + "." + joinTableKeyData[1] + " = " + rootTable + "." + parentTableKeyData[1] + condition;
                 }
             }
         }
