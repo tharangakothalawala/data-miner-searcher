@@ -53,7 +53,6 @@ public class Search {
      */
     String[] foreignKeyArray;
 
-
     /*
      * User search keyword
      */
@@ -65,6 +64,7 @@ public class Search {
     public Search() {
         ENTITY_DISPLAY_LIMIT = db.entityDisplayLimit;
         this.loadEntityRelations();
+        db.ensureRelations(this.foreignKeyArray); // to check the validity of the defined related_table in the XML with the datbase schema
         query = new Query(this.primaryKeyArray, this.foreignKeyArray);
         rawUserInputData = new String[db.getEntity().getEntityConfigValuesAtIndex(0).length];
         irrelationalRawUserInputData = new String[db.getEntity().getEntityConfigValuesAtIndex(0).length];
@@ -84,7 +84,7 @@ public class Search {
             initialUserInput = this.promptMessage("For what are you searching for?\n: ", false);
 
             // exit
-            if (initialUserInput.equalsIgnoreCase("q") || initialUserInput.equalsIgnoreCase("exit") || initialUserInput.equalsIgnoreCase("quit")) {
+            if (initialUserInput.equalsIgnoreCase("[q]") || initialUserInput.equalsIgnoreCase("[exit]")) {
                 System.exit(0); //break;
             }
 
@@ -106,7 +106,7 @@ public class Search {
                 userTableSelection = this.promptMessage("\nAre you looking for something under the above categories? Please select a category or say 'no'. (no|category)\n: ", false);
 
 
-                if (this.in_array(suggestableTables, userTableSelection)) {
+                if (Functions.in_array(suggestableTables, userTableSelection)) {
                     // SEARCH in the selected initialUserInput
                     searchableTables = userTableSelection;
                     searchMode = 1;
@@ -133,7 +133,7 @@ public class Search {
                         irrelationalRawUserInputData[t] = this.getQueryRawData(tables[t], "a", searchKeywordValue);
                     }
                     searchMode = 3;
-                } else if ((userTableSelection.equalsIgnoreCase("exit") || userTableSelection.equalsIgnoreCase("quit") || userTableSelection.equalsIgnoreCase("q"))) {
+                } else if ((userTableSelection.equalsIgnoreCase("[q]") || userTableSelection.equalsIgnoreCase("[exit]"))) {
                     System.exit(0);
                 }
 
@@ -185,7 +185,7 @@ public class Search {
                         String relatedTables = this.db.getEntity().getEntityMeta(searchableTables, 5, true);
                         String[] relatedTablesSplit = relatedTables.split(",");
                         // If exists more than one related tables
-                        if (this.is_array(relatedTablesSplit)) {
+                        if (Functions.is_array(relatedTablesSplit)) {
                             relatedTables = ""; // initialize again to put new multiple table names
                             for (int r = 0; r < relatedTablesSplit.length; r++) {
                                 relatedTables += db.getEntity().getEntityMeta(relatedTablesSplit[r], 2, true) + ", "; // #2: display_name
@@ -201,7 +201,7 @@ public class Search {
                     if (isRelatedTableAvailable) {
                         userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + db.getEntity().getEntityMeta(searchableTables, 2, true) + "'. Please select a related category or say 'no'. (no|category)\n: ", false);
                     }
-                    if (this.in_array(db.getEntity().getEntityConfigValuesAtIndex(1), userRelatedCategorySelection) && isRelatedTableAvailable) {
+                    if (Functions.in_array(db.getEntity().getEntityConfigValuesAtIndex(1), userRelatedCategorySelection) && isRelatedTableAvailable) {
                         userRelatedCategorySelection = db.getEntity().getEntityMeta(userRelatedCategorySelection, 1, true); // getting the real_name
                         String userRelatedCategoryAttributeSelection = this.promptMessage("\nPlease select the related attributes/fields which you require. Seperate by commas for multiple entries. (all|<attribute1>,<attribute2>)\nAvailable related attributes: " + db.getEntity().getSearchables(userRelatedCategorySelection, false) + "\n: ", true);
                         if (userRelatedCategoryAttributeSelection.equalsIgnoreCase("all") || userRelatedCategoryAttributeSelection.equalsIgnoreCase("a")) {
@@ -241,13 +241,13 @@ public class Search {
                 }
 
                 // re-initialize the array to prevent the old values being considered during the command line execution
-                this.initializeArray(rawUserInputData);
+                Functions.initializeArray(rawUserInputData);
             } else if (searchMode == 2) {
                 this.displayRealData(null, irrelationalRawUserInputData);
-                this.initializeArray(irrelationalRawUserInputData);
+                Functions.initializeArray(irrelationalRawUserInputData);
             } else if (searchMode == 3) {
                 this.displayRealData(null, irrelationalRawUserInputData);
-                this.initializeArray(irrelationalRawUserInputData);
+                Functions.initializeArray(irrelationalRawUserInputData);
             }
 
 
@@ -405,39 +405,8 @@ public class Search {
                     }
                 }
             }
-        } catch (Exception ex) { }
-    }
-
-    /*
-     * This initializes any given array
-     */
-    public void initializeArray(String[] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = null;
+        } catch (Exception ex) {
         }
-    }
-
-    /*
-     * This is equivalent to the PHP in_array function to detect values in any given array
-     */
-    public boolean in_array(String[] array, String searchValue) {
-        for (int i = 0; i < array.length; i++) {
-            if (array[i].equalsIgnoreCase(searchValue)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public boolean is_array (String[] array) {
-        try {
-            String attempToGetTheValueAtArrayIndexTwo = array[1];
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            return false;
-        }
-
-        return true;
     }
 
     /*

@@ -256,4 +256,53 @@ public class Database {
     public Entity getEntity() {
         return new Entity();
     }
+
+    /*
+     * Validating the defined related_tables in the XML file with the existing relations in the database
+     * @param (String[])	foreignKeyArray	: array of foreign keys detected from the database to valiate against the defined XML data
+     */
+    public void ensureRelations(String[] foreignKeyArray) {
+        int detectedRelationCount = 0;
+        int definedRelationCount = 0;
+
+        String[] tableRelationArray = this.getEntity().getEntityConfigValuesAtIndex(4);
+        for (int r = 0; r < tableRelationArray.length; r++) {
+            if (!tableRelationArray[r].equalsIgnoreCase("null")) {
+                String[] arrayValue = tableRelationArray[r].split(",");
+                definedRelationCount += arrayValue.length;
+            }
+        }
+        String[] tableArray = this.getEntity().getEntityConfigValuesAtIndex(0);
+        for (int t = 0; t < tableArray.length; t++) {
+            String relatedTables = this.getEntity().getEntityMeta(tableArray[t], 5, false);
+            if (!relatedTables.equalsIgnoreCase("null")) { // check only the tables which related_table have been defined
+                for (int i = 0; i < foreignKeyArray.length; i++) {
+                    if (foreignKeyArray[i] != null) {
+                        String[] arrayValue = foreignKeyArray[i].split(this.COLNAMETYPESP);
+                        String[] related = relatedTables.split(",");
+
+                        if (arrayValue[0].toString().equalsIgnoreCase(tableArray[t]) && relatedTables.equalsIgnoreCase(arrayValue[2]) && !Functions.is_array(related)) {
+                            //System.out.println(tableArray[t] + "(SINGLE) - foreignKeyArray: " + this.foreignKeyArray[i]);
+                            detectedRelationCount++;
+                        } else if (Functions.is_array(related) && relatedTables.contains(arrayValue[2])) {
+                            for (int b = 0; b < related.length; b++) {
+                                if (arrayValue[0].toString().equalsIgnoreCase(tableArray[t]) && arrayValue[2].toString().equalsIgnoreCase(related[b])) {
+                                    //System.out.println(tableArray[t] + "(MULTIPLE-" + related.length + ") - foreignKeyArray:" + this.foreignKeyArray[i]);
+                                    detectedRelationCount++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (definedRelationCount != detectedRelationCount) {
+            System.out.println("Error : Undefined entity relationships found! Check the foreign key constraints in the database schema!" +
+		"\n\nRun the following SQL as user, 'root' in the database to see the existing relations and " +
+                "compare them with the DB definitions in 'config/databases/" + this.dbname + "_entity_config.xml' file. (<related_tables>)" +
+		"\n\n> SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = '" + this.dbname + "' AND REFERENCED_TABLE_NAME != '';");
+            System.exit(0);
+        }
+    }
 }

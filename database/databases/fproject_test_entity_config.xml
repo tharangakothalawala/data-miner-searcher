@@ -7,11 +7,12 @@
     Description:
 	- The following meta data will be used to create the SQL.
 	- Don't specify the tables if they don't have searchable attributes
-	- You can include meta keywords within entity descriptions.
+	- You can include meta keywords within entity descriptions, aliases.
 	  They are just words which are refering to any exisitng tables in the DB.
-	  The meta description (implicit_annotation) will be used to recommend the user for the search categories.
+	  The meta description (implicit_annotation) and the aliases will be used to recommend the user for the search categories.
 	- You can specify searchable attributes / fields of a table in the searchable_attributes tag. So that application
 	  will get them from here apart from generating automatically.
+	- Before specifying any related table in the "related_tables" tag, make sure there are defined foreign key constraints in the database schema
 -->
 
 <database>
@@ -36,7 +37,7 @@
         <display_name>Comments</display_name>
         <implicit_annotation>This category or the table is about the comments done by users for stored images.</implicit_annotation>
         <aliases></aliases>
-        <related_tables>fproject_users</related_tables>
+        <related_tables>fproject_users,fproject_images</related_tables>
         <searchable_attributes force="0">user_name:this is a user images,comment_headline:headline of the comment. may contain images,comment_text:comment in details and this may contain images</searchable_attributes>
     </table>
     <table>

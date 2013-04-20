@@ -181,6 +181,7 @@ public class Entity {
      * @param	(String)	table	: the table name
      * @param	(String)	key	: this indicates what value is needed
      * @param	(boolean)	isInit	: indicate whether this is a call during the App Init or not
+     * @return	(String)	any value	: returns the config value depending on the requested key (for the value position in array)
      */
     public String getEntityMeta(String table, int key, boolean isInit) {
         String[] definedTableData = this.loadEntityConfig(isInit);

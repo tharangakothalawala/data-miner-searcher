@@ -37,6 +37,7 @@ public class Query {
     /*
      * @param (String[])    queryRawDataArray   : This contains the processed raw user input data
      * @param (boolean)     includeJoinCondition: This indicates whether the query needs a conditions for the JOINing table or not
+     * @return (String)     sql statement       : the generated SQL statement
      */
     public String buildQuery (String[] queryRawDataArray, boolean isFacetedSearchMode) {
         this.init();
@@ -63,30 +64,23 @@ public class Query {
                     String[] rootTableData = queryRawDataArray[0].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP); // seperating the data by "::"
                     parentJoinTable = rootTableData[0];
 
-                    this.whereCondition += this.createJoinWhereClause(rootTableData, false);
+                    this.whereCondition += rootTableData[2];
 
                     this.selectClause += sqlSelects.substring(0, (sqlSelects.length()) - 1) + " FROM " + rootTableData[0]; // SELECT <attributes> FROM <selected_root_table>
                 } else {
                     // creating the rest of the SQL statement including the JOINs
                     String[] parentJoinTableData = queryRawDataArray[i-1].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP);
                     parentJoinTable = parentJoinTableData[0];
-                    String[] joinTableClause = queryRawDataArray[i].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP);
+                    String[] joinTableData = queryRawDataArray[i].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP);
 
-                    String[] joinTableKeyData = primaryKeyArray[this.getArrayIndexAtValue(primaryKeyArray, joinTableClause[0], db.COLNAMETYPESP, false)].split(db.COLNAMETYPESP); // getting the primary key for a table
-                    try {
-                        String[] parentTableKeyData = foreignKeyArray[this.getArrayIndexAtValue(foreignKeyArray, parentJoinTable + db.COLNAMETYPESP + joinTableClause[0], db.COLNAMETYPESP, true)].split(db.COLNAMETYPESP); // getting the foreign key for a table
+                    String[] joinTableKeyData = primaryKeyArray[this.getArrayIndexAtValue(primaryKeyArray, joinTableData[0], db.COLNAMETYPESP, false)].split(db.COLNAMETYPESP); // getting the primary key from the join table
+                    String[] parentTableKeyData = foreignKeyArray[this.getArrayIndexAtValue(foreignKeyArray, parentJoinTable + db.COLNAMETYPESP + joinTableData[0], db.COLNAMETYPESP, true)].split(db.COLNAMETYPESP); // getting the foreign key from the current table related to the join table
 
-                        if (isFacetedSearchMode) { // include conditions for the JOIN table
-                            // this is used to specify conditions for the join table (Facets)
-                            condition = " AND " + this.createJoinWhereClause(joinTableClause, true);
-                        }
-
-                        joinStatement += " JOIN " + joinTableClause[0] + " ON " + joinTableKeyData[0] + "." + joinTableKeyData[1] + " = " + parentTableKeyData[0] + "." + parentTableKeyData[1] + condition;
-                    } catch (NumberFormatException nfe) {
-                        // getArrayIndexAtValue function send a null value if there is no foreign key found in the foreignKeyArray, means a schema error
-                        System.out.println("Error : Entity relations are invalid or incomplete. Check for the table constraints in the database schema!");
-                        System.exit(0);
+                    if (isFacetedSearchMode) { // include conditions for the JOIN table
+                        // this is used to specify conditions for the join table (Facets)
+                        condition = " AND (" + joinTableData[2] + ")";
                     }
+                    joinStatement += " JOIN " + joinTableData[0] + " ON " + joinTableKeyData[0] + "." + joinTableKeyData[1] + " = " + parentTableKeyData[0] + "." + parentTableKeyData[1] + condition;
                 }
             }
         }
@@ -111,36 +105,20 @@ public class Query {
     }
 
     /*
-     * This creates the formatted WHERE clause
+     * This creates the formatted WHERE clause out of the searchable attributes
      * @param	(String)	searchables	: attributes which are needed in the WHERE clause
      * @param	(String)	keyword		: user search keyword
+     * @return	(String)	clause		: sends the formatted (with SQL LIKEs and ORs) clause
      */
     public String makeClause (String searchables, String keyword) {
         if (searchables != null) {
-            searchables = searchables.replaceAll(",", " LIKE '%" + keyword + "%' OR ");
-            searchables += " LIKE '%" + keyword + "%'";
+            String clause = searchables.replaceAll(",", " LIKE '%" + keyword + "%' OR ");
+            clause += " LIKE '%" + keyword + "%'";
 
-            return searchables;
+            return clause;
         } else {
             return null;
         }
-    }
-
-    /*
-     * Similar version of the above function to create the WHERE clause,
-	But here it is not creating the clause but passing the already created clause
-     */
-    public String createJoinWhereClause (String[] rawDataArray, boolean isWithinJoin) {
-        String[] conditions = rawDataArray[2].split(db.COLNAMETYPESP);
-        String whereClause = "";
-        for (int k = 0; k < conditions.length; k++) {
-            whereClause += conditions[k] + " OR ";
-        }
-        whereClause = whereClause.substring(0, (whereClause.length()) - 4);
-        if (isWithinJoin)
-            return "(" + whereClause + ")";
-        else
-            return whereClause;
     }
 
     /*

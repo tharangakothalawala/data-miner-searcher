@@ -1,6 +1,6 @@
 :: Product	: Search Application
-:: Purpose	: To execute the program though command line.
-:: author	: Tharanga Kothalawala <tharanga.kothalawala@gmail.com>
+:: Purpose	: To execute the program through command line.
+:: Author	: Tharanga Kothalawala <tharanga.kothalawala@gmail.com>
 
 ::set locationtosearchapp = C:\Users\Tharanga\Documents\NetBeansProjects\ProjectAttempt_1\dist
 

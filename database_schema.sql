@@ -137,7 +137,8 @@ CREATE TABLE IF NOT EXISTS `fproject_users` (
 -- Constraints for table `fproject_comments`
 --
 ALTER TABLE `fproject_comments`
-  ADD CONSTRAINT `fproject_comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `fproject_users` (`user_id`);
+  ADD CONSTRAINT `fproject_comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `fproject_users` (`user_id`),
+  ADD CONSTRAINT `fproject_comments_ibfk_2` FOREIGN KEY (`image_id`) REFERENCES `fproject_images` (`image_id`);
 
 --
 -- Constraints for table `fproject_images`

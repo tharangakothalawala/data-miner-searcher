@@ -1,7 +1,7 @@
 :: Product	: Search Application
-:: Purpose	: To create hard links outside the project repository (outside the ./src/ directory)
+:: Purpose	: To create hard links outside the project GIT repository (outside the ./src/ directory)
 ::			to load configuration details using external XML files.
-:: author	: Tharanga Kothalawala <tharanga.kothalawala@gmail.com>
+:: Author	: Tharanga Kothalawala <tharanga.kothalawala@gmail.com>
 
 echo ## executing mklink in %cd%
 
