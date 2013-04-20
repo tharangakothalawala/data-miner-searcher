@@ -28,14 +28,13 @@ public class Entity {
     public String getSearchables(String table, boolean appendTableName) {
         String attributes = "";
         boolean getPredefined = false;
+        String[] arr = {""};
 
         try {
-            db.setQuery("SELECT * FROM " + table);
-            ResultSet rs = db.loadData();
-
-            String[] arr = {""};
-
             if (this.getEntityMeta(table, 6, true).equalsIgnoreCase("null")) {
+                db.setQuery("SELECT * FROM " + table);
+                ResultSet rs = db.loadData();
+
                 arr = db.getMetaData(rs, 2); // get entity coloumns with their datatypes
             } else {
                 arr = this.getEntityMeta(table, 6, true).split(","); // get the defined searchable attributes
