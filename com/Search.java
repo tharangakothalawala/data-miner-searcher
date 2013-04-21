@@ -85,7 +85,7 @@ public class Search {
 
             // exit
             if (initialUserInput.equalsIgnoreCase("[q]") || initialUserInput.equalsIgnoreCase("[exit]")) {
-                System.exit(0); //break;
+                break;
             }
 
             String detectedSuggestableTables = "";
@@ -97,10 +97,12 @@ public class Search {
 
             if (!detectedSuggestableTables.toString().equalsIgnoreCase("") && !detectedSuggestableTables.toString().equalsIgnoreCase(OVERFLOW)) {
                 String[] suggestableTables = this.getSuggestableTables(initialUserInput);
+                tableSugessions = ""; // re-initialize to prevent old data being considered
                 for (int i = 0; i < suggestableTables.length; i++) {
                     tableSugessions += suggestableTables[i] + ",";
                     System.out.println("- " + suggestableTables[i] + " : " + db.getEntity().getEntityMeta(suggestableTables[i], 3, true));
                 }
+                tableSugessions = tableSugessions.substring(0, (tableSugessions.length()) - 1); // trims the extra comma at the end: ","
 
 
                 userTableSelection = this.promptMessage("\nAre you looking for something under the above categories? Please select a category or say 'no'. (no|category)\n: ", false);
@@ -134,7 +136,7 @@ public class Search {
                     }
                     searchMode = 3;
                 } else if ((userTableSelection.equalsIgnoreCase("[q]") || userTableSelection.equalsIgnoreCase("[exit]"))) {
-                    System.exit(0);
+                    break;
                 }
 
             } else {
