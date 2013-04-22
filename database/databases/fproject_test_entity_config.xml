@@ -12,7 +12,7 @@
 	  The meta description (implicit_annotation) and the aliases will be used to recommend the user for the search categories.
 	- You can specify searchable attributes / fields of a table in the searchable_attributes tag. So that application
 	  will get them from here apart from generating automatically.
-	- Before specifying any related table in the "related_tables" tag, make sure there are defined foreign key constraints in the database schema
+	- Before specifying any related table in the "related_tables" tag, make sure there are defined-foreign key constraints in the database schema
 -->
 
 <database>

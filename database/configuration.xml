@@ -6,9 +6,9 @@
     Author     : Tharanga
     Description:
 	- Currently this application supports MS SQL Server and MySQL only!
-	- Database configuration. You can store multiple databases in this file.
+	- You may store multiple databases in this database configuration.
           BUT for the database you need to consider, you need to make the "isEnabled" to the value "1" and the rest to the value, "0".
-        - Also you will need to create a entity_config.xml file named as the following way (you also need to put the config content into that):
+        - Also you will need to create a ./config/entity_config.xml file named as the following way (you also need to put the config content into that):
           <the-database-name-you-spcified-in-this-file>_entity_config.xml
           ex: CGDB_entity_config.xml
 -->

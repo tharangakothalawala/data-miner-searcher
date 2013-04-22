@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Document   : configuration.xml
+    Document   : CGDB_entity_config.xml
     Created on : March 19, 2013, 8:43 PM
     Author     : Tharanga
     Description:
 	- The following meta data will be used to create the SQL.
 	- Don't specify the tables if they don't have searchable attributes
-	- You can include meta keywords within entity descriptions.
+	- You can include meta keywords within entity descriptions, aliases.
 	  They are just words which are refering to any exisitng tables in the DB.
-	  The meta description (implicit_annotation) will be used to recommend the user for the search categories.
+	  The meta description (implicit_annotation) and the aliases will be used to recommend the user for the search categories.
 	- You can specify searchable attributes / fields of a table in the searchable_attributes tag. So that application
 	  will get them from here apart from generating automatically.
+	- Before specifying any related table in the "related_tables" tag, make sure there are defined-foreign key constraints in the database schema
 -->
 
 <database>

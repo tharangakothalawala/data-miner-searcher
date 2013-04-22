@@ -2,6 +2,7 @@
 /**
  * @Author	Tharanga S Kothalawala <tharanga.kothalawala@my.westminster.ac.uk>
  * @StudentNo	w1278462
+ * @Purpose	This class is to do the Search and to interact with the user through command line.
  */
 
 package com;
@@ -365,8 +366,7 @@ public class Search {
             if (sqlQuery != null) {
                 Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, true);
                 System.out.println("SQL :" + db.getQuery());
-                String sqlCountQuery = sqlQuery.replaceAll("SELECT([^<]*)FROM", "SELECT COUNT(*) FROM");
-                System.out.println("--- " + query.getCount(sqlCountQuery) + " results found ---");
+                System.out.println("--- " + query.getCount(sqlQuery) + " results found ---");
 
                 // begin :traversing through each row to display data
                 if (resultsets.length > 0) {
@@ -388,8 +388,7 @@ public class Search {
                     Map[] resultsets = db.sqlSelect(queryMeta[0], queryMeta[1], queryMeta[2], null, null, null, false);
                     System.out.println("SQL :" + db.getQuery());
 
-                    String sqlCountQuery = db.getQuery().replaceAll("SELECT([^<]*)FROM", "SELECT COUNT(*) FROM");
-                    System.out.println("--- " + query.getCount(sqlCountQuery) + " results found ---");
+                    System.out.println("--- " + query.getCount(db.getQuery()) + " results found ---");
 
                     // begin :traversing through each row to display data
                     if (resultsets.length > 0) {

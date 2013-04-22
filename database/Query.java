@@ -2,6 +2,7 @@
 /**
  * @Author	Tharanga S Kothalawala <tharanga.kothalawala@my.westminster.ac.uk>
  * @StudentNo	w1278462
+ * @Purpose	This class is to do SQL query specific functions.
  */
 
 package database;
@@ -98,7 +99,8 @@ public class Query {
      */
     public int getCount (String sqlQuery) {
         if (sqlQuery != null) {
-            Map[] resultsets = db.sqlSelect(sqlQuery, "null", null, null, null, null, true);
+            String sqlCountQuery = sqlQuery.replaceAll("SELECT([^<]*)FROM", "SELECT COUNT(*) FROM");
+            Map[] resultsets = db.sqlSelect(sqlCountQuery, "null", null, null, null, null, true);
 
             Map<String, String> rs = resultsets[0];
             return Integer.parseInt(rs.get("COUNT(*)"));

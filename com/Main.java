@@ -2,6 +2,7 @@
 /**
  * @Author	Tharanga S Kothalawala <tharanga.kothalawala@my.westminster.ac.uk>
  * @StudentNo	w1278462
+ * @Purpose	To launch the Search Application.
  */
 
 package com;
