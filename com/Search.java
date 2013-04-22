@@ -85,7 +85,7 @@ public class Search {
             initialUserInput = this.promptMessage("For what are you searching for?\n: ", false);
 
             // exit
-            if (initialUserInput.equalsIgnoreCase("[q]") || initialUserInput.equalsIgnoreCase("[exit]")) {
+            if (initialUserInput.equalsIgnoreCase("\\q") || initialUserInput.equalsIgnoreCase("\\exit")) {
                 break;
             }
 
@@ -136,7 +136,7 @@ public class Search {
                         irrelationalRawUserInputData[t] = this.getQueryRawData(tables[t], "a", searchKeywordValue);
                     }
                     searchMode = 3;
-                } else if ((userTableSelection.equalsIgnoreCase("[q]") || userTableSelection.equalsIgnoreCase("[exit]"))) {
+                } else if ((userTableSelection.equalsIgnoreCase("\\q") || userTableSelection.equalsIgnoreCase("\\exit"))) {
                     break;
                 }
 
