@@ -38,7 +38,7 @@
         <implicit_annotation>the resources category where it contains the data about resources such as people/users.</implicit_annotation>
         <aliases></aliases>
         <related_tables>CALENDAR,ROLES,USERS</related_tables>
-        <searchable_attributes force="1">rsrc_name:name of a resource, this can be a user,office_phone,email_addr</searchable_attributes>
+        <searchable_attributes force="1">rsrc_name:name of a resource. This can be a user,office_phone,email_addr</searchable_attributes>
     </table>
     <table>
         <table_name>PROJECT</table_name>
