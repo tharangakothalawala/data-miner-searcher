@@ -384,22 +384,24 @@ public class Search {
                 }
             } else {
                 for (int c = 0; c < sqlQueryMeta.length; c++) {
-                    String[] queryMeta = sqlQueryMeta[c].split(db.COLNAMETYPESP + db.COLNAMETYPESP);
-                    Map[] resultsets = db.sqlSelect(queryMeta[0], queryMeta[1], queryMeta[2], null, null, null, false);
-                    System.out.println("SQL :" + db.getQuery());
+                    if (sqlQueryMeta[c] != null) {
+                        String[] queryMeta = sqlQueryMeta[c].split(db.COLNAMETYPESP + db.COLNAMETYPESP);
+                        Map[] resultsets = db.sqlSelect(queryMeta[0], queryMeta[1], queryMeta[2], null, null, null, false);
+                        System.out.println("SQL :" + db.getQuery());
 
-                    System.out.println("--- " + query.getCount(db.getQuery()) + " results found ---");
+                        System.out.println("--- " + query.getCount(db.getQuery()) + " results found ---");
 
-                    // begin :traversing through each row to display data
-                    if (resultsets.length > 0) {
-                        for (int i = 0; i < resultsets.length; i++) {
-                            Map<String, String> resultset = resultsets[i];
-                            System.out.println("== ROW: " + (i + 1) + " ========================");
-                            for (Map.Entry<String, String> entry : resultset.entrySet()) {
-                                String key = entry.getKey();
-                                String value = entry.getValue();
-                                if (value != null) {
-                                    System.out.println("['" + key + "'] = " + value);
+                        // begin :traversing through each row to display data
+                        if (resultsets.length > 0) {
+                            for (int i = 0; i < resultsets.length; i++) {
+                                Map<String, String> resultset = resultsets[i];
+                                System.out.println("== ROW: " + (i + 1) + " ========================");
+                                for (Map.Entry<String, String> entry : resultset.entrySet()) {
+                                    String key = entry.getKey();
+                                    String value = entry.getValue();
+                                    if (value != null) {
+                                        System.out.println("['" + key + "'] = " + value);
+                                    }
                                 }
                             }
                         }
@@ -407,6 +409,7 @@ public class Search {
                 }
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -452,5 +455,29 @@ public class Search {
                 }// end :traversing through each row
             }
         } // end: traversing through each table
+
+        /* There is no field called , "REFERENCED_TABLE_NAME" in the MS SQL server INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+           database table to get foreign key reference tables
+         * So find them out using the primaryKeyArray array
+         */
+        if (db.connurl.matches(".*sqlserver.*")) {
+            for (int fk = 0; fk < this.foreignKeyArray.length; fk++) {
+                if (this.foreignKeyArray[fk] != null) {
+                    String[] foreignKeyArrayValue = this.foreignKeyArray[fk].split(db.COLNAMETYPESP);
+                    String currentForeignKey = foreignKeyArrayValue[1];
+                    for (int pk = 0; pk < this.primaryKeyArray.length; pk++) {
+                        if (this.primaryKeyArray[pk] != null) {
+                            String[] primaryKeyArrayValue = this.primaryKeyArray[pk].split(db.COLNAMETYPESP);
+                            String currentPrimaryKey = primaryKeyArrayValue[1];
+                            if (currentForeignKey.equalsIgnoreCase(currentPrimaryKey)) {
+                                this.foreignKeyArray[fk] = this.foreignKeyArray[fk].replaceAll("null", primaryKeyArrayValue[0]);
+                                //System.out.println ("primaryKeyArray : " + primaryKeyArray[pk] + " | " + "currentForeignKey : " + currentForeignKey + " : currentPrimaryKey : " + currentPrimaryKey + ":" + primaryKeyArrayValue[0] + "this.foreignKeyArray[fk] : " + this.foreignKeyArray[fk]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //Functions.dumpArray(this.foreignKeyArray);
     }
 }

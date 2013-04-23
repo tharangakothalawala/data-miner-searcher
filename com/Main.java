@@ -10,7 +10,6 @@ package com;
 public class Main {
 
     private static Search search = new Search();
-    private static AppTest apptest = new AppTest(); // for testing the app
 
     public static void main(String[] args) {
         runApp();
@@ -18,7 +17,8 @@ public class Main {
 
     public static void runApp() {
 	// Unit Tests to demonstrate the application functionality
-	/*apptest.testSearch(); // a normal search
+	/*AppTest apptest = new AppTest(); // for testing the app
+        apptest.testSearch(); // a normal search
 	apptest.testJoinSearch(); // joined search
 	apptest.testFacetedSearch(); // faceted search
 	apptest.testWithURLFormat(); // just a demo to show how we can improve this application to run as a web service

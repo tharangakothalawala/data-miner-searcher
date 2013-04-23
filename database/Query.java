@@ -103,7 +103,11 @@ public class Query {
             Map[] resultsets = db.sqlSelect(sqlCountQuery, "null", null, null, null, null, true);
 
             Map<String, String> rs = resultsets[0];
-            return Integer.parseInt(rs.get("COUNT(*)"));
+            try {
+		return Integer.parseInt(rs.get("COUNT(*)"));
+            } catch (NumberFormatException nfe) {
+		return 0;
+            }
         }
         return 0;
     }

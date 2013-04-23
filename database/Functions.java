@@ -44,4 +44,14 @@ public class Functions {
 
         return true;
     }
+
+    /*
+     * This prints all the values in any given array. Useful when debuging
+     */
+    public static void dumpArray (String[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null)
+                System.out.println(array[i]);
+        }
+    }
 }

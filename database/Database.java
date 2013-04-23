@@ -22,7 +22,7 @@ public class Database {
 
     // database parameters
     private String dbdriver;
-    private String connurl;
+    public String connurl;
     public String dbname;
     private String dbuser;
     private String dbpasswd;
@@ -281,14 +281,13 @@ public class Database {
                     if (foreignKeyArray[i] != null) {
                         String[] arrayValue = foreignKeyArray[i].split(this.COLNAMETYPESP);
                         String[] related = relatedTables.split(",");
-
                         if (arrayValue[0].toString().equalsIgnoreCase(tableArray[t]) && relatedTables.equalsIgnoreCase(arrayValue[2]) && !Functions.is_array(related)) {
-                            //System.out.println(tableArray[t] + "(SINGLE) - foreignKeyArray: " + this.foreignKeyArray[i]);
+                            //System.out.println(tableArray[t] + "(SINGLE) - foreignKeyArray: " + foreignKeyArray[i]);
                             detectedRelationCount++;
                         } else if (Functions.is_array(related) && relatedTables.contains(arrayValue[2])) {
                             for (int b = 0; b < related.length; b++) {
                                 if (arrayValue[0].toString().equalsIgnoreCase(tableArray[t]) && arrayValue[2].toString().equalsIgnoreCase(related[b])) {
-                                    //System.out.println(tableArray[t] + "(MULTIPLE-" + related.length + ") - foreignKeyArray:" + this.foreignKeyArray[i]);
+                                    //System.out.println(tableArray[t] + "(MULTIPLE-" + related.length + ") - foreignKeyArray:" + foreignKeyArray[i]);
                                     detectedRelationCount++;
                                 }
                             }
@@ -302,7 +301,7 @@ public class Database {
             System.out.println("Error : Undefined entity relationships found! Check the foreign key constraints in the database schema!" +
 		"\n\nRun the following SQL as user, 'root' in the database to see the existing relations and " +
                 "compare them with the DB definitions in 'config/databases/" + this.dbname + "_entity_config.xml' file. (<related_tables>)" +
-		"\n\n> SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = '" + this.dbname + "' AND REFERENCED_TABLE_NAME != '';");
+		"\n\n> SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE (CONSTRAINT_SCHEMA = '" + this.dbname + "' OR CONSTRAINT_CATALOG = '" + this.dbname + "');");
             System.exit(0);
         }
     }
