@@ -33,16 +33,18 @@ public class Database {
     private Map<String, String> map; // to hold each row
 
     // other configuration parameters
-    public final String COLNAMETYPESP = ":"; // to be used to identify metadata ex: username:nvarchar. And also act as data seperator
+    public final String COLNAMETYPESP = ":"; // used to identify metadata ex: username:nvarchar. And also act as a data seperator
     public String searchable_data_types;
     public int entityDisplayLimit;
     public boolean considerUserAttributeSelectionForWhereClause;
+    public boolean isFacetedSearchModeEnabled;
 
     /*
      * Constructor intializes the database configuration
      */
     public Database() {
         this.considerUserAttributeSelectionForWhereClause = false;
+        this.isFacetedSearchModeEnabled = false;
         boolean isFoundEnabledDB = false;
         try {
             File DBConfigFile = new File("config/configuration.xml");
@@ -72,6 +74,9 @@ public class Database {
                             this.entityDisplayLimit = Integer.parseInt(element.getElementsByTagName("entityDisplayLimit").item(0).getTextContent());
                             if (element.getElementsByTagName("acceptAttributeRequestValuesForClause").item(0).getTextContent().equalsIgnoreCase("1")) {
                                 this.considerUserAttributeSelectionForWhereClause = true;
+                            }
+                            if (element.getElementsByTagName("isFacetedSearchModeEnabled").item(0).getTextContent().equalsIgnoreCase("1")) {
+                                this.isFacetedSearchModeEnabled = true;
                             }
                         }
                     }

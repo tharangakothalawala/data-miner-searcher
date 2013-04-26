@@ -126,7 +126,7 @@ public class Search {
                     }
 
                     for (int t = 0; t < db.getEntity().getEntityConfigValuesAtIndex(0).length; t++) {
-                        irrelationalRawUserInputData[t] = this.getQueryRawData(db.getEntity().getEntityConfigValuesAtIndex(0)[t], "a", searchKeywordValue);
+                        irrelationalRawUserInputData[t] = this.getQueryRawData(db.getEntity().getEntityConfigValuesAtIndex(0)[t], "a", searchKeywordValue, false);
                     }
                     searchMode = 2;
                 } else if ((userTableSelection.equalsIgnoreCase("yes") || userTableSelection.equalsIgnoreCase("y"))) {
@@ -138,7 +138,7 @@ public class Search {
                     }
                     String[] tables = searchableTables.split(",");
                     for (int t = 0; t < tables.length; t++) {
-                        irrelationalRawUserInputData[t] = this.getQueryRawData(tables[t], "a", searchKeywordValue);
+                        irrelationalRawUserInputData[t] = this.getQueryRawData(tables[t], "a", searchKeywordValue, false);
                     }
                     searchMode = 3;
                 } else if ((userTableSelection.equalsIgnoreCase("\\q") || userTableSelection.equalsIgnoreCase("\\exit"))) {
@@ -158,7 +158,7 @@ public class Search {
                 }
 
                 for (int t = 0; t < db.getEntity().getEntityConfigValuesAtIndex(0).length; t++) {
-                    irrelationalRawUserInputData[t] = this.getQueryRawData(db.getEntity().getEntityConfigValuesAtIndex(0)[t], "a", searchKeywordValue);
+                    irrelationalRawUserInputData[t] = this.getQueryRawData(db.getEntity().getEntityConfigValuesAtIndex(0)[t], "a", searchKeywordValue, false);
                 }
                 searchMode = 2; // this is equal to the step: 2 as this is searching in all tables
             }
@@ -186,6 +186,7 @@ public class Search {
                 String rootTable = searchableTables;
                 String userRelatedCategorySelection = "";
                 boolean isAjoin = false;
+                boolean isFacetedSearchMode = false;
                 String relatedTables = "";
 
                 if (!this.db.getEntity().getEntityMeta(searchableTables, 5, true).toString().equalsIgnoreCase("null")) {
@@ -242,7 +243,24 @@ public class Search {
                         }
 
                         isAjoin = true;
-                        rawUserInputData[count] = this.getQueryRawData(userRelatedCategorySelection, userRelatedCategoryAttributeSelection, "");
+                        rawUserInputData[count] = this.getQueryRawData(userRelatedCategorySelection, userRelatedCategoryAttributeSelection, "", true);
+                        rawUserInputData[count] = rawUserInputData[count] + "null"; // initializing the facets. So initially there are no facets to consider during a Faceted Search
+
+                        if (db.isFacetedSearchModeEnabled) {
+                            String attributeSelection = "";
+                            attributeSelection = this.promptMessage("\nYou can set values for one of the selected attributes above. (yes|no)\n: ", false);
+
+                            if (attributeSelection.equalsIgnoreCase("yes") || attributeSelection.equalsIgnoreCase("y")) { // set values
+                                Scanner input = new Scanner(System.in);
+                                System.out.print("Select an attribute (A Facet) from the selected attributes, to set a value\n: ");
+                                String attribute = input.next();
+                                System.out.print("value\n: ");
+                                String value = input.next();
+
+                                rawUserInputData[count] = rawUserInputData[count].substring(0, (rawUserInputData[count].length()) - 4) + userRelatedCategorySelection + "." + attribute + " LIKE '%" + value + "%'";
+                                isFacetedSearchMode = true;
+                            }
+                        }
                         for (int r = 0; r < relatedTablesSplit.length; r++) {
                             if (relatedTablesSplit[r] != null && relatedTablesSplit[r].equalsIgnoreCase(userRelatedCategorySelection)) {
                                 relatedTablesSplit[r] = null;
@@ -261,9 +279,9 @@ public class Search {
                     }
 
                     // according to this application logic, always the index 0 should contain the selected root category (look at the Query Class)
-                    rawUserInputData[0] = this.getQueryRawData(rootTable, userCategoryAttributeSelection, searchKeywordValue);
+                    rawUserInputData[0] = this.getQueryRawData(rootTable, userCategoryAttributeSelection, searchKeywordValue, false);
 
-                    String sqlQuery = query.buildQuery(rawUserInputData, false);
+                    String sqlQuery = query.buildQuery(rawUserInputData, isFacetedSearchMode);
                     this.displayRealData(sqlQuery, null);
                 } else {
                     String userSearchValue = this.promptMessage("\n--\n-- Please enter a keyword to search in the selected category, '" + userTableSelection + "'\n--\n: ", false);
@@ -271,7 +289,7 @@ public class Search {
                         searchKeywordValue = userSearchValue;
                     }
 
-                    irrelationalRawUserInputData[0] = this.getQueryRawData(searchableTables, userCategoryAttributeSelection, searchKeywordValue);
+                    irrelationalRawUserInputData[0] = this.getQueryRawData(searchableTables, userCategoryAttributeSelection, searchKeywordValue, false);
                     this.displayRealData(null, irrelationalRawUserInputData);
                 }
 
@@ -294,10 +312,12 @@ public class Search {
      * @param (String)	tableName		: selected table name
      * @param (String)	requiredDataFields	: requested data fields
      * @param (String)	searchKeyword		: search keyword
+     * @param (boolean)	isFacetedSearchMode	: send true to remove the clause being processed, the value will be, "".
+     * 							In Faceted Search mode, we don't need this to set automatically. Facets are to be set by the user
      * @return (String)	queryRawData		: this returns the query raw data which will be used to create the SQL statement
      * 							ex: "<table_name>::<requested_fields>::<where_clause>"
      */
-    public String getQueryRawData(String tableName, String requiredDataFields, String searchKeyword) {
+    public String getQueryRawData(String tableName, String requiredDataFields, String searchKeyword, boolean isFacetedSearchMode) {
         tableName = db.getEntity().getEntityMeta(tableName, 1, true);
         String dataSeperator = db.COLNAMETYPESP + db.COLNAMETYPESP;
         String queryRawData = "";
@@ -307,10 +327,12 @@ public class Search {
         }
 
         String clause = "";
-        if (db.considerUserAttributeSelectionForWhereClause) {
-            clause = query.makeClause(requiredDataFields, searchKeyword);
-        } else {
-            clause = query.makeClause(db.getEntity().getSearchables(tableName, true), searchKeyword);
+        if (!isFacetedSearchMode) {
+            if (db.considerUserAttributeSelectionForWhereClause) {
+                clause = query.makeClause(requiredDataFields, searchKeyword);
+            } else {
+                clause = query.makeClause(db.getEntity().getSearchables(tableName, true), searchKeyword);
+            }
         }
 
         queryRawData = tableName + dataSeperator

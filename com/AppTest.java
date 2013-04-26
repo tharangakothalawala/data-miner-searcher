@@ -23,7 +23,7 @@ public class AppTest {
 	String[] rawUserInputData = new String[2];
 
 	// This is a single query statment without JOINs
-	rawUserInputData[0] = search.getQueryRawData("Images", "image_name,image_description,image_keywords", "Texas");
+	rawUserInputData[0] = search.getQueryRawData("Images", "image_name,image_description,image_keywords", "Texas", false);
 
 	search.displayRealData(null, rawUserInputData);
     }
@@ -40,8 +40,8 @@ public class AppTest {
 	rawUserInputData[1] = "fproject_users::user_name,user_email,user_location::";//*/
 
 	// Data for 2 tables
-	rawUserInputData[0] = search.getQueryRawData("Images", "a", "Texas"); // "a" means to fetch all available data attributes
-	rawUserInputData[1] = search.getQueryRawData("Users", "user_name,user_email,user_location", ""); // here the required data attributes are defined
+	rawUserInputData[0] = search.getQueryRawData("Images", "a", "Texas", false); // "a" means to fetch all available data attributes
+	rawUserInputData[1] = search.getQueryRawData("Users", "user_name,user_email,user_location", "", false); // here the required data attributes are defined
 
 	// This is a join query statment with a JOIN
 	String sqlQuery = query.buildQuery(rawUserInputData, false);
@@ -50,9 +50,9 @@ public class AppTest {
 
 	System.out.println("\n\n############################### *** Joined Search 2 (Data from 3 tables) *** ");
 	// Data for 3 tables
-	rawUserInputData[0] = search.getQueryRawData("Comments", "comment_id,fproject_comments.user_name,comment_headline, comment_text", "nice");
-	rawUserInputData[1] = search.getQueryRawData("Images", "fproject_images.image_id,image_name", "");
-        rawUserInputData[2] = search.getQueryRawData("Users", "fproject_users.user_id,user_email", "");
+	rawUserInputData[0] = search.getQueryRawData("Comments", "comment_id,fproject_comments.user_name,comment_headline, comment_text", "nice", false);
+	rawUserInputData[1] = search.getQueryRawData("Images", "fproject_images.image_id,image_name", "", false);
+	rawUserInputData[2] = search.getQueryRawData("Users", "fproject_users.user_id,user_email", "", false);
 
 	// This is a join query statment with two JOINs
 	sqlQuery = query.buildQuery(rawUserInputData, false);
@@ -93,8 +93,8 @@ public class AppTest {
             String[] query2 = url2.getQuery().split("&");
 
             // To create the raw data and to parse any data as well. E.g.: "Images" into real table name, "fproject_images"
-            rawUserInputData[0] = search.getQueryRawData(query1[0].split("=")[1], query1[1].split("=")[1], query1[2].split("=")[1]);
-            rawUserInputData[1] = search.getQueryRawData(query2[0].split("=")[1], query2[1].split("=")[1], query2[2].split("=")[1]);
+            rawUserInputData[0] = search.getQueryRawData(query1[0].split("=")[1], query1[1].split("=")[1], query1[2].split("=")[1], false);
+            rawUserInputData[1] = search.getQueryRawData(query2[0].split("=")[1], query2[1].split("=")[1], query2[2].split("=")[1], false);
 
             String sqlQuery = query.buildQuery(rawUserInputData, false);
             search.displayRealData(sqlQuery, null);

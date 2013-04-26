@@ -58,7 +58,7 @@ public class Query {
             }
         }
 
-        String rootTable = "";
+        String rootTable = ""; // to hold the selected main category. This will be used within JOINs
         for (int i = 0; i < queryRawDataArray.length; i++) {
             if (queryRawDataArray[i] != null) {
                 // index 0 means to consider the 0th index values as <selected_root_table> data
@@ -80,8 +80,10 @@ public class Query {
                     String[] parentTableKeyData = foreignKeyArray[this.getArrayIndexAtValue(foreignKeyArray, rootTable + db.COLNAMETYPESP + joinTableData[0], db.COLNAMETYPESP, true)].split(db.COLNAMETYPESP); // getting the foreign key from the current table related to the join table
 
                     if (isFacetedSearchMode) { // include conditions for the JOIN table
-                        // this is used to specify conditions for the join table (Facets)
-                        condition = " AND (" + joinTableData[2] + ")";
+                        // this is used to specify "available" conditions for the join table (Facets)
+                        if (!joinTableData[2].equalsIgnoreCase("null")) {
+                            condition = " AND (" + joinTableData[2] + ")";
+                        }
                     }
                     joinStatement += " JOIN " + joinTableData[0] + " ON " + joinTableKeyData[0] + "." + joinTableKeyData[1] + " = " + rootTable + "." + parentTableKeyData[1] + condition;
                 }

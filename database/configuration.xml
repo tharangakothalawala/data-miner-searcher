@@ -24,6 +24,7 @@
         <searchableDataTypes>nvarchar,varchar,ntext,text</searchableDataTypes>
         <entityDisplayLimit>6</entityDisplayLimit>
         <acceptAttributeRequestValuesForClause>0</acceptAttributeRequestValuesForClause>
+	<isFacetedSearchModeEnabled>0</isFacetedSearchModeEnabled>
     </database>
     <database>
         <isEnabled>1</isEnabled>
@@ -35,5 +36,6 @@
         <searchableDataTypes>nvarchar,varchar,ntext,text</searchableDataTypes>
         <entityDisplayLimit>4</entityDisplayLimit>
         <acceptAttributeRequestValuesForClause>0</acceptAttributeRequestValuesForClause>
+	<isFacetedSearchModeEnabled>0</isFacetedSearchModeEnabled>
     </database>
 </databases>
