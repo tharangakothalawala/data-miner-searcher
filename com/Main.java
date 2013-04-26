@@ -16,7 +16,10 @@ public class Main {
     }
 
     public static void runApp() {
-	// Unit Tests to demonstrate the application functionality
+        /*
+         * Unit Tests to demonstrate the application functionality
+         * Proper Unit Testing has been carried out. Look inside the Test Packages
+         */
 	/*AppTest apptest = new AppTest(); // for testing the app
         apptest.testSearch(); // a normal search
 	apptest.testJoinSearch(); // joined search
