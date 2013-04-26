@@ -83,7 +83,7 @@ public class Query {
                         // this is used to specify conditions for the join table (Facets)
                         condition = " AND (" + joinTableData[2] + ")";
                     }
-                    joinStatement += " JOIN " + joinTableData[0] + " ON " + joinTableKeyData[0] + "." + joinTableKeyData[1] + " = " + rootTable + "." + parentTableKeyData[1] + condition;
+                    joinStatement += " JOIN " + joinTableData[0] + " ON " + joinTableKeyData[0] + "." + joinTableKeyData[1] + " = " + parentTableKeyData[0] + "." + parentTableKeyData[1] + condition;
                 }
             }
         }
@@ -102,10 +102,10 @@ public class Query {
             String sqlCountQuery = sqlQuery.replaceAll("SELECT([^<]*)FROM", "SELECT COUNT(*) FROM");
             Map[] resultsets = db.sqlSelect(sqlCountQuery, "null", null, null, null, null, true);
 
-            Map<String, String> rs = resultsets[0];
             try {
+                Map<String, String> rs = resultsets[0];
 		return Integer.parseInt(rs.get("COUNT(*)"));
-            } catch (NumberFormatException nfe) {
+            } catch (Exception ex) {
 		return 0;
             }
         }
