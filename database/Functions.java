@@ -40,6 +40,21 @@ public class Functions {
             String attempToGetTheValueAtArrayIndexTwo = array[1];
         } catch (ArrayIndexOutOfBoundsException ex) {
             return false;
+        } catch (NullPointerException ex) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /*
+     * To check an array is emtpy or not
+     */
+    public static boolean is_array_empty(String[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null) {
+                return false;
+            }
         }
 
         return true;

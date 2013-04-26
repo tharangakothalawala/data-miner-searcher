@@ -77,7 +77,7 @@ public class Query {
                     String[] joinTableData = queryRawDataArray[i].split(this.db.COLNAMETYPESP+this.db.COLNAMETYPESP);
 
                     String[] joinTableKeyData = primaryKeyArray[this.getArrayIndexAtValue(primaryKeyArray, joinTableData[0], db.COLNAMETYPESP, false)].split(db.COLNAMETYPESP); // getting the primary key from the join table
-                    String[] parentTableKeyData = foreignKeyArray[this.getArrayIndexAtValue(foreignKeyArray, parentJoinTable + db.COLNAMETYPESP + joinTableData[0], db.COLNAMETYPESP, true)].split(db.COLNAMETYPESP); // getting the foreign key from the current table related to the join table
+                    String[] parentTableKeyData = foreignKeyArray[this.getArrayIndexAtValue(foreignKeyArray, rootTable + db.COLNAMETYPESP + joinTableData[0], db.COLNAMETYPESP, true)].split(db.COLNAMETYPESP); // getting the foreign key from the current table related to the join table
 
                     if (isFacetedSearchMode) { // include conditions for the JOIN table
                         // this is used to specify conditions for the join table (Facets)
@@ -102,10 +102,10 @@ public class Query {
             String sqlCountQuery = sqlQuery.replaceAll("SELECT([^<]*)FROM", "SELECT COUNT(*) FROM");
             Map[] resultsets = db.sqlSelect(sqlCountQuery, "null", null, null, null, null, true);
 
-            Map<String, String> rs = resultsets[0];
             try {
+                Map<String, String> rs = resultsets[0];
 		return Integer.parseInt(rs.get("COUNT(*)"));
-            } catch (NumberFormatException nfe) {
+            } catch (Exception ex) {
 		return 0;
             }
         }
@@ -159,7 +159,7 @@ public class Query {
                 }
             }
         }
-        return Integer.parseInt(null);
+        return 0;
     }
 
 }

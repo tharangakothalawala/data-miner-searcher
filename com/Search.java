@@ -60,6 +60,11 @@ public class Search {
     String searchKeywordValue = "";
 
     /*
+     * This array is used to store the related_tables for the search category selected by the user
+     */
+    String[] relatedTablesSplit;
+
+    /*
      * Constructor loads the entity relatonships from the XML for further processing and intializes the table key arrays
      */
     public Search() {
@@ -173,36 +178,59 @@ public class Search {
                     userCategoryAttributeSelection = searchableTables + "." + userCategoryAttributeSelection.replaceAll(",", "," + searchableTables + ".");
                 }
 
-                // displaying the child/related tables
-                // by default it is assuming as we have related table. After that it will find out the reality and stop where necessary
+                /* by default it is assuming as we have related tables.
+                 * After that it will find out the reality and stop where necessary
+                 */
                 boolean isRelatedTableAvailable = true;
                 int count = 1;
                 String rootTable = searchableTables;
                 String userRelatedCategorySelection = "";
                 boolean isAjoin = false;
+                String relatedTables = "";
+
+                if (!this.db.getEntity().getEntityMeta(searchableTables, 5, true).toString().equalsIgnoreCase("null")) {
+                    relatedTables = this.db.getEntity().getEntityMeta(searchableTables, 5, true);
+                    relatedTablesSplit = relatedTables.split(",");
+                }
 
                 while (isRelatedTableAvailable) {
 
-                    isRelatedTableAvailable = false;
-                    if (!this.db.getEntity().getEntityMeta(searchableTables, 5, true).toString().equalsIgnoreCase("null")) {
-                        String relatedTables = this.db.getEntity().getEntityMeta(searchableTables, 5, true);
-                        String[] relatedTablesSplit = relatedTables.split(",");
-                        // If exists more than one related tables
-                        if (Functions.is_array(relatedTablesSplit)) {
-                            relatedTables = ""; // initialize again to put new multiple table names
-                            for (int r = 0; r < relatedTablesSplit.length; r++) {
-                                relatedTables += db.getEntity().getEntityMeta(relatedTablesSplit[r], 2, true) + ", "; // #2: display_name
-                            }
-                            relatedTables = relatedTables.substring(0, (relatedTables.length()) - 2); // trims the extra comma at the end: ", "
+                    if (!this.db.getEntity().getEntityMeta(rootTable, 5, true).toString().equalsIgnoreCase("null")) {
+                        int selectedTableCount = 0; // to track the selected tables.
+                        if (!Functions.is_array_empty(relatedTablesSplit)) {
+                            System.out.println("Related categories: "); // available related entities
                         } else {
-                            relatedTables = db.getEntity().getEntityMeta(relatedTables, 2, true); // #2: display_name
+                            // exit the loop if no related tables to show
+                            isRelatedTableAvailable = false;
                         }
-                        System.out.println("Related categories: " + relatedTables); // available related entities
-                        isRelatedTableAvailable = true;
+
+                        // displaying the child/related tables
+                        // If exists more than one related table
+                        if (Functions.is_array(relatedTablesSplit)) {
+                            for (int r = 0; r < relatedTablesSplit.length; r++) {
+                                if (relatedTablesSplit[r] != null) {
+                                    System.out.println(db.getEntity().getEntityMeta(relatedTablesSplit[r], 2, true));
+                                } else {
+                                    selectedTableCount++;
+                                }
+                            }
+                            // exit the loop if no related tables to show
+                            if (selectedTableCount == relatedTablesSplit.length) {
+                                isRelatedTableAvailable = false;
+                            }
+                        } else {
+                            // exists only one related table
+                            if (relatedTablesSplit[0] != null) {
+                                System.out.println(db.getEntity().getEntityMeta(relatedTablesSplit[0], 2, true));
+                            }
+                        }
+                    } else {
+                        // exit the loop if there are no related tables defined/available.
+                        isRelatedTableAvailable = false;
                     }
 
                     if (isRelatedTableAvailable) {
-                        userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + db.getEntity().getEntityMeta(searchableTables, 2, true) + "'. Please select a related category or say 'no'. (no|category)\n: ", false);
+                        userRelatedCategorySelection = this.promptMessage("\nYou can select one of the above related categories to get related data to your selected category, '" + db.getEntity().getEntityMeta(rootTable, 2, true) + "'. Please select a related category or say 'no'. (no|category)\n: ", false);
                     }
                     if (Functions.in_array(db.getEntity().getEntityConfigValuesAtIndex(1), userRelatedCategorySelection) && isRelatedTableAvailable) {
                         userRelatedCategorySelection = db.getEntity().getEntityMeta(userRelatedCategorySelection, 1, true); // getting the real_name
@@ -215,7 +243,11 @@ public class Search {
 
                         isAjoin = true;
                         rawUserInputData[count] = this.getQueryRawData(userRelatedCategorySelection, userRelatedCategoryAttributeSelection, "");
-                        searchableTables = userRelatedCategorySelection;
+                        for (int r = 0; r < relatedTablesSplit.length; r++) {
+                            if (relatedTablesSplit[r] != null && relatedTablesSplit[r].equalsIgnoreCase(userRelatedCategorySelection)) {
+                                relatedTablesSplit[r] = null;
+                            }
+                        }
                         count++;
                     } else {
                         isRelatedTableAvailable = false; // Exit the loop. No more related tables found
@@ -223,7 +255,7 @@ public class Search {
                 }
 
                 if (isAjoin) {
-                    String userSearchValue = this.promptMessage("\nPlease enter a keyword to search in the selected category, '" + userTableSelection + "'\n: ", false);
+                    String userSearchValue = this.promptMessage("\n--\n-- Please enter a keyword to search in the selected category, '" + userTableSelection + "'\n--\n: ", false);
                     if (!userSearchValue.equalsIgnoreCase("")) {
                         searchKeywordValue = userSearchValue;
                     }
@@ -234,7 +266,7 @@ public class Search {
                     String sqlQuery = query.buildQuery(rawUserInputData, false);
                     this.displayRealData(sqlQuery, null);
                 } else {
-                    String userSearchValue = this.promptMessage("\nPlease enter a keyword to search in the selected category, '" + userTableSelection + "'\n: ", false);
+                    String userSearchValue = this.promptMessage("\n--\n-- Please enter a keyword to search in the selected category, '" + userTableSelection + "'\n--\n: ", false);
                     if (!userSearchValue.equalsIgnoreCase("")) {
                         searchKeywordValue = userSearchValue;
                     }
