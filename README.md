@@ -1,0 +1,4 @@
+data-miner-searcher
+===================
+
+The application has been developed using the Java language and allows users to interactively search for the content which is in the database. The application consists an intelligent query builder which interacts with the user to gather what he/she is searching for in order to create suitable database query statements or in other words SQL statements to get satisfactory search results. It consists of the functionality to identify the defined database schema using an external XML interface which consists with metadata of the database describing, what data is available and how they relate each other. This helps in providing specific search results to the user search query. Faceted search has also been implemented within the search application to provide more specific search results. Therefore this application uses semantic search techniques to identify and optimize the user’s search experience.
